@@ -58,7 +58,7 @@ export default function Chatbot() {
         <CardHeader className="bg-primary text-white rounded-t-xl">
           <CardTitle className="flex items-center">
             <Bot className="mr-3 h-6 w-6" />
-            NephroCare AI Assistant
+            NephroBot Assistant
           </CardTitle>
           <p className="text-blue-100 text-sm">
             Ask me anything about CKD, your results, or kidney health

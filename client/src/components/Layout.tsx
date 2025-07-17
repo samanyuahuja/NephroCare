@@ -28,7 +28,7 @@ export default function Layout({ children }: LayoutProps) {
             {/* Logo */}
             <Link href="/" className="flex items-center space-x-3">
               <Heart className="h-8 w-8 text-primary" />
-              <span className="text-xl font-bold text-gray-900">NephroCare AI</span>
+              <span className="text-xl font-bold text-gray-900">NephroCare</span>
             </Link>
 
             {/* Desktop Navigation */}
@@ -59,7 +59,7 @@ export default function Layout({ children }: LayoutProps) {
                 <SheetContent side="right" className="w-72">
                   <div className="flex items-center space-x-3 mb-8">
                     <Heart className="h-8 w-8 text-primary" />
-                    <span className="text-xl font-bold">NephroCare AI</span>
+                    <span className="text-xl font-bold">NephroCare</span>
                   </div>
                   <nav className="space-y-4">
                     {navItems.map((item) => (
@@ -96,10 +96,10 @@ export default function Layout({ children }: LayoutProps) {
             <div>
               <div className="flex items-center space-x-3 mb-4">
                 <Heart className="h-8 w-8 text-primary" />
-                <span className="text-xl font-bold text-white">NephroCare AI</span>
+                <span className="text-xl font-bold text-white">NephroCare</span>
               </div>
               <p className="text-gray-400">
-                AI-powered kidney health prediction and personalized care solutions.
+                Professional kidney health prediction and personalized care solutions.
               </p>
             </div>
             <div>
@@ -139,7 +139,7 @@ export default function Layout({ children }: LayoutProps) {
             </div>
           </div>
           <div className="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 NephroCare AI. All rights reserved.</p>
+            <p>&copy; 2024 NephroCare. All rights reserved.</p>
           </div>
         </div>
       </footer>

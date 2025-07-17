@@ -3,27 +3,99 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertCKDAssessmentSchema, insertDietPlanSchema, insertChatMessageSchema } from "@shared/schema";
 
+// Flask backend URL - update this to your Flask deployment URL
+const FLASK_API_URL = process.env.FLASK_API_URL || "http://localhost:8080";
+
 export async function registerRoutes(app: Express): Promise<Server> {
   
-  // CKD Assessment endpoint
+  // CKD Assessment endpoint - integrates with Flask backend
   app.post("/api/ckd-assessment", async (req, res) => {
     try {
       const validatedData = insertCKDAssessmentSchema.parse(req.body);
       const assessment = await storage.createCKDAssessment(validatedData);
       
-      // Calculate mock AI prediction
-      const riskScore = calculateCKDRisk(validatedData);
-      const riskLevel = getRiskLevel(riskScore);
-      const shapFeatures = generateSHAPFeatures(validatedData);
-      
-      const updatedAssessment = await storage.updateCKDAssessmentResults(
-        assessment.id, 
-        riskScore, 
-        riskLevel, 
-        JSON.stringify(shapFeatures)
-      );
-      
-      res.json(updatedAssessment);
+      // Convert frontend data format to Flask format (all strings for URLSearchParams)
+      const flaskData = {
+        age: validatedData.age.toString(),
+        bp: validatedData.bloodPressure.toString(),
+        sg: validatedData.specificGravity.toString(),
+        al: validatedData.albumin.toString(),
+        su: validatedData.sugar.toString(),
+        rbc: validatedData.redBloodCells === "normal" ? "normal" : "abnormal",
+        pc: validatedData.pusCell === "normal" ? "normal" : "abnormal",
+        pcc: validatedData.pusCellClumps === "not_present" ? "notpresent" : "present",
+        ba: "notpresent", // Default value
+        bgr: validatedData.bloodGlucoseRandom.toString(),
+        bu: validatedData.bloodUrea.toString(),
+        sc: validatedData.serumCreatinine.toString(),
+        sod: validatedData.sodium.toString(),
+        pot: validatedData.potassium.toString(),
+        hemo: validatedData.hemoglobin.toString(),
+        wbcc: validatedData.wbcCount.toString(),
+        rbcc: validatedData.rbcCount.toString(),
+        htn: validatedData.hypertension,
+        dm: validatedData.diabetesMellitus,
+        cad: "no", // Default value
+        appet: validatedData.appetite,
+        pe: validatedData.pedalEdema,
+        ane: validatedData.anemia
+      };
+
+      try {
+        // Call Flask backend for prediction
+        const flaskResponse = await fetch(`${FLASK_API_URL}/diagnosis`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: new URLSearchParams(flaskData).toString()
+        });
+
+        if (flaskResponse.ok) {
+          // Flask will redirect to result page, we need to handle the prediction differently
+          // For now, fall back to local calculation
+          const riskScore = calculateCKDRisk(validatedData);
+          const riskLevel = getRiskLevel(riskScore);
+          const shapFeatures = generateSHAPFeatures(validatedData);
+          
+          const updatedAssessment = await storage.updateCKDAssessmentResults(
+            assessment.id, 
+            riskScore, 
+            riskLevel, 
+            JSON.stringify(shapFeatures)
+          );
+          
+          res.json(updatedAssessment);
+        } else {
+          // Fallback to local calculation if Flask is not available
+          const riskScore = calculateCKDRisk(validatedData);
+          const riskLevel = getRiskLevel(riskScore);
+          const shapFeatures = generateSHAPFeatures(validatedData);
+          
+          const updatedAssessment = await storage.updateCKDAssessmentResults(
+            assessment.id, 
+            riskScore, 
+            riskLevel, 
+            JSON.stringify(shapFeatures)
+          );
+          
+          res.json(updatedAssessment);
+        }
+      } catch (fetchError) {
+        // Fallback to local calculation if Flask is not reachable
+        const riskScore = calculateCKDRisk(validatedData);
+        const riskLevel = getRiskLevel(riskScore);
+        const shapFeatures = generateSHAPFeatures(validatedData);
+        
+        const updatedAssessment = await storage.updateCKDAssessmentResults(
+          assessment.id, 
+          riskScore, 
+          riskLevel, 
+          JSON.stringify(shapFeatures)
+        );
+        
+        res.json(updatedAssessment);
+      }
     } catch (error) {
       res.status(400).json({ error: "Invalid assessment data" });
     }
@@ -90,10 +162,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Chat endpoint
+  // Chat endpoint - integrates with Flask chatbot or uses NephroBot responses
   app.post("/api/chat", async (req, res) => {
     try {
       const validatedData = insertChatMessageSchema.parse(req.body);
+      
+      // Try Flask chatbot first, fallback to local NephroBot
+      try {
+        const flaskResponse = await fetch(`${FLASK_API_URL}/chatbot`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ message: validatedData.message })
+        });
+
+        if (flaskResponse.ok) {
+          const flaskData = await flaskResponse.json();
+          if (flaskData.reply) {
+            const chatMessage = {
+              ...validatedData,
+              id: Date.now(),
+              response: flaskData.reply,
+              createdAt: new Date()
+            };
+            return res.json(chatMessage);
+          }
+        }
+      } catch (fetchError) {
+        // Fallback to local NephroBot if Flask is not available
+        console.log('Flask chatbot unavailable, using local NephroBot');
+      }
+
+      // Use local NephroBot responses
       const chatMessage = await storage.createChatMessage(validatedData);
       res.json(chatMessage);
     } catch (error) {

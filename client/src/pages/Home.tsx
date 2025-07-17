@@ -10,10 +10,10 @@ export default function Home() {
       <div className="medical-gradient rounded-2xl text-white p-12">
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="text-4xl md:text-6xl font-bold mb-6">
-            AI-Powered CKD Prediction & Personalized Care
+            CKD Prediction & Personalized Care
           </h1>
           <p className="text-xl md:text-2xl mb-8 text-blue-100">
-            Get early insights into your kidney health with AI diagnostics, 
+            Get early insights into your kidney health with advanced diagnostics, 
             explainable results, and a smart diet planner.
           </p>
           <Link href="/diagnosis">
@@ -32,12 +32,12 @@ export default function Home() {
             <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-4">
               <Brain className="h-8 w-8 text-primary" />
             </div>
-            <CardTitle className="text-xl">AI-Powered Diagnosis</CardTitle>
+            <CardTitle className="text-xl">Advanced Diagnosis</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-gray-600">
-              Advanced machine learning algorithms analyze your medical parameters 
-              to predict CKD risk with high accuracy.
+              Sophisticated algorithms analyze your medical parameters 
+              to predict CKD risk with high accuracy using proven models.
             </p>
           </CardContent>
         </Card>
@@ -81,7 +81,7 @@ export default function Home() {
               Trusted by Healthcare Professionals
             </h2>
             <p className="text-gray-600">
-              Our AI model has been validated with clinical data and provides reliable insights.
+              Our prediction model has been validated with clinical data and provides reliable insights.
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">

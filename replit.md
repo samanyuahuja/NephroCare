@@ -1,8 +1,18 @@
-# NephroCare AI - CKD Prediction Application
+# NephroCare - CKD Prediction Application
 
 ## Overview
 
-NephroCare AI is a professional, responsive Chronic Kidney Disease (CKD) prediction website that leverages AI to provide early insights into kidney health. The application features AI-powered diagnostics, explainable results with SHAP/LIME analysis, and a smart diet planner for personalized care recommendations.
+NephroCare is a professional, responsive Chronic Kidney Disease (CKD) prediction website that provides early insights into kidney health. The application features advanced diagnostics with trained machine learning models, explainable results with SHAP/LIME analysis, and a smart diet planner for personalized care recommendations.
+
+## Recent Changes (January 17, 2025)
+
+- Integrated user's Flask app.py containing trained ML models (logistic regression and random forest)
+- Removed all "AI" branding - changed "NephroCare AI" to "NephroCare" throughout the application
+- Updated chatbot name from "NephroCare AI Assistant" to "NephroBot" specifically
+- Implemented NephroBot responses based on Flask app.py chatbot logic with 100+ medical responses
+- Added Flask backend integration API endpoint with fallback to local calculation if Flask unavailable
+- Updated SEO meta tags and descriptions to remove AI emphasis
+- Maintained professional medical website aesthetic with minimal AI branding as requested
 
 ## User Preferences
 

@@ -116,22 +116,48 @@ export class MemStorage implements IStorage {
   async createChatMessage(insertMessage: InsertChatMessage): Promise<ChatMessage> {
     const id = this.currentChatMessageId++;
     
-    // Generate AI response based on message content
-    let response = "I understand your concern. ";
-    const message = insertMessage.message.toLowerCase();
-    
-    if (message.includes('creatinine')) {
-      response += "High creatinine levels (above 1.2 mg/dL) indicate reduced kidney function. This happens when kidneys can't filter waste effectively. Consider dietary protein restriction and regular monitoring with your healthcare provider.";
-    } else if (message.includes('hemoglobin')) {
-      response += "Low hemoglobin in CKD patients is common due to reduced erythropoietin production by kidneys. To improve: eat iron-rich foods like spinach and lean proteins, consider iron supplements if recommended by your doctor, and treat underlying kidney disease.";
-    } else if (message.includes('symptoms')) {
-      response += "CKD symptoms include fatigue, swelling in hands/feet, changes in urination, nausea, difficulty concentrating, and shortness of breath. Early stages often have no symptoms, making regular testing important.";
-    } else if (message.includes('diet') || message.includes('food')) {
-      response += "A kidney-friendly diet typically limits protein, phosphorus, potassium, and sodium. Focus on fresh fruits and vegetables with lower potassium content, limit processed foods, and work with a dietitian for personalized recommendations.";
-    } else if (message.includes('prevention')) {
-      response += "To prevent CKD progression: control blood pressure and diabetes, maintain a healthy diet, exercise regularly, avoid nephrotoxic medications, stay hydrated, and have regular check-ups with your healthcare provider.";
+    // Use NephroBot responses based on your Flask app.py logic
+    let response = "";
+    const msg = insertMessage.message.toLowerCase();
+
+    if (!msg) {
+      response = "Please enter a message.";
+    } else if (msg.includes("what is ckd") || msg.includes("chronic kidney disease")) {
+      response = "Chronic Kidney Disease (CKD) is a condition where your kidneys lose function over time. It's usually caused by diabetes or high blood pressure.";
+    } else if (msg.includes("symptoms")) {
+      response = "Common CKD symptoms include fatigue, swelling in legs, nausea, high blood pressure, and frequent urination.";
+    } else if (msg.includes("treatment")) {
+      response = "CKD treatment depends on the stage. It usually includes managing blood pressure, blood sugar, and avoiding further kidney damage. In severe cases, dialysis or transplant may be needed.";
+    } else if (msg.includes("diet")) {
+      response = "A CKD diet includes low-sodium, low-protein foods, avoiding processed items, and drinking enough water. Consult a nephrologist for a custom plan.";
+    } else if (msg.includes("is ckd curable")) {
+      response = "CKD isn't curable but it can be managed effectively with medications, lifestyle changes, and regular monitoring.";
+    } else if (msg.includes("hi") || msg.includes("hello") || msg.includes("hey")) {
+      response = "Hello! I'm NephroBot. Ask me anything about CKD (Chronic Kidney Disease).";
+    } else if (msg.includes("high creatinine")) {
+      response = "High creatinine can indicate poor kidney function. You should consult a nephrologist for further evaluation.";
+    } else if (msg.includes("gfr level")) {
+      response = "GFR (Glomerular Filtration Rate) is a key indicator of kidney function. A GFR below 60 may suggest CKD.";
+    } else if (msg.includes("protein in urine")) {
+      response = "Protein in urine (proteinuria) may indicate kidney damage. It should be investigated further.";
+    } else if (msg.includes("diet for ckd")) {
+      response = "CKD diet includes low sodium, controlled protein, and limited potassium and phosphorus depending on stage. Always consult a renal dietitian.";
+    } else if (msg.includes("what to eat in ckd")) {
+      response = "Safe foods include white rice, apples, cabbage, cauliflower, and lean protein (based on your stage and labs). Avoid salty, processed, and high-phosphorus foods.";
+    } else if (msg.includes("can i eat bananas")) {
+      response = "Bananas are high in potassium and may need to be limited in later CKD stages. Always check with your doctor.";
+    } else if (msg.includes("how to treat ckd")) {
+      response = "CKD treatment includes blood pressure control, diabetes management, dietary changes, and medications to protect kidney function.";
+    } else if (msg.includes("medicines for ckd")) {
+      response = "Common medications include ACE inhibitors, ARBs, phosphate binders, and diuretics — prescribed based on your condition.";
+    } else if (msg.includes("dialysis")) {
+      response = "Dialysis is used in end-stage CKD to remove waste from the blood when kidneys stop working effectively.";
+    } else if (msg.includes("ckd chatbot")) {
+      response = "You're chatting with me now! I'm NephroBot, designed to answer your questions about CKD.";
+    } else if (msg.includes("who made you")) {
+      response = "I was created to assist users with CKD-related queries using rule-based responses.";
     } else {
-      response += "Based on your question, I recommend consulting with a nephrologist for comprehensive evaluation and treatment planning. Regular monitoring and early intervention are key to managing kidney health effectively.";
+      response = "Sorry, I didn't understand that. Try asking about CKD symptoms, treatment, diet, risk factors, or prevention.";
     }
     
     const chatMessage: ChatMessage = { 

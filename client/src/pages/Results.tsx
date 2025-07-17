@@ -186,12 +186,12 @@ This report is for informational purposes only and should not replace profession
           <CardHeader>
             <CardTitle className="flex items-center">
               <Bot className="mr-3 h-5 w-5 text-primary" />
-              AI Assistant
+              NephroBot Assistant
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="bg-gray-50 rounded-lg p-4 mb-4">
-              <div className="text-sm text-gray-600 mb-2">AI Assistant:</div>
+              <div className="text-sm text-gray-600 mb-2">NephroBot:</div>
               <div className="text-gray-800">
                 {shapFeatures.length > 0 && shapFeatures[0].feature.includes('Creatinine') ? 
                   `Your ${shapFeatures[0].feature.toLowerCase()} is the primary risk factor. Normal levels are typically 0.6-1.2 mg/dL. Would you like to know more about managing creatinine levels?` :
