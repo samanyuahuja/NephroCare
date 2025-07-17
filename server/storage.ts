@@ -100,6 +100,7 @@ export class MemStorage implements IStorage {
     const dietPlan: DietPlan = { 
       ...insertDietPlan, 
       id,
+      assessmentId: insertDietPlan.assessmentId || null,
       createdAt: new Date()
     };
     this.dietPlans.set(id, dietPlan);
