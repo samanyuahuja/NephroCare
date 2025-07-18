@@ -55,11 +55,10 @@ export default function Results({ params }: ResultsProps) {
   };
 
   const getRiskBadgeVariant = (level: string) => {
-    switch (level.toLowerCase()) {
-      case 'high': return 'destructive' as const;
-      case 'moderate': return 'secondary' as const;
-      default: return 'default' as const;
-    }
+    const lowerLevel = level.toLowerCase();
+    if (lowerLevel.includes('high')) return 'destructive' as const;
+    if (lowerLevel.includes('moderate')) return 'secondary' as const;
+    return 'default' as const;
   };
 
   const downloadReport = () => {
@@ -119,21 +118,25 @@ This report is for informational purposes only and should not replace profession
           </h1>
           
           <div className={`${
-            riskLevel.toLowerCase() === 'high' ? 'bg-red-600' :
-            riskLevel.toLowerCase() === 'moderate' ? 'bg-orange-600' :
+            riskLevel.toLowerCase().includes('high') ? 'bg-red-600' :
+            riskLevel.toLowerCase().includes('moderate') ? 'bg-orange-600' :
             'bg-green-600'
           } text-white rounded-xl p-8 mb-6 inline-block`}>
             <div className="text-6xl font-bold mb-2">{(riskScore * 100).toFixed(1)}%</div>
             <div className="text-xl">CKD Risk Score</div>
           </div>
           
-          <Badge variant={getRiskBadgeVariant(riskLevel)} className="text-lg px-4 py-2 mb-6">
-            {riskLevel} Risk
+          <Badge variant={getRiskBadgeVariant(riskLevel)} className={`text-lg px-4 py-2 mb-6 ${
+            riskLevel.toLowerCase().includes('high') ? 'bg-red-100 text-red-800 border-red-300' :
+            riskLevel.toLowerCase().includes('moderate') ? 'bg-orange-100 text-orange-800 border-orange-300' :
+            'bg-green-100 text-green-800 border-green-300'
+          }`}>
+            {riskLevel}
           </Badge>
           
           <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-            Based on your medical parameters, our AI model indicates a {riskLevel.toLowerCase()} risk 
-            for Chronic Kidney Disease. {riskLevel === 'High' ? 
+            Based on your medical parameters, our ML model indicates a {riskLevel.toLowerCase()} 
+            for Chronic Kidney Disease. {riskLevel.toLowerCase().includes('high') ? 
             'Please consult with a healthcare professional for proper medical evaluation.' :
             'Continue monitoring your kidney health and maintain healthy lifestyle habits.'}
           </p>
