@@ -47,7 +47,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const { promisify } = await import('util');
         const execAsync = promisify(exec);
         
-        const pythonCommand = `python python_predictor.py '${JSON.stringify(flaskData).replace(/'/g, "\\'")}'`;
+        const pythonCommand = `python model_predictor.py '${JSON.stringify(flaskData).replace(/'/g, "\\'")}'`;
         
         try {
           const { stdout, stderr } = await execAsync(pythonCommand);
@@ -74,11 +74,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             JSON.stringify(shapFeatures)
           );
           
-          console.log(`🏥 Clinical prediction: ${riskLevel} (${(riskScore * 100).toFixed(1)}%) - ${pythonResult.reasoning}`);
+          console.log(`🧠 ML Model prediction: ${riskLevel} (${(riskScore * 100).toFixed(1)}%) using ${pythonResult.model_used}`);
           res.json(updatedAssessment);
           
         } catch (pythonError: any) {
-          console.log(`⚠️ Python predictor failed: ${pythonError?.message || pythonError}, using fallback`);
+          console.log(`⚠️ ML model predictor failed: ${pythonError?.message || pythonError}, using fallback`);
           
           // Fallback to original calculation
           const riskScore = calculateCKDRisk(validatedData);
