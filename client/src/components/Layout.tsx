@@ -1,8 +1,9 @@
 import { Link, useLocation } from "wouter";
-import { Heart, Menu, X } from "lucide-react";
+import { Heart, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useState } from "react";
+import LanguageToggle from "@/components/LanguageToggle";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -15,8 +16,9 @@ export default function Layout({ children }: LayoutProps) {
   const navItems = [
     { href: "/", label: "Home" },
     { href: "/diagnosis", label: "Assessment" },
-    { href: "/chatbot", label: "AI Assistant" },
-    { href: "/about", label: "About CKD" },
+    { href: "/symptom-checker", label: "Symptoms" },
+    { href: "/chatbot", label: "NephroBot" },
+    { href: "/about", label: "About" },
   ];
 
   return (
@@ -32,7 +34,7 @@ export default function Layout({ children }: LayoutProps) {
             </Link>
 
             {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-8">
+            <div className="hidden md:flex items-center space-x-6">
               {navItems.map((item) => (
                 <Link
                   key={item.href}
@@ -46,6 +48,8 @@ export default function Layout({ children }: LayoutProps) {
                   {item.label}
                 </Link>
               ))}
+              <div className="h-4 border-l border-gray-300 mx-2"></div>
+              <LanguageToggle />
             </div>
 
             {/* Mobile Menu */}
@@ -76,6 +80,9 @@ export default function Layout({ children }: LayoutProps) {
                         {item.label}
                       </Link>
                     ))}
+                    <div className="pt-4 border-t border-gray-200">
+                      <LanguageToggle />
+                    </div>
                   </nav>
                 </SheetContent>
               </Sheet>
@@ -118,28 +125,28 @@ export default function Layout({ children }: LayoutProps) {
               </ul>
             </div>
             <div>
-              <h3 className="text-white font-semibold mb-4">Resources</h3>
-              <ul className="space-y-2">
-                <li><a href="#" className="hover:text-white transition-colors">Privacy Policy</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Terms of Service</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Medical Disclaimer</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Contact Support</a></li>
+              <h3 className="text-white font-semibold mb-4">Features</h3>
+              <ul className="space-y-2 text-gray-400">
+                <li>ML-powered Prediction</li>
+                <li>Personalized Diet Plans</li>
+                <li>Risk Assessment</li>
+                <li>Symptom Checker</li>
               </ul>
             </div>
             <div>
-              <h3 className="text-white font-semibold mb-4">Contact</h3>
-              <div className="space-y-2 text-sm">
-                <p>support@nephrocare.ai</p>
-                <p>+1 (555) 123-4567</p>
-                <p className="text-gray-400 mt-4">
-                  <strong>Medical Disclaimer:</strong> This tool is for informational 
-                  purposes only and should not replace professional medical advice.
-                </p>
-              </div>
+              <h3 className="text-white font-semibold mb-4">Support</h3>
+              <ul className="space-y-2 text-gray-400">
+                <li>Medical Guidance</li>
+                <li>Health Resources</li>
+                <li>Early Detection</li>
+                <li>Treatment Support</li>
+              </ul>
             </div>
           </div>
-          <div className="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 NephroCare. All rights reserved.</p>
+          <div className="border-t border-gray-700 mt-8 pt-8 text-center">
+            <p className="text-gray-400">
+              © 2025 NephroCare. Built by Samanyu Ahuja for kidney health awareness.
+            </p>
           </div>
         </div>
       </footer>

@@ -10,6 +10,7 @@ import Results from "@/pages/Results";
 import DietPlan from "@/pages/DietPlan";
 import Chatbot from "@/pages/Chatbot";
 import AboutCKD from "@/pages/AboutCKD";
+import SymptomChecker from "@/pages/SymptomChecker";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -18,6 +19,7 @@ function Router() {
       <Switch>
         <Route path="/" component={Home} />
         <Route path="/diagnosis" component={Diagnosis} />
+        <Route path="/symptom-checker" component={SymptomChecker} />
         <Route path="/results/:id" component={Results} />
         <Route path="/diet-plan/:id" component={DietPlan} />
         <Route path="/chatbot" component={Chatbot} />
