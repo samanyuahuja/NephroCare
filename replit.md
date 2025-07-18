@@ -23,6 +23,9 @@ NephroCare is a professional, responsive Chronic Kidney Disease (CKD) prediction
 - Implemented real-time warnings for abnormal blood pressure, glucose, creatinine, and electrolytes
 - Fixed percentage display in Results page to show accurate ML model predictions
 - Added detailed graph reading instructions for SHAP, PDP, and LIME explanations
+- Created comprehensive About CKD page with medical information, stages, symptoms, and prevention
+- Fixed language toggle functionality with proper state management and localStorage persistence
+- Added Hindi translations for key sections and working language switching system
 
 ## User Preferences
 

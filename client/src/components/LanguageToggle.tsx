@@ -1,17 +1,16 @@
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Globe } from "lucide-react";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface LanguageToggleProps {
   className?: string;
 }
 
 export default function LanguageToggle({ className = "" }: LanguageToggleProps) {
-  const [language, setLanguage] = useState<"en" | "hi">("en");
+  const { language, toggleLanguage } = useLanguage();
 
-  const toggleLanguage = () => {
-    setLanguage(language === "en" ? "hi" : "en");
-    // TODO: Implement actual language switching logic
+  const handleToggle = () => {
+    toggleLanguage();
     console.log(`Language switched to: ${language === "en" ? "Hindi" : "English"}`);
   };
 
@@ -19,7 +18,7 @@ export default function LanguageToggle({ className = "" }: LanguageToggleProps) 
     <Button
       variant="outline"
       size="sm"
-      onClick={toggleLanguage}
+      onClick={handleToggle}
       className={`flex items-center gap-2 ${className}`}
     >
       <Globe className="h-4 w-4" />

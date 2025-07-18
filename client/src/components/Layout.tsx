@@ -18,7 +18,7 @@ export default function Layout({ children }: LayoutProps) {
     { href: "/diagnosis", label: "Assessment" },
     { href: "/symptom-checker", label: "Symptoms" },
     { href: "/chatbot", label: "NephroBot" },
-    { href: "/about", label: "About" },
+    { href: "/about", label: "About CKD" },
   ];
 
   return (

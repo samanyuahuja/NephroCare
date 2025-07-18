@@ -2,24 +2,29 @@ import { Link } from "wouter";
 import { Brain, ChartLine, Utensils, Stethoscope } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useLanguage, t } from "@/hooks/useLanguage";
 
 export default function Home() {
+  const { language } = useLanguage();
+  
   return (
     <div className="space-y-12">
       {/* Hero Section */}
       <div className="medical-gradient rounded-2xl text-white p-12">
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="text-4xl md:text-6xl font-bold mb-6">
-            CKD Prediction & Personalized Care
+            {t("CKD Prediction & Personalized Care", "सीकेडी भविष्यवाणी और व्यक्तिगत देखभाल")}
           </h1>
           <p className="text-xl md:text-2xl mb-8 text-blue-100">
-            Get early insights into your kidney health with advanced diagnostics, 
-            explainable results, and a smart diet planner.
+            {t(
+              "Get early insights into your kidney health with advanced diagnostics, explainable results, and a smart diet planner.",
+              "उन्नत निदान, समझने योग्य परिणामों और स्मार्ट आहार योजनाकार के साथ अपने गुर्दे के स्वास्थ्य में प्रारंभिक अंतर्दृष्टि प्राप्त करें।"
+            )}
           </p>
           <Link href="/diagnosis">
             <Button size="lg" variant="secondary" className="text-lg px-8 py-4">
               <Stethoscope className="mr-3 h-5 w-5" />
-              Start Assessment
+              {t("Start Assessment", "मूल्यांकन शुरू करें")}
             </Button>
           </Link>
         </div>
