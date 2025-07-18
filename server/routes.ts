@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertCKDAssessmentSchema, insertDietPlanSchema, insertChatMessageSchema } from "@shared/schema";
 
-// Flask backend URL - update this to your Flask deployment URL
+// Flask backend URL - points to our Python Flask API
 const FLASK_API_URL = process.env.FLASK_API_URL || "http://localhost:8080";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -42,21 +42,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       try {
-        // Call Flask backend for prediction
-        const flaskResponse = await fetch(`${FLASK_API_URL}/diagnosis`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-          body: new URLSearchParams(flaskData).toString()
-        });
-
-        if (flaskResponse.ok) {
-          // Flask will redirect to result page, we need to handle the prediction differently
-          // For now, fall back to local calculation
-          const riskScore = calculateCKDRisk(validatedData);
-          const riskLevel = getRiskLevel(riskScore);
-          const shapFeatures = generateSHAPFeatures(validatedData);
+        // Use Python predictor based on your clinical logic
+        const { exec } = await import('child_process');
+        const { promisify } = await import('util');
+        const execAsync = promisify(exec);
+        
+        const pythonCommand = `python python_predictor.py '${JSON.stringify(flaskData).replace(/'/g, "\\'")}'`;
+        
+        try {
+          const { stdout, stderr } = await execAsync(pythonCommand);
+          
+          if (stderr) {
+            console.log(`⚠️ Python predictor warning: ${stderr}`);
+          }
+          
+          const pythonResult = JSON.parse(stdout.trim());
+          
+          if (pythonResult.error) {
+            throw new Error(pythonResult.error);
+          }
+          
+          // Use Python clinical prediction results
+          const riskScore = pythonResult.probability;
+          const riskLevel = pythonResult.risk_level;
+          const shapFeatures = generateSHAPFeatures(validatedData); // Keep SHAP for visualization
           
           const updatedAssessment = await storage.updateCKDAssessmentResults(
             assessment.id, 
@@ -65,9 +74,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
             JSON.stringify(shapFeatures)
           );
           
+          console.log(`🏥 Clinical prediction: ${riskLevel} (${(riskScore * 100).toFixed(1)}%) - ${pythonResult.reasoning}`);
           res.json(updatedAssessment);
-        } else {
-          // Fallback to local calculation if Flask is not available
+          
+        } catch (pythonError: any) {
+          console.log(`⚠️ Python predictor failed: ${pythonError?.message || pythonError}, using fallback`);
+          
+          // Fallback to original calculation
           const riskScore = calculateCKDRisk(validatedData);
           const riskLevel = getRiskLevel(riskScore);
           const shapFeatures = generateSHAPFeatures(validatedData);
@@ -81,8 +94,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           res.json(updatedAssessment);
         }
-      } catch (fetchError) {
-        // Fallback to local calculation if Flask is not reachable
+      } catch (importError) {
+        // Fallback if import fails
+        console.log('⚠️ Could not import child_process, using basic calculation');
         const riskScore = calculateCKDRisk(validatedData);
         const riskLevel = getRiskLevel(riskScore);
         const shapFeatures = generateSHAPFeatures(validatedData);
@@ -169,7 +183,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Try Flask chatbot first, fallback to local NephroBot
       try {
-        const flaskResponse = await fetch(`${FLASK_API_URL}/chatbot`, {
+        const flaskResponse = await fetch(`${FLASK_API_URL}/api/chatbot`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -186,12 +200,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
               response: flaskData.reply,
               createdAt: new Date()
             };
+            console.log(`🤖 NephroBot (Flask): ${flaskData.reply.substring(0, 50)}...`);
             return res.json(chatMessage);
           }
         }
       } catch (fetchError) {
         // Fallback to local NephroBot if Flask is not available
-        console.log('Flask chatbot unavailable, using local NephroBot');
+        console.log('⚠️ Flask chatbot unavailable, using local NephroBot');
       }
 
       // Use local NephroBot responses
