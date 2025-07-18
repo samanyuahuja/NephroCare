@@ -22,6 +22,7 @@ export default function Diagnosis() {
   const form = useForm<InsertCKDAssessment>({
     resolver: zodResolver(insertCKDAssessmentSchema),
     defaultValues: {
+      patientName: "",
       age: 45,
       bloodPressure: 120,
       specificGravity: 1.020,
@@ -99,6 +100,22 @@ export default function Diagnosis() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <FormField
+                    control={form.control}
+                    name="patientName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t("Patient Name", "रोगी का नाम")} *</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="text"
+                            placeholder={t("Enter patient's full name", "रोगी का पूरा नाम दर्ज करें")}
+                            {...field}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
                   <FormField
                     control={form.control}
                     name="age"

@@ -11,6 +11,7 @@ export const users = pgTable("users", {
 export const ckdAssessments = pgTable("ckd_assessments", {
   id: serial("id").primaryKey(),
   // Patient Info
+  patientName: text("patient_name").notNull(),
   age: integer("age").notNull(),
   bloodPressure: integer("blood_pressure").notNull(),
   specificGravity: real("specific_gravity").notNull(),
@@ -42,7 +43,7 @@ export const ckdAssessments = pgTable("ckd_assessments", {
   riskLevel: text("risk_level"),
   shapFeatures: text("shap_features"), // JSON string
   
-  createdAt: timestamp("created_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const dietPlans = pgTable("diet_plans", {
@@ -73,6 +74,8 @@ export const insertCKDAssessmentSchema = createInsertSchema(ckdAssessments).omit
   riskLevel: true,
   shapFeatures: true,
   createdAt: true,
+}).extend({
+  patientName: z.string().min(1, "Patient name is required"),
 });
 
 export const insertDietPlanSchema = createInsertSchema(dietPlans).omit({

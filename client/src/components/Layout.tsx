@@ -19,6 +19,7 @@ export default function Layout({ children }: LayoutProps) {
     { href: "/", label: t("Home", "होम") },
     { href: "/diagnosis", label: t("Assessment", "मूल्यांकन") },
     { href: "/symptom-checker", label: t("Symptoms", "लक्षण") },
+    { href: "/history", label: t("History", "इतिहास") },
     { href: "/chatbot", label: t("NephroBot", "नेफ्रोबॉट") },
     { href: "/about", label: t("About", "के बारे में") },
     { href: "/about-ckd", label: t("About CKD", "सीकेडी के बारे में") },

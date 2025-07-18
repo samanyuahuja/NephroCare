@@ -13,6 +13,9 @@ import {
   type InsertChatMessage
 } from "@shared/schema";
 
+import { db } from "./db";
+import { eq, desc } from "drizzle-orm";
+
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
@@ -21,12 +24,96 @@ export interface IStorage {
   createCKDAssessment(assessment: InsertCKDAssessment): Promise<CKDAssessment>;
   getCKDAssessment(id: number): Promise<CKDAssessment | undefined>;
   updateCKDAssessmentResults(id: number, riskScore: number, riskLevel: string, shapFeatures: string): Promise<CKDAssessment | undefined>;
+  getAllCKDAssessments(): Promise<CKDAssessment[]>;
   
   createDietPlan(dietPlan: InsertDietPlan): Promise<DietPlan>;
   getDietPlanByAssessmentId(assessmentId: number): Promise<DietPlan | undefined>;
   
   createChatMessage(message: InsertChatMessage): Promise<ChatMessage>;
   getChatMessages(): Promise<ChatMessage[]>;
+}
+
+export class DatabaseStorage implements IStorage {
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db.insert(users).values(insertUser).returning();
+    return user;
+  }
+
+  async createCKDAssessment(assessment: InsertCKDAssessment): Promise<CKDAssessment> {
+    const [result] = await db.insert(ckdAssessments).values(assessment).returning();
+    return result;
+  }
+
+  async getCKDAssessment(id: number): Promise<CKDAssessment | undefined> {
+    const [assessment] = await db.select().from(ckdAssessments).where(eq(ckdAssessments.id, id));
+    return assessment || undefined;
+  }
+
+  async updateCKDAssessmentResults(id: number, riskScore: number, riskLevel: string, shapFeatures: string): Promise<CKDAssessment | undefined> {
+    const [updated] = await db
+      .update(ckdAssessments)
+      .set({ riskScore, riskLevel, shapFeatures })
+      .where(eq(ckdAssessments.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  async getAllCKDAssessments(): Promise<CKDAssessment[]> {
+    return await db.select().from(ckdAssessments).orderBy(desc(ckdAssessments.createdAt));
+  }
+
+  async createDietPlan(dietPlan: InsertDietPlan): Promise<DietPlan> {
+    const [plan] = await db.insert(dietPlans).values(dietPlan).returning();
+    return plan;
+  }
+
+  async getDietPlanByAssessmentId(assessmentId: number): Promise<DietPlan | undefined> {
+    const [plan] = await db.select().from(dietPlans).where(eq(dietPlans.assessmentId, assessmentId));
+    return plan || undefined;
+  }
+
+  async createChatMessage(message: InsertChatMessage): Promise<ChatMessage> {
+    const nephroResponse = this.generateNephroBotResponse(message.message);
+    const chatData = {
+      ...message,
+      response: nephroResponse
+    };
+    const [chat] = await db.insert(chatMessages).values(chatData).returning();
+    return chat;
+  }
+
+  private generateNephroBotResponse(message: string): string {
+    const msg = message.toLowerCase();
+    if (!msg) {
+      return "Please enter a message.";
+    } else if (msg.includes("what is ckd") || msg.includes("chronic kidney disease")) {
+      return "Chronic Kidney Disease (CKD) is a condition where your kidneys lose function over time. It's usually caused by diabetes or high blood pressure.";
+    } else if (msg.includes("symptoms")) {
+      return "Common CKD symptoms include fatigue, swelling in legs, nausea, high blood pressure, and frequent urination.";
+    } else if (msg.includes("treatment")) {
+      return "CKD treatment depends on the stage. It usually includes managing blood pressure, blood sugar, and avoiding further kidney damage. In severe cases, dialysis or transplant may be needed.";
+    } else if (msg.includes("diet")) {
+      return "A CKD diet includes low-sodium, low-protein foods, avoiding processed items, and drinking enough water. Consult a nephrologist for a custom plan.";
+    } else if (msg.includes("hi") || msg.includes("hello") || msg.includes("hey")) {
+      return "Hello! I'm NephroBot. Ask me anything about CKD (Chronic Kidney Disease).";
+    } else {
+      return "I'm here to help with CKD-related questions. Try asking about symptoms, treatment, diet, or general kidney health information.";
+    }
+  }
+
+  async getChatMessages(): Promise<ChatMessage[]> {
+    return await db.select().from(chatMessages).orderBy(desc(chatMessages.createdAt));
+  }
 }
 
 export class MemStorage implements IStorage {
@@ -175,6 +262,12 @@ export class MemStorage implements IStorage {
       a.createdAt!.getTime() - b.createdAt!.getTime()
     );
   }
+
+  async getAllCKDAssessments(): Promise<CKDAssessment[]> {
+    return Array.from(this.ckdAssessments.values()).sort((a, b) => 
+      new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
+    );
+  }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();

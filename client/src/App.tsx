@@ -11,6 +11,7 @@ import DietPlan from "@/pages/DietPlan";
 import Chatbot from "@/pages/Chatbot";
 import About from "@/pages/About";
 import AboutCKD from "@/pages/AboutCKD";
+import History from "@/pages/History";
 import SymptomChecker from "@/pages/SymptomChecker";
 import NotFound from "@/pages/not-found";
 
@@ -26,6 +27,7 @@ function Router() {
         <Route path="/chatbot" component={Chatbot} />
         <Route path="/about" component={About} />
         <Route path="/about-ckd" component={AboutCKD} />
+        <Route path="/history" component={History} />
         <Route component={NotFound} />
       </Switch>
     </Layout>

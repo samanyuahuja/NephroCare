@@ -131,6 +131,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get all CKD Assessments (history)
+  app.get("/api/ckd-assessments", async (req, res) => {
+    try {
+      const assessments = await storage.getAllCKDAssessments();
+      res.json(assessments);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to retrieve assessment history" });
+    }
+  });
+
   // Generate Diet Plan
   app.post("/api/diet-plan", async (req, res) => {
     try {
