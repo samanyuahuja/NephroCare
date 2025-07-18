@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useState } from "react";
 import LanguageToggle from "@/components/LanguageToggle";
+import { useLanguage, t } from "@/hooks/useLanguage";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -12,14 +13,15 @@ interface LayoutProps {
 export default function Layout({ children }: LayoutProps) {
   const [location] = useLocation();
   const [isOpen, setIsOpen] = useState(false);
+  const { language } = useLanguage();
 
   const navItems = [
-    { href: "/", label: "Home" },
-    { href: "/diagnosis", label: "Assessment" },
-    { href: "/symptom-checker", label: "Symptoms" },
-    { href: "/chatbot", label: "NephroBot" },
-    { href: "/about", label: "About" },
-    { href: "/about-ckd", label: "About CKD" },
+    { href: "/", label: t("Home", "होम") },
+    { href: "/diagnosis", label: t("Assessment", "मूल्यांकन") },
+    { href: "/symptom-checker", label: t("Symptoms", "लक्षण") },
+    { href: "/chatbot", label: t("NephroBot", "नेफ्रोबॉट") },
+    { href: "/about", label: t("About", "के बारे में") },
+    { href: "/about-ckd", label: t("About CKD", "सीकेडी के बारे में") },
   ];
 
   return (
@@ -107,11 +109,14 @@ export default function Layout({ children }: LayoutProps) {
                 <span className="text-xl font-bold text-white">NephroCare</span>
               </div>
               <p className="text-gray-400">
-                Professional kidney health prediction and personalized care solutions.
+                {t(
+                  "Professional kidney health prediction and personalized care solutions.",
+                  "पेशेवर गुर्दे के स्वास्थ्य की भविष्यवाणी और व्यक्तिगत देखभाल समाधान।"
+                )}
               </p>
             </div>
             <div>
-              <h3 className="text-white font-semibold mb-4">Quick Links</h3>
+              <h3 className="text-white font-semibold mb-4">{t("Quick Links", "त्वरित लिंक")}</h3>
               <ul className="space-y-2">
                 {navItems.map((item) => (
                   <li key={item.href}>
@@ -126,21 +131,21 @@ export default function Layout({ children }: LayoutProps) {
               </ul>
             </div>
             <div>
-              <h3 className="text-white font-semibold mb-4">Features</h3>
+              <h3 className="text-white font-semibold mb-4">{t("Features", "विशेषताएं")}</h3>
               <ul className="space-y-2 text-gray-400">
-                <li>ML-powered Prediction</li>
-                <li>Personalized Diet Plans</li>
-                <li>Risk Assessment</li>
-                <li>Symptom Checker</li>
+                <li>{t("ML-powered Prediction", "एमएल-संचालित भविष्यवाणी")}</li>
+                <li>{t("Personalized Diet Plans", "व्यक्तिगत आहार योजना")}</li>
+                <li>{t("Risk Assessment", "जोखिम मूल्यांकन")}</li>
+                <li>{t("Symptom Checker", "लक्षण चेकर")}</li>
               </ul>
             </div>
             <div>
-              <h3 className="text-white font-semibold mb-4">Support</h3>
+              <h3 className="text-white font-semibold mb-4">{t("Support", "सहायता")}</h3>
               <ul className="space-y-2 text-gray-400">
-                <li>Medical Guidance</li>
-                <li>Health Resources</li>
-                <li>Early Detection</li>
-                <li>Treatment Support</li>
+                <li>{t("Medical Guidance", "चिकित्सा मार्गदर्शन")}</li>
+                <li>{t("Health Resources", "स्वास्थ्य संसाधन")}</li>
+                <li>{t("Early Detection", "शीघ्र निदान")}</li>
+                <li>{t("Treatment Support", "उपचार सहायता")}</li>
               </ul>
             </div>
           </div>

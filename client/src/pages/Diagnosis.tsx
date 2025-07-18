@@ -12,31 +12,33 @@ import { User, FlaskConical, FileText, BarChart3 } from "lucide-react";
 import { insertCKDAssessmentSchema, type InsertCKDAssessment } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage, t } from "@/hooks/useLanguage";
 
 export default function Diagnosis() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { language } = useLanguage();
 
   const form = useForm<InsertCKDAssessment>({
     resolver: zodResolver(insertCKDAssessmentSchema),
     defaultValues: {
-      age: undefined,
-      bloodPressure: undefined,
-      specificGravity: undefined,
-      albumin: undefined,
-      sugar: undefined,
+      age: 45,
+      bloodPressure: 120,
+      specificGravity: 1.020,
+      albumin: 1,
+      sugar: 0,
       redBloodCells: "normal",
       pusCell: "normal", 
       pusCellClumps: "not_present",
       bacteria: "not_present",
-      bloodGlucoseRandom: undefined,
-      bloodUrea: undefined,
-      serumCreatinine: undefined,
-      sodium: undefined,
-      potassium: undefined,
-      hemoglobin: undefined,
-      wbcCount: undefined,
-      rbcCount: undefined,
+      bloodGlucoseRandom: 145,
+      bloodUrea: 35,
+      serumCreatinine: 1.8,
+      sodium: 135,
+      potassium: 4.5,
+      hemoglobin: 12,
+      wbcCount: 7600,
+      rbcCount: 5.2,
       hypertension: false,
       diabetesMellitus: false,
       coronaryArteryDisease: false,
@@ -75,9 +77,14 @@ export default function Diagnosis() {
     <div className="max-w-4xl mx-auto">
       <Card>
         <CardHeader className="text-center">
-          <CardTitle className="text-3xl font-bold">CKD Risk Assessment</CardTitle>
+          <CardTitle className="text-3xl font-bold">
+            {t("CKD Risk Assessment", "सीकेडी जोखिम मूल्यांकन")}
+          </CardTitle>
           <p className="text-gray-600">
-            Please fill out the medical parameters below for accurate CKD risk prediction.
+            {t(
+              "Please fill out the medical parameters below for accurate CKD risk prediction.",
+              "सटीक सीकेडी जोखिम भविष्यवाणी के लिए कृपया नीचे दिए गए चिकित्सा पैरामीटर भरें।"
+            )}
           </p>
         </CardHeader>
         <CardContent>
@@ -88,7 +95,7 @@ export default function Diagnosis() {
                 <CardHeader>
                   <CardTitle className="flex items-center text-xl">
                     <User className="mr-3 h-5 w-5 text-primary" />
-                    Patient Information
+                    {t("Patient Information", "रोगी की जानकारी")}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -97,7 +104,7 @@ export default function Diagnosis() {
                     name="age"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Age (years)</FormLabel>
+                        <FormLabel>{t("Age (years)", "आयु (वर्ष)")}</FormLabel>
                         <FormControl>
                           <Input
                             type="number"
@@ -119,7 +126,7 @@ export default function Diagnosis() {
                     name="bloodPressure"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Blood Pressure (mmHg)</FormLabel>
+                        <FormLabel>{t("Blood Pressure (mmHg)", "रक्तचाप (mmHg)")}</FormLabel>
                         <FormControl>
                           <Input
                             type="number"
@@ -214,7 +221,7 @@ export default function Diagnosis() {
                 <CardHeader>
                   <CardTitle className="flex items-center text-xl">
                     <FlaskConical className="mr-3 h-5 w-5 text-primary" />
-                    Laboratory Results
+                    {t("Laboratory Results", "प्रयोगशाला परिणाम")}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
