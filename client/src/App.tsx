@@ -9,6 +9,7 @@ import Diagnosis from "@/pages/Diagnosis";
 import Results from "@/pages/Results";
 import DietPlan from "@/pages/DietPlan";
 import Chatbot from "@/pages/Chatbot";
+import About from "@/pages/About";
 import AboutCKD from "@/pages/AboutCKD";
 import SymptomChecker from "@/pages/SymptomChecker";
 import NotFound from "@/pages/not-found";
@@ -23,7 +24,8 @@ function Router() {
         <Route path="/results/:id" component={Results} />
         <Route path="/diet-plan/:id" component={DietPlan} />
         <Route path="/chatbot" component={Chatbot} />
-        <Route path="/about" component={AboutCKD} />
+        <Route path="/about" component={About} />
+        <Route path="/about-ckd" component={AboutCKD} />
         <Route component={NotFound} />
       </Switch>
     </Layout>

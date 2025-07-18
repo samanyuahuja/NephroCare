@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Heart, Menu } from "lucide-react";
+import { Activity, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useState } from "react";
@@ -18,7 +18,8 @@ export default function Layout({ children }: LayoutProps) {
     { href: "/diagnosis", label: "Assessment" },
     { href: "/symptom-checker", label: "Symptoms" },
     { href: "/chatbot", label: "NephroBot" },
-    { href: "/about", label: "About CKD" },
+    { href: "/about", label: "About" },
+    { href: "/about-ckd", label: "About CKD" },
   ];
 
   return (
@@ -29,7 +30,7 @@ export default function Layout({ children }: LayoutProps) {
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
             <Link href="/" className="flex items-center space-x-3">
-              <Heart className="h-8 w-8 text-primary" />
+              <Activity className="h-8 w-8 text-primary" />
               <span className="text-xl font-bold text-gray-900">NephroCare</span>
             </Link>
 
@@ -62,7 +63,7 @@ export default function Layout({ children }: LayoutProps) {
                 </SheetTrigger>
                 <SheetContent side="right" className="w-72">
                   <div className="flex items-center space-x-3 mb-8">
-                    <Heart className="h-8 w-8 text-primary" />
+                    <Activity className="h-8 w-8 text-primary" />
                     <span className="text-xl font-bold">NephroCare</span>
                   </div>
                   <nav className="space-y-4">
@@ -102,7 +103,7 @@ export default function Layout({ children }: LayoutProps) {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
               <div className="flex items-center space-x-3 mb-4">
-                <Heart className="h-8 w-8 text-primary" />
+                <Activity className="h-8 w-8 text-primary" />
                 <span className="text-xl font-bold text-white">NephroCare</span>
               </div>
               <p className="text-gray-400">

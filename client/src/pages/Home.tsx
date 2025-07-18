@@ -37,12 +37,16 @@ export default function Home() {
             <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-4">
               <Brain className="h-8 w-8 text-primary" />
             </div>
-            <CardTitle className="text-xl">Advanced Diagnosis</CardTitle>
+            <CardTitle className="text-xl">
+              {t("Advanced Diagnosis", "उन्नत निदान")}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-gray-600">
-              Sophisticated algorithms analyze your medical parameters 
-              to predict CKD risk with high accuracy using proven models.
+              {t(
+                "Sophisticated algorithms analyze your medical parameters to predict CKD risk with high accuracy using proven models.",
+                "परिष्कृत एल्गोरिदम आपके मेडिकल पैरामीटर का विश्लेषण करके सिद्ध मॉडल का उपयोग करके उच्च सटीकता के साथ सीकेडी जोखिम की भविष्यवाणी करते हैं।"
+              )}
             </p>
           </CardContent>
         </Card>
@@ -52,12 +56,16 @@ export default function Home() {
             <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-4">
               <ChartLine className="h-8 w-8 text-primary" />
             </div>
-            <CardTitle className="text-xl">Explainable Results</CardTitle>
+            <CardTitle className="text-xl">
+              {t("Explainable Results", "समझने योग्य परिणाम")}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-gray-600">
-              Understand your results with SHAP plots, dependency charts, 
-              and clear explanations of risk factors.
+              {t(
+                "Understand your results with SHAP plots, dependency charts, and clear explanations of risk factors.",
+                "SHAP प्लॉट, निर्भरता चार्ट और जोखिम कारकों के स्पष्ट स्पष्टीकरण के साथ अपने परिणामों को समझें।"
+              )}
             </p>
           </CardContent>
         </Card>
@@ -67,12 +75,16 @@ export default function Home() {
             <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-4">
               <Utensils className="h-8 w-8 text-primary" />
             </div>
-            <CardTitle className="text-xl">Personalized Diet Plan</CardTitle>
+            <CardTitle className="text-xl">
+              {t("Smart Diet Plans", "स्मार्ट आहार योजना")}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-gray-600">
-              Receive customized nutrition recommendations based on your 
-              specific risk factors and health profile.
+              {t(
+                "Get personalized nutrition recommendations based on your assessment results and dietary preferences.",
+                "अपने मूल्यांकन परिणामों और आहार वरीयताओं के आधार पर व्यक्तिगत पोषण सिफारिशें प्राप्त करें।"
+              )}
             </p>
           </CardContent>
         </Card>
@@ -83,28 +95,31 @@ export default function Home() {
         <CardContent className="p-8">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Trusted by Healthcare Professionals
+              {t("Trusted by Healthcare Professionals", "स्वास्थ्य पेशेवरों द्वारा भरोसेमंद")}
             </h2>
             <p className="text-gray-600">
-              Our prediction model has been validated with clinical data and provides reliable insights.
+              {t(
+                "Our prediction model has been validated with clinical data and provides reliable insights.",
+                "हमारे भविष्यवाणी मॉडल को क्लिनिकल डेटा के साथ मान्यता प्राप्त है और विश्वसनीय अंतर्दृष्टि प्रदान करता है।"
+              )}
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
             <div>
               <div className="text-3xl font-bold text-primary mb-2">95%</div>
-              <div className="text-gray-600">Accuracy Rate</div>
+              <div className="text-gray-600">{t("Accuracy Rate", "सटीकता दर")}</div>
             </div>
             <div>
               <div className="text-3xl font-bold text-primary mb-2">10,000+</div>
-              <div className="text-gray-600">Assessments</div>
+              <div className="text-gray-600">{t("Assessments", "मूल्यांकन")}</div>
             </div>
             <div>
               <div className="text-3xl font-bold text-primary mb-2">500+</div>
-              <div className="text-gray-600">Healthcare Partners</div>
+              <div className="text-gray-600">{t("Healthcare Partners", "स्वास्थ्य साझेदार")}</div>
             </div>
             <div>
               <div className="text-3xl font-bold text-primary mb-2">24/7</div>
-              <div className="text-gray-600">AI Support</div>
+              <div className="text-gray-600">{t("AI Support", "एआई सहायता")}</div>
             </div>
           </div>
         </CardContent>
