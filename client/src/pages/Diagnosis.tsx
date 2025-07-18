@@ -95,14 +95,20 @@ export default function Diagnosis() {
                     name="age"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Age</FormLabel>
+                        <FormLabel>Age (years)</FormLabel>
                         <FormControl>
                           <Input
                             type="number"
+                            min="0"
+                            max="120"
                             {...field}
                             onChange={(e) => field.onChange(parseInt(e.target.value))}
+                            className={parseInt(field.value) < 10 || parseInt(field.value) > 90 ? "border-orange-400" : ""}
                           />
                         </FormControl>
+                        {(parseInt(field.value) < 10 || parseInt(field.value) > 90) && (
+                          <p className="text-sm text-orange-600">Age outside typical range for CKD assessment</p>
+                        )}
                       </FormItem>
                     )}
                   />
@@ -111,14 +117,23 @@ export default function Diagnosis() {
                     name="bloodPressure"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Blood Pressure</FormLabel>
+                        <FormLabel>Blood Pressure (mmHg)</FormLabel>
                         <FormControl>
                           <Input
                             type="number"
+                            min="60"
+                            max="200"
                             {...field}
                             onChange={(e) => field.onChange(parseInt(e.target.value))}
+                            className={parseInt(field.value) < 60 || parseInt(field.value) > 140 ? "border-red-400" : ""}
                           />
                         </FormControl>
+                        {parseInt(field.value) < 60 && (
+                          <p className="text-sm text-red-600">Warning: Hypotension - consult doctor immediately</p>
+                        )}
+                        {parseInt(field.value) > 140 && (
+                          <p className="text-sm text-red-600">Warning: High blood pressure - major CKD risk factor</p>
+                        )}
                       </FormItem>
                     )}
                   />
@@ -132,10 +147,16 @@ export default function Diagnosis() {
                           <Input
                             type="number"
                             step="0.001"
+                            min="1.000"
+                            max="1.035"
                             {...field}
                             onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                            className={parseFloat(field.value) < 1.005 || parseFloat(field.value) > 1.030 ? "border-red-400" : ""}
                           />
                         </FormControl>
+                        {(parseFloat(field.value) < 1.005 || parseFloat(field.value) > 1.030) && (
+                          <p className="text-sm text-red-600">Warning: Abnormal specific gravity - kidney function concern</p>
+                        )}
                       </FormItem>
                     )}
                   />
@@ -144,14 +165,20 @@ export default function Diagnosis() {
                     name="albumin"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Albumin</FormLabel>
+                        <FormLabel>Albumin (0-5 scale)</FormLabel>
                         <FormControl>
                           <Input
                             type="number"
+                            min="0"
+                            max="5"
                             {...field}
                             onChange={(e) => field.onChange(parseInt(e.target.value))}
+                            className={parseInt(field.value) > 3 ? "border-red-400" : ""}
                           />
                         </FormControl>
+                        {parseInt(field.value) > 3 && (
+                          <p className="text-sm text-red-600">Warning: High proteinuria - indicates kidney damage</p>
+                        )}
                       </FormItem>
                     )}
                   />
@@ -160,14 +187,20 @@ export default function Diagnosis() {
                     name="sugar"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Sugar</FormLabel>
+                        <FormLabel>Sugar (0-5 scale)</FormLabel>
                         <FormControl>
                           <Input
                             type="number"
+                            min="0"
+                            max="5"
                             {...field}
                             onChange={(e) => field.onChange(parseInt(e.target.value))}
+                            className={parseInt(field.value) > 2 ? "border-red-400" : ""}
                           />
                         </FormControl>
+                        {parseInt(field.value) > 2 && (
+                          <p className="text-sm text-red-600">Warning: May signal diabetes - major CKD risk factor</p>
+                        )}
                       </FormItem>
                     )}
                   />
@@ -248,14 +281,20 @@ export default function Diagnosis() {
                     name="bloodGlucoseRandom"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Blood Glucose Random</FormLabel>
+                        <FormLabel>Blood Glucose Random (mg/dL)</FormLabel>
                         <FormControl>
                           <Input
                             type="number"
+                            min="70"
+                            max="400"
                             {...field}
                             onChange={(e) => field.onChange(parseInt(e.target.value))}
+                            className={parseInt(field.value) > 200 ? "border-red-400" : ""}
                           />
                         </FormControl>
+                        {parseInt(field.value) > 200 && (
+                          <p className="text-sm text-red-600">Warning: Uncontrolled diabetes - very high CKD risk</p>
+                        )}
                       </FormItem>
                     )}
                   />
@@ -264,14 +303,20 @@ export default function Diagnosis() {
                     name="bloodUrea"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Blood Urea</FormLabel>
+                        <FormLabel>Blood Urea (mg/dL)</FormLabel>
                         <FormControl>
                           <Input
                             type="number"
+                            min="7"
+                            max="100"
                             {...field}
                             onChange={(e) => field.onChange(parseInt(e.target.value))}
+                            className={parseInt(field.value) > 40 ? "border-red-400" : ""}
                           />
                         </FormControl>
+                        {parseInt(field.value) > 40 && (
+                          <p className="text-sm text-red-600">Warning: Kidney function loss indicated</p>
+                        )}
                       </FormItem>
                     )}
                   />
@@ -280,15 +325,21 @@ export default function Diagnosis() {
                     name="serumCreatinine"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Serum Creatinine</FormLabel>
+                        <FormLabel>Serum Creatinine (mg/dL)</FormLabel>
                         <FormControl>
                           <Input
                             type="number"
                             step="0.1"
+                            min="0.6"
+                            max="10.0"
                             {...field}
                             onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                            className={parseFloat(field.value) > 1.5 ? "border-red-400" : ""}
                           />
                         </FormControl>
+                        {parseFloat(field.value) > 1.5 && (
+                          <p className="text-sm text-red-600">Warning: Declining kidney function - urgent evaluation needed</p>
+                        )}
                       </FormItem>
                     )}
                   />
@@ -297,14 +348,20 @@ export default function Diagnosis() {
                     name="sodium"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Sodium</FormLabel>
+                        <FormLabel>Sodium (mEq/L)</FormLabel>
                         <FormControl>
                           <Input
                             type="number"
+                            min="130"
+                            max="150"
                             {...field}
                             onChange={(e) => field.onChange(parseInt(e.target.value))}
+                            className={parseInt(field.value) < 130 || parseInt(field.value) > 150 ? "border-red-400" : ""}
                           />
                         </FormControl>
+                        {(parseInt(field.value) < 130 || parseInt(field.value) > 150) && (
+                          <p className="text-sm text-red-600">Warning: Electrolyte imbalance - medical attention needed</p>
+                        )}
                       </FormItem>
                     )}
                   />
@@ -313,15 +370,21 @@ export default function Diagnosis() {
                     name="potassium"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Potassium</FormLabel>
+                        <FormLabel>Potassium (mEq/L)</FormLabel>
                         <FormControl>
                           <Input
                             type="number"
                             step="0.1"
+                            min="3.0"
+                            max="6.0"
                             {...field}
                             onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                            className={parseFloat(field.value) > 5.5 ? "border-red-400" : ""}
                           />
                         </FormControl>
+                        {parseFloat(field.value) > 5.5 && (
+                          <p className="text-sm text-red-600">Warning: Hyperkalemia risk - dangerous for heart</p>
+                        )}
                       </FormItem>
                     )}
                   />
@@ -330,15 +393,21 @@ export default function Diagnosis() {
                     name="hemoglobin"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Hemoglobin</FormLabel>
+                        <FormLabel>Hemoglobin (g/dL)</FormLabel>
                         <FormControl>
                           <Input
                             type="number"
                             step="0.1"
+                            min="8.0"
+                            max="18.0"
                             {...field}
                             onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                            className={parseFloat(field.value) < 10 ? "border-red-400" : ""}
                           />
                         </FormControl>
+                        {parseFloat(field.value) < 10 && (
+                          <p className="text-sm text-red-600">Warning: Anemia detected - common in CKD patients</p>
+                        )}
                       </FormItem>
                     )}
                   />

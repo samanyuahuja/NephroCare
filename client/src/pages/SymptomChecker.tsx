@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { AlertCircle, Info, Stethoscope } from "lucide-react";
+import { AlertCircle, Info, Stethoscope, CheckCircle, AlertTriangle } from "lucide-react";
 import { useLocation } from "wouter";
 import {
   Collapsible,
@@ -15,7 +15,9 @@ interface Symptom {
   id: string;
   name: string;
   description: string;
-  severity: number; // 1-3 scale
+  severity: number; // 1-5 scale
+  urgency: string; // low, moderate, high, urgent
+  possibleCauses: string[];
 }
 
 const symptoms: Symptom[] = [
@@ -23,255 +25,385 @@ const symptoms: Symptom[] = [
     id: "fatigue",
     name: "Persistent fatigue",
     description: "Constant tiredness not relieved by rest, often due to anemia or toxin buildup in CKD.",
-    severity: 2
+    severity: 2,
+    urgency: "moderate",
+    possibleCauses: ["Anemia", "Uremia", "Electrolyte imbalance"]
   },
   {
     id: "swelling",
     name: "Swelling in legs or ankles",
     description: "Fluid retention (edema) occurs when kidneys can't remove excess fluid from the body.",
-    severity: 3
+    severity: 3,
+    urgency: "high",
+    possibleCauses: ["Fluid retention", "Heart failure", "Kidney dysfunction"]
   },
   {
     id: "urination",
-    name: "Changes in urination",
+    name: "Changes in urination (color, frequency)",
     description: "Frequency, color changes, or difficulty urinating may indicate kidney function decline.",
-    severity: 2
+    severity: 3,
+    urgency: "high",
+    possibleCauses: ["Kidney function decline", "Urinary tract infection", "Diabetes"]
   },
   {
     id: "foamy",
     name: "Foamy urine",
     description: "Protein in urine (proteinuria) creates foam, indicating kidney filtering problems.",
-    severity: 3
+    severity: 4,
+    urgency: "high",
+    possibleCauses: ["Proteinuria", "Kidney damage", "Glomerular disease"]
   },
   {
     id: "nausea",
     name: "Nausea or vomiting",
     description: "Toxin buildup in blood (uremia) can cause digestive symptoms in advanced CKD.",
-    severity: 2
+    severity: 3,
+    urgency: "moderate",
+    possibleCauses: ["Uremia", "Metabolic acidosis", "Electrolyte imbalance"]
   },
   {
     id: "breath",
     name: "Shortness of breath",
     description: "Fluid in lungs or anemia can cause breathing difficulties in CKD patients.",
-    severity: 3
+    severity: 4,
+    urgency: "high",
+    possibleCauses: ["Pulmonary edema", "Anemia", "Metabolic acidosis"]
   },
   {
     id: "appetite",
     name: "Loss of appetite",
     description: "Uremia and metabolic changes in CKD often reduce appetite and food intake.",
-    severity: 2
+    severity: 2,
+    urgency: "moderate",
+    possibleCauses: ["Uremia", "Depression", "Medication side effects"]
   },
   {
     id: "blood",
     name: "Blood in urine (Hematuria)",
     description: "Visible or microscopic blood in urine may indicate kidney damage or disease.",
-    severity: 3
+    severity: 5,
+    urgency: "urgent",
+    possibleCauses: ["Kidney stones", "Glomerulonephritis", "Tumor", "Infection"]
   },
   {
     id: "pressure",
     name: "High blood pressure",
     description: "Kidney disease and hypertension often occur together, worsening each other.",
-    severity: 2
+    severity: 3,
+    urgency: "high",
+    possibleCauses: ["Kidney disease", "Essential hypertension", "Renovascular disease"]
   },
   {
     id: "skin",
     name: "Itchy or dry skin",
-    description: "Mineral imbalances and toxin buildup in CKD can cause skin problems.",
-    severity: 1
+    description: "Persistent itching due to waste buildup in blood and mineral imbalances.",
+    severity: 2,
+    urgency: "low",
+    possibleCauses: ["Uremic toxins", "Mineral imbalance", "Dry skin"]
   },
   {
     id: "concentration",
     name: "Trouble concentrating",
-    description: "Uremia can affect brain function, causing confusion and difficulty focusing.",
-    severity: 2
+    description: "Mental fog or difficulty focusing on tasks due to uremic toxins.",
+    severity: 2,
+    urgency: "moderate",
+    possibleCauses: ["Uremic encephalopathy", "Anemia", "Sleep disturbances"]
   },
   {
     id: "cramps",
     name: "Muscle cramps",
-    description: "Electrolyte imbalances (calcium, phosphorus) in CKD can cause muscle issues.",
-    severity: 1
+    description: "Involuntary muscle contractions, especially at night, due to electrolyte imbalances.",
+    severity: 2,
+    urgency: "low",
+    possibleCauses: ["Electrolyte imbalance", "Fluid overload", "Mineral deficiency"]
   },
   {
     id: "backpain",
-    name: "Back pain near kidneys",
-    description: "Pain in lower back or sides may indicate kidney stones or infection.",
-    severity: 2
+    name: "Back pain near the kidneys",
+    description: "Persistent pain in lower back or flank area, possibly indicating kidney problems.",
+    severity: 3,
+    urgency: "moderate",
+    possibleCauses: ["Kidney stones", "Kidney infection", "Polycystic kidney disease"]
   }
 ];
 
+interface AssessmentResult {
+  totalScore: number;
+  riskLevel: string;
+  urgency: string;
+  recommendations: string[];
+  selectedSymptoms: Symptom[];
+}
+
 export default function SymptomChecker() {
+  const [, setLocation] = useLocation();
   const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([]);
   const [showResults, setShowResults] = useState(false);
-  const [, setLocation] = useLocation();
+  const [assessment, setAssessment] = useState<AssessmentResult | null>(null);
 
-  const handleSymptomChange = (symptomId: string, checked: boolean) => {
-    if (checked) {
-      setSelectedSymptoms([...selectedSymptoms, symptomId]);
-    } else {
-      setSelectedSymptoms(selectedSymptoms.filter(id => id !== symptomId));
-    }
+  const handleSymptomToggle = (symptomId: string) => {
+    setSelectedSymptoms(prev => 
+      prev.includes(symptomId) 
+        ? prev.filter(id => id !== symptomId)
+        : [...prev, symptomId]
+    );
   };
 
-  const calculateAssessment = () => {
-    if (selectedSymptoms.length === 0) return null;
+  const calculateAssessment = (): AssessmentResult => {
+    const selectedSymptomData = symptoms.filter(s => selectedSymptoms.includes(s.id));
+    
+    if (selectedSymptomData.length === 0) {
+      return {
+        totalScore: 0,
+        riskLevel: "No Symptoms",
+        urgency: "none",
+        recommendations: ["No symptoms selected. Consider regular health checkups."],
+        selectedSymptoms: []
+      };
+    }
 
-    const selectedSymptomObjects = symptoms.filter(s => selectedSymptoms.includes(s.id));
-    const avgSeverity = selectedSymptomObjects.reduce((sum, s) => sum + s.severity, 0) / selectedSymptomObjects.length;
-    const highSeverityCount = selectedSymptomObjects.filter(s => s.severity === 3).length;
+    const totalScore = selectedSymptomData.reduce((sum, symptom) => sum + symptom.severity, 0);
+    const avgSeverity = totalScore / selectedSymptomData.length;
+    const hasUrgentSymptoms = selectedSymptomData.some(s => s.urgency === "urgent");
+    const hasHighUrgency = selectedSymptomData.some(s => s.urgency === "high");
 
-    let severity: string;
+    let riskLevel: string;
     let urgency: string;
-    let recommendation: string;
-    let badgeColor: "default" | "secondary" | "destructive" | "outline";
+    let recommendations: string[];
 
-    if (highSeverityCount >= 2 || avgSeverity >= 2.5) {
-      severity = "High Concern";
-      urgency = "Urgent";
-      recommendation = "Please consult a nephrologist immediately. These symptoms may indicate significant kidney function decline.";
-      badgeColor = "destructive";
-    } else if (selectedSymptoms.length >= 3 || avgSeverity >= 2) {
-      severity = "Moderate Concern";
-      urgency = "Soon";
-      recommendation = "Schedule an appointment with your doctor within 1-2 weeks for kidney function tests.";
-      badgeColor = "secondary";
+    if (hasUrgentSymptoms || totalScore >= 15) {
+      riskLevel = "High Concern";
+      urgency = "urgent";
+      recommendations = [
+        "Seek immediate medical attention",
+        "Contact a nephrologist or emergency department",
+        "Do not delay treatment",
+        "Bring a list of all medications and medical history"
+      ];
+    } else if (hasHighUrgency || totalScore >= 10) {
+      riskLevel = "Moderate Concern";
+      urgency = "high";
+      recommendations = [
+        "Schedule an appointment with your doctor within 1-2 weeks",
+        "Consider consulting a nephrologist",
+        "Monitor symptoms closely",
+        "Start keeping a symptom diary"
+      ];
+    } else if (totalScore >= 5) {
+      riskLevel = "Low Concern";
+      urgency = "moderate";
+      recommendations = [
+        "Discuss symptoms with your primary care physician",
+        "Consider basic kidney function tests",
+        "Maintain healthy lifestyle habits",
+        "Monitor blood pressure regularly"
+      ];
     } else {
-      severity = "Low Concern";
-      urgency = "Routine";
-      recommendation = "Monitor symptoms and consider discussing with your doctor at your next regular visit.";
-      badgeColor = "outline";
+      riskLevel = "Minimal Concern";
+      urgency = "low";
+      recommendations = [
+        "Continue regular health maintenance",
+        "Stay hydrated and maintain healthy diet",
+        "Monitor for any worsening symptoms",
+        "Consider annual kidney function screening"
+      ];
     }
 
-    return { severity, urgency, recommendation, badgeColor };
+    return {
+      totalScore,
+      riskLevel,
+      urgency,
+      recommendations,
+      selectedSymptoms: selectedSymptomData
+    };
   };
 
-  const assessment = showResults ? calculateAssessment() : null;
+  const handleSubmit = () => {
+    const result = calculateAssessment();
+    setAssessment(result);
+    setShowResults(true);
+  };
+
+  const getRiskColor = (riskLevel: string) => {
+    switch (riskLevel) {
+      case "High Concern": return "bg-red-100 text-red-800 border-red-300";
+      case "Moderate Concern": return "bg-orange-100 text-orange-800 border-orange-300";
+      case "Low Concern": return "bg-yellow-100 text-yellow-800 border-yellow-300";
+      default: return "bg-green-100 text-green-800 border-green-300";
+    }
+  };
+
+  const getUrgencyIcon = (urgency: string) => {
+    switch (urgency) {
+      case "urgent": return <AlertTriangle className="h-5 w-5 text-red-600" />;
+      case "high": return <AlertCircle className="h-5 w-5 text-orange-600" />;
+      case "moderate": return <Info className="h-5 w-5 text-blue-600" />;
+      default: return <CheckCircle className="h-5 w-5 text-green-600" />;
+    }
+  };
+
+  if (showResults && assessment) {
+    return (
+      <div className="container mx-auto px-4 py-8 max-w-4xl">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-primary mb-4">Symptom Assessment Results</h1>
+          <p className="text-muted-foreground">
+            Based on your selected symptoms, here's your kidney health assessment
+          </p>
+        </div>
+
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <span>Assessment Summary</span>
+              {getUrgencyIcon(assessment.urgency)}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              <div className="text-center">
+                <p className="text-sm text-muted-foreground">Symptoms Selected</p>
+                <p className="text-2xl font-bold">{selectedSymptoms.length}</p>
+              </div>
+              <div className="text-center">
+                <p className="text-sm text-muted-foreground">Total Severity Score</p>
+                <p className="text-2xl font-bold">{assessment.totalScore}</p>
+              </div>
+              <div className="text-center">
+                <p className="text-sm text-muted-foreground">Risk Level</p>
+                <Badge className={`text-sm ${getRiskColor(assessment.riskLevel)}`}>
+                  {assessment.riskLevel}
+                </Badge>
+              </div>
+            </div>
+
+            <div className="mb-6">
+              <h4 className="font-semibold mb-3">Selected Symptoms:</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                {assessment.selectedSymptoms.map(symptom => (
+                  <div key={symptom.id} className="flex items-center p-2 bg-muted/50 rounded">
+                    <Badge variant="outline" className="mr-2">
+                      Severity: {symptom.severity}
+                    </Badge>
+                    <span className="text-sm">{symptom.name}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <h4 className="font-semibold mb-3">Recommendations:</h4>
+              <ul className="space-y-2">
+                {assessment.recommendations.map((rec, index) => (
+                  <li key={index} className="flex items-start">
+                    <span className="w-2 h-2 bg-primary rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                    <span className="text-sm text-muted-foreground">{rec}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="flex gap-4 justify-center">
+          <Button onClick={() => setShowResults(false)} variant="outline">
+            Check Again
+          </Button>
+          <Button onClick={() => setLocation("/diagnosis")} className="flex items-center">
+            <Stethoscope className="mr-2 h-4 w-4" />
+            Start Full Assessment
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-primary mb-4">Symptom Checker</h1>
+        <h1 className="text-3xl font-bold text-primary mb-4">CKD Symptom Checker</h1>
         <p className="text-muted-foreground">
-          Select symptoms you are experiencing to get an initial assessment
+          Select symptoms you're experiencing to get an initial kidney health assessment
         </p>
-        <div className="flex items-center justify-center mt-4 p-3 bg-blue-50 rounded-lg">
-          <AlertCircle className="h-5 w-5 text-blue-600 mr-2" />
-          <span className="text-sm text-blue-800">
-            This tool is for educational purposes only and does not replace professional medical advice
-          </span>
-        </div>
       </div>
 
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle className="flex items-center">
-            <Stethoscope className="mr-3 h-5 w-5" />
-            Select Your Symptoms
-          </CardTitle>
+          <CardTitle>Common CKD-Related Symptoms</CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Click on symptoms you're currently experiencing. Each has detailed medical information.
+          </p>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {symptoms.map((symptom) => (
-              <div key={symptom.id} className="border rounded-lg p-4">
-                <div className="flex items-start space-x-3">
+              <Collapsible key={symptom.id}>
+                <div className="flex items-start space-x-3 p-3 border rounded-lg hover:bg-muted/50">
                   <Checkbox
                     id={symptom.id}
                     checked={selectedSymptoms.includes(symptom.id)}
-                    onCheckedChange={(checked) => 
-                      handleSymptomChange(symptom.id, checked as boolean)
-                    }
+                    onCheckedChange={() => handleSymptomToggle(symptom.id)}
+                    className="mt-1"
                   />
                   <div className="flex-1">
-                    <label
-                      htmlFor={symptom.id}
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                    >
-                      {symptom.name}
-                    </label>
-                    <Collapsible>
-                      <CollapsibleTrigger className="flex items-center mt-1 text-xs text-muted-foreground hover:text-primary">
-                        <Info className="h-3 w-3 mr-1" />
-                        Learn more
-                      </CollapsibleTrigger>
-                      <CollapsibleContent className="mt-2">
-                        <p className="text-xs text-muted-foreground">
-                          {symptom.description}
-                        </p>
-                      </CollapsibleContent>
-                    </Collapsible>
+                    <div className="flex items-center justify-between">
+                      <label
+                        htmlFor={symptom.id}
+                        className="text-sm font-medium cursor-pointer"
+                      >
+                        {symptom.name}
+                      </label>
+                      <div className="flex items-center space-x-2">
+                        <Badge variant="secondary" className="text-xs">
+                          Severity: {symptom.severity}
+                        </Badge>
+                        <CollapsibleTrigger asChild>
+                          <Button variant="ghost" size="sm" className="p-1 h-6 w-6">
+                            <Info className="h-3 w-3" />
+                          </Button>
+                        </CollapsibleTrigger>
+                      </div>
+                    </div>
+                    <CollapsibleContent className="mt-2">
+                      <div className="text-xs text-muted-foreground space-y-2">
+                        <p>{symptom.description}</p>
+                        <div>
+                          <span className="font-medium">Possible causes: </span>
+                          {symptom.possibleCauses.join(", ")}
+                        </div>
+                        <Badge variant="outline" className={`text-xs ${
+                          symptom.urgency === 'urgent' ? 'border-red-500 text-red-700' :
+                          symptom.urgency === 'high' ? 'border-orange-500 text-orange-700' :
+                          symptom.urgency === 'moderate' ? 'border-blue-500 text-blue-700' :
+                          'border-green-500 text-green-700'
+                        }`}>
+                          {symptom.urgency.charAt(0).toUpperCase() + symptom.urgency.slice(1)} urgency
+                        </Badge>
+                      </div>
+                    </CollapsibleContent>
                   </div>
                 </div>
-              </div>
+              </Collapsible>
             ))}
           </div>
         </CardContent>
       </Card>
 
-      <div className="flex flex-col sm:flex-row gap-4 mb-6">
+      <div className="text-center">
         <Button 
-          onClick={() => setShowResults(true)}
+          onClick={handleSubmit} 
           disabled={selectedSymptoms.length === 0}
-          className="flex-1"
+          className="px-8 py-3 text-lg"
         >
-          Assess Symptoms ({selectedSymptoms.length})
+          <AlertCircle className="mr-2 h-5 w-5" />
+          Get Assessment ({selectedSymptoms.length} symptoms selected)
         </Button>
-        <Button 
-          variant="outline"
-          onClick={() => setLocation("/diagnosis")}
-          className="flex-1"
-        >
-          Start Full Diagnosis
-        </Button>
+        
+        <p className="text-xs text-muted-foreground mt-4 max-w-2xl mx-auto">
+          This tool provides preliminary guidance only. Always consult healthcare professionals 
+          for proper diagnosis and treatment. Emergency symptoms require immediate medical attention.
+        </p>
       </div>
-
-      {assessment && (
-        <Card className="border-2">
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              Assessment Results
-              <Badge variant={assessment.badgeColor}>
-                {assessment.severity}
-              </Badge>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div>
-                <h4 className="font-semibold text-sm">Urgency Level:</h4>
-                <p className="text-sm text-muted-foreground">{assessment.urgency}</p>
-              </div>
-              <div>
-                <h4 className="font-semibold text-sm">Recommendation:</h4>
-                <p className="text-sm text-muted-foreground">{assessment.recommendation}</p>
-              </div>
-              <div>
-                <h4 className="font-semibold text-sm">Selected Symptoms:</h4>
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {selectedSymptoms.map(id => {
-                    const symptom = symptoms.find(s => s.id === id);
-                    return (
-                      <Badge key={id} variant="secondary" className="text-xs">
-                        {symptom?.name}
-                      </Badge>
-                    );
-                  })}
-                </div>
-              </div>
-              <div className="mt-6 p-4 bg-muted/50 rounded-lg">
-                <p className="text-sm">
-                  <strong>Next Step:</strong> For a comprehensive kidney health assessment with 
-                  lab values and medical history, use our complete diagnostic tool.
-                </p>
-                <Button 
-                  className="mt-3 w-full"
-                  onClick={() => setLocation("/diagnosis")}
-                >
-                  Start Complete Diagnosis
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 }
