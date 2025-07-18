@@ -17,6 +17,12 @@ NephroCare is a professional, responsive Chronic Kidney Disease (CKD) prediction
 - Removed all emoji usage throughout the application as requested
 - Enhanced About page with developer information and app description from user's content
 - Implemented fallback system for ML model compatibility issues
+- Fixed form validation NaN warnings by adding proper field value checks
+- Enhanced symptom checker with medical severity scoring and detailed risk assessment
+- Added comprehensive medical value validation with proper ranges for all lab values
+- Implemented real-time warnings for abnormal blood pressure, glucose, creatinine, and electrolytes
+- Fixed percentage display in Results page to show accurate ML model predictions
+- Added detailed graph reading instructions for SHAP, PDP, and LIME explanations
 
 ## User Preferences
 

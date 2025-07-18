@@ -118,8 +118,12 @@ This report is for informational purposes only and should not replace profession
             CKD Risk Assessment Results
           </h1>
           
-          <div className={`${getRiskColor(riskLevel)} text-white rounded-xl p-8 mb-6 inline-block`}>
-            <div className="text-6xl font-bold mb-2">{Math.round(riskScore)}%</div>
+          <div className={`${
+            riskLevel.toLowerCase() === 'high' ? 'bg-red-600' :
+            riskLevel.toLowerCase() === 'moderate' ? 'bg-orange-600' :
+            'bg-green-600'
+          } text-white rounded-xl p-8 mb-6 inline-block`}>
+            <div className="text-6xl font-bold mb-2">{(riskScore * 100).toFixed(1)}%</div>
             <div className="text-xl">CKD Risk Score</div>
           </div>
           
@@ -147,6 +151,15 @@ This report is for informational purposes only and should not replace profession
             </CardTitle>
           </CardHeader>
           <CardContent>
+            <div className="mb-4 p-4 bg-blue-50 rounded-lg">
+              <h4 className="font-semibold mb-2 text-blue-900">How to Read This Chart:</h4>
+              <ul className="text-sm text-blue-800 space-y-1">
+                <li>• Red bars show factors increasing CKD risk</li>
+                <li>• Blue bars show factors decreasing CKD risk</li>
+                <li>• Longer bars = stronger impact on prediction</li>
+                <li>• Numbers show how much each factor affects your risk score</li>
+              </ul>
+            </div>
             <SHAPPlot features={shapFeatures} />
           </CardContent>
         </Card>
@@ -160,6 +173,15 @@ This report is for informational purposes only and should not replace profession
             </CardTitle>
           </CardHeader>
           <CardContent>
+            <div className="mb-4 p-4 bg-green-50 rounded-lg">
+              <h4 className="font-semibold mb-2 text-green-900">How to Read This Chart:</h4>
+              <ul className="text-sm text-green-800 space-y-1">
+                <li>• Shows how changing one value affects CKD risk</li>
+                <li>• Your current value is marked with a red dot</li>
+                <li>• Higher line = higher CKD risk at that value</li>
+                <li>• Normal ranges are shaded in green</li>
+              </ul>
+            </div>
             <PDPPlot 
               feature="Serum Creatinine" 
               value={assessment.serumCreatinine}
@@ -177,6 +199,15 @@ This report is for informational purposes only and should not replace profession
             </CardTitle>
           </CardHeader>
           <CardContent>
+            <div className="mb-4 p-4 bg-purple-50 rounded-lg">
+              <h4 className="font-semibold mb-2 text-purple-900">How to Read This Analysis:</h4>
+              <ul className="text-sm text-purple-800 space-y-1">
+                <li>• Shows which factors contributed most to YOUR specific result</li>
+                <li>• Green text = factors that decreased your risk</li>
+                <li>• Red text = factors that increased your risk</li>
+                <li>• Percentages show the strength of each factor's influence</li>
+              </ul>
+            </div>
             <LIMEExplanation features={shapFeatures} />
           </CardContent>
         </Card>
