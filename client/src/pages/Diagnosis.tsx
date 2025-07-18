@@ -39,12 +39,12 @@ export default function Diagnosis() {
       hemoglobin: 12,
       wbcCount: 7600,
       rbcCount: 5.2,
-      hypertension: false,
-      diabetesMellitus: false,
-      coronaryArteryDisease: false,
+      hypertension: "no",
+      diabetesMellitus: "no",
+      coronaryArteryDisease: "no",
       appetite: "good",
-      pedalEdema: false,
-      anemia: false,
+      pedalEdema: "no",
+      anemia: "no",
     },
   });
 
@@ -471,10 +471,10 @@ export default function Diagnosis() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Hypertension</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue />
+                              <SelectValue placeholder="Select option" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -491,10 +491,10 @@ export default function Diagnosis() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Diabetes Mellitus</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue />
+                              <SelectValue placeholder="Select option" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -511,10 +511,10 @@ export default function Diagnosis() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Appetite</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue />
+                              <SelectValue placeholder="Select option" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -531,10 +531,10 @@ export default function Diagnosis() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Pedal Edema</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue />
+                              <SelectValue placeholder="Select option" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -551,10 +551,10 @@ export default function Diagnosis() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Anemia</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue />
+                              <SelectValue placeholder="Select option" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>

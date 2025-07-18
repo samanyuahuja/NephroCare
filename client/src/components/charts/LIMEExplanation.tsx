@@ -11,7 +11,14 @@ interface LIMEExplanationProps {
 }
 
 export function LIMEExplanation({ features }: LIMEExplanationProps) {
-  if (!features || features.length === 0) {
+  // Convert SHAP features to LIME format if needed
+  const limeFeatures = features.map((f: any) => ({
+    feature: f.feature || f.name || 'Unknown',
+    impact: f.impact || f.value || 0,
+    type: (f.impact || f.value || 0) > 0 ? 'positive' : 'negative'
+  }));
+
+  if (!limeFeatures || limeFeatures.length === 0) {
     return (
       <div className="text-center text-gray-500 py-8">
         <p>No LIME explanation available</p>
@@ -51,7 +58,7 @@ export function LIMEExplanation({ features }: LIMEExplanationProps) {
 
   return (
     <div className="space-y-3">
-      {features.slice(0, 3).map((feature, index) => {
+      {limeFeatures.slice(0, 5).map((feature, index) => {
         const explanation = getFeatureExplanation(feature.feature, feature.impact);
         const riskChange = feature.impact * 100;
         
