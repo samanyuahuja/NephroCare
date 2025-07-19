@@ -17,6 +17,10 @@ const Browse = () => {
     queryKey: ["/api/ckd-assessments"],
   });
 
+  const { data: dietPlans, isLoading: dietPlansLoading } = useQuery<DietPlan[]>({
+    queryKey: ["/api/diet-plans"],
+  });
+
   const formatDateTime = (dateString: string | null) => {
     if (!dateString) return "N/A";
     const date = new Date(dateString);
@@ -49,8 +53,8 @@ const Browse = () => {
         </div>
         <p className="text-gray-600 dark:text-gray-300 max-w-3xl">
           {t(
-            "Browse through completed assessments and their results, or view available diet plans without needing to take a new assessment.",
-            "पूर्ण मूल्यांकन और उनके परिणामों को ब्राउज़ करें, या नया मूल्यांकन लिए बिना उपलब्ध आहार योजनाएं देखें।"
+            "Browse through your completed assessments with detailed results and view your personalized diet plan history.",
+            "अपने पूर्ण मूल्यांकन और विस्तृत परिणामों को ब्राउज़ करें और अपनी व्यक्तिगत आहार योजना इतिहास देखें।"
           )}
         </p>
       </div>
@@ -63,7 +67,7 @@ const Browse = () => {
           </TabsTrigger>
           <TabsTrigger value="diet-plans" className="flex items-center gap-2">
             <Utensils className="h-4 w-4" />
-            {t("Diet Plans", "आहार योजनाएं")}
+            {t("Diet History", "आहार इतिहास")}
           </TabsTrigger>
         </TabsList>
 
@@ -144,147 +148,106 @@ const Browse = () => {
         </TabsContent>
 
         <TabsContent value="diet-plans">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Sample Diet Plans */}
-            <Card className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Utensils className="h-5 w-5 text-primary" />
-                  {t("Vegetarian CKD Diet", "शाकाहारी सीकेडी आहार")}
-                </CardTitle>
-                <CardDescription>
-                  {t("Plant-based nutrition plan for kidney health", "गुर्दे के स्वास्थ्य के लिए पौधे-आधारित पोषण योजना")}
-                </CardDescription>
-              </CardHeader>
+          {dietPlansLoading ? (
+            <div className="flex items-center justify-center min-h-[300px]">
+              <div className="text-lg">{t("Loading diet plans...", "आहार योजनाएं लोड हो रही हैं...")}</div>
+            </div>
+          ) : !dietPlans || dietPlans.length === 0 ? (
+            <Card className="text-center py-16">
               <CardContent>
-                <div className="space-y-3 mb-4">
-                  <div className="text-sm">
-                    <span className="font-semibold text-green-600">{t("Foods to Eat:", "खाने योग्य खाद्य पदार्थ:")}</span>
-                    <p className="text-gray-600 mt-1">
-                      {t("White rice, apples, cabbage, cauliflower, olive oil", "सफेद चावल, सेब, पत्ता गोभी, फूलगोभी, जैतून का तेल")}
-                    </p>
-                  </div>
-                  <div className="text-sm">
-                    <span className="font-semibold text-red-600">{t("Foods to Avoid:", "बचने योग्य खाद्य पदार्थ:")}</span>
-                    <p className="text-gray-600 mt-1">
-                      {t("High-protein pulses, bananas, processed foods", "उच्च प्रोटीन दालें, केला, प्रसंस्कृत खाद्य पदार्थ")}
-                    </p>
-                  </div>
-                </div>
-                <Button variant="outline" size="sm" className="w-full">
-                  {t("View Full Plan", "पूरी योजना देखें")}
-                </Button>
+                <Utensils className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold mb-2">
+                  {t("No Diet Plans Available", "कोई आहार योजना उपलब्ध नहीं")}
+                </h3>
+                <p className="text-gray-600 dark:text-gray-300 mb-6">
+                  {t(
+                    "Complete your first CKD assessment to get personalized diet recommendations.",
+                    "व्यक्तिगत आहार सिफारिशें पाने के लिए अपना पहला CKD मूल्यांकन पूरा करें।"
+                  )}
+                </p>
+                <Link href="/diagnosis">
+                  <Button className="bg-primary hover:bg-primary/90">
+                    {t("Take Assessment", "मूल्यांकन लें")}
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {dietPlans.map((plan) => (
+                <Card key={plan.id} className="hover:shadow-lg transition-shadow">
+                  <CardHeader>
+                    <div className="flex items-start justify-between mb-2">
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <Utensils className="h-5 w-5 text-primary" />
+                        {plan.patientName && t(`Diet Plan for ${plan.patientName}`, `${plan.patientName} के लिए आहार योजना`)}
+                      </CardTitle>
+                      <Badge variant="outline">
+                        {plan.dietType || t("Personalized", "व्यक्तिगत")}
+                      </Badge>
+                    </div>
+                    <CardDescription className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4" />
+                      {formatDateTime(plan.createdAt)}
+                    </CardDescription>
+                  </CardHeader>
+                  
+                  <CardContent>
+                    <div className="space-y-3 mb-4">
+                      {plan.recommendations && (
+                        <div className="text-sm">
+                          <span className="font-semibold text-green-600">{t("Key Recommendations:", "मुख्य सिफारिशें:")}</span>
+                          <p className="text-gray-600 mt-1 line-clamp-3">
+                            {plan.recommendations}
+                          </p>
+                        </div>
+                      )}
+                      
+                      {plan.restrictions && (
+                        <div className="text-sm">
+                          <span className="font-semibold text-red-600">{t("Dietary Restrictions:", "आहार प्रतिबंध:")}</span>
+                          <p className="text-gray-600 mt-1 line-clamp-2">
+                            {plan.restrictions}
+                          </p>
+                        </div>
+                      )}
+                      
+                      {plan.calories && (
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-500">{t("Daily Calories", "दैनिक कैलोरी")}</span>
+                          <span className="font-semibold">{plan.calories} kcal</span>
+                        </div>
+                      )}
+                    </div>
 
-            <Card className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Utensils className="h-5 w-5 text-primary" />
-                  {t("Non-Vegetarian CKD Diet", "मांसाहारी सीकेडी आहार")}
-                </CardTitle>
-                <CardDescription>
-                  {t("Balanced nutrition with lean proteins", "दुबले प्रोटीन के साथ संतुलित पोषण")}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3 mb-4">
-                  <div className="text-sm">
-                    <span className="font-semibold text-green-600">{t("Foods to Eat:", "खाने योग्य खाद्य पदार्थ:")}</span>
-                    <p className="text-gray-600 mt-1">
-                      {t("Egg whites, small fish portions, lean chicken", "अंडे का सफेद भाग, मछली के छोटे टुकड़े, दुबला चिकन")}
-                    </p>
-                  </div>
-                  <div className="text-sm">
-                    <span className="font-semibold text-red-600">{t("Foods to Avoid:", "बचने योग्य खाद्य पदार्थ:")}</span>
-                    <p className="text-gray-600 mt-1">
-                      {t("Red meat, organ meats, processed meats", "लाल मांस, अंग मांस, प्रसंस्कृत मांस")}
-                    </p>
-                  </div>
-                </div>
-                <Button variant="outline" size="sm" className="w-full">
-                  {t("View Full Plan", "पूरी योजना देखें")}
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Utensils className="h-5 w-5 text-primary" />
-                  {t("Low Sodium Diet", "कम सोडियम आहार")}
-                </CardTitle>
-                <CardDescription>
-                  {t("Specialized plan for blood pressure control", "रक्तचाप नियंत्रण के लिए विशेष योजना")}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3 mb-4">
-                  <div className="text-sm">
-                    <span className="font-semibold text-green-600">{t("Foods to Eat:", "खाने योग्य खाद्य पदार्थ:")}</span>
-                    <p className="text-gray-600 mt-1">
-                      {t("Fresh fruits, herbs, garlic, lemon", "ताजे फल, जड़ी-बूटियां, लहसुन, नींबू")}
-                    </p>
-                  </div>
-                  <div className="text-sm">
-                    <span className="font-semibold text-red-600">{t("Foods to Avoid:", "बचने योग्य खाद्य पदार्थ:")}</span>
-                    <p className="text-gray-600 mt-1">
-                      {t("Pickles, canned foods, table salt", "अचार, डिब्बाबंद खाना, नमक")}
-                    </p>
-                  </div>
-                </div>
-                <Button variant="outline" size="sm" className="w-full">
-                  {t("View Full Plan", "पूरी योजना देखें")}
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Utensils className="h-5 w-5 text-primary" />
-                  {t("Diabetes + CKD Diet", "मधुमेह + सीकेडी आहार")}
-                </CardTitle>
-                <CardDescription>
-                  {t("Combined approach for diabetes and kidney care", "मधुमेह और गुर्दे की देखभाल के लिए संयुक्त दृष्टिकोण")}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3 mb-4">
-                  <div className="text-sm">
-                    <span className="font-semibold text-green-600">{t("Foods to Eat:", "खाने योग्य खाद्य पदार्थ:")}</span>
-                    <p className="text-gray-600 mt-1">
-                      {t("Complex carbs, low-GI foods, controlled portions", "जटिल कार्बोहाइड्रेट, कम GI खाद्य पदार्थ, नियंत्रित भाग")}
-                    </p>
-                  </div>
-                  <div className="text-sm">
-                    <span className="font-semibold text-red-600">{t("Foods to Avoid:", "बचने योग्य खाद्य पदार्थ:")}</span>
-                    <p className="text-gray-600 mt-1">
-                      {t("High-sugar foods, refined carbs, high-potassium fruits", "उच्च चीनी खाद्य पदार्थ, रिफाइंड कार्ब्स, उच्च पोटेशियम फल")}
-                    </p>
-                  </div>
-                </div>
-                <Button variant="outline" size="sm" className="w-full">
-                  {t("View Full Plan", "पूरी योजना देखें")}
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
+                    <div className="flex gap-2">
+                      <Link href={`/diet-plan/${plan.id}`} className="flex-1">
+                        <Button size="sm" className="w-full">
+                          <Utensils className="h-4 w-4 mr-2" />
+                          {t("View Full Plan", "पूरी योजना देखें")}
+                        </Button>
+                      </Link>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
 
           <div className="mt-8 p-6 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
             <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">
-              {t("Need a Personalized Diet Plan?", "व्यक्तिगत आहार योजना चाहिए?")}
+              {t("Need a New Diet Plan?", "नई आहार योजना चाहिए?")}
             </h3>
             <p className="text-blue-700 dark:text-blue-300 mb-4">
               {t(
-                "Take a complete CKD assessment to get a diet plan tailored specifically to your health condition and dietary preferences.",
-                "अपनी स्वास्थ्य स्थिति और आहार प्राथमिकताओं के अनुसार विशेष रूप से तैयार की गई आहार योजना पाने के लिए एक पूर्ण CKD मूल्यांकन करें।"
+                "Take a complete CKD assessment to get a fresh diet plan tailored to your current health condition.",
+                "अपनी वर्तमान स्वास्थ्य स्थिति के अनुसार एक नई आहार योजना पाने के लिए एक पूर्ण CKD मूल्यांकन करें।"
               )}
             </p>
             <Link href="/diagnosis">
               <Button>
                 <Activity className="mr-2 h-4 w-4" />
-                {t("Take Assessment", "मूल्यांकन लें")}
+                {t("Take New Assessment", "नया मूल्यांकन लें")}
               </Button>
             </Link>
           </div>
