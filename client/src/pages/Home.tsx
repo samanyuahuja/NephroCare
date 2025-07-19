@@ -39,13 +39,13 @@ export default function Home() {
           {/* Enhanced CTA Buttons */}
           <div className="flex flex-col lg:flex-row gap-6 justify-center items-center mb-16">
             <Link href="/diagnosis">
-              <Button className="group relative bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 hover:from-blue-700 hover:via-blue-800 hover:to-blue-900 text-white px-12 py-6 text-xl font-black rounded-3xl shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-110 hover:-translate-y-2 border-0 min-w-[300px] animate-pulse hover:animate-none">
-                <div className="absolute inset-0 bg-white opacity-20 rounded-3xl transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></div>
+              <Button className="group relative bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 hover:from-blue-700 hover:via-blue-800 hover:to-blue-900 text-white px-12 py-6 text-xl font-black rounded-3xl shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 border-0 min-w-[300px]">
+                <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 rounded-3xl transition-opacity duration-300"></div>
                 <div className="relative flex items-center justify-center">
-                  <Activity className="mr-4 h-7 w-7 group-hover:rotate-180 transition-transform duration-500" />
+                  <Activity className="mr-4 h-7 w-7 group-hover:rotate-12 transition-transform duration-300" />
                   {t("START ASSESSMENT NOW", "अभी मूल्यांकन शुरू करें")}
                 </div>
-                <div className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-blue-400 to-blue-600 opacity-75 blur group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-tilt"></div>
+                <div className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-blue-400 to-blue-600 opacity-0 group-hover:opacity-30 blur transition-opacity duration-300"></div>
               </Button>
             </Link>
             
