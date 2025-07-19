@@ -56,8 +56,8 @@ export default function Results({ params }: ResultsProps) {
     }
   };
 
-  // Get personalized recommendations based on top risk factors
-  const getPersonalizedRecommendations = (assessment: CKDAssessment) => {
+  // Get personalized recommendations based on SHAP feature importance
+  const getPersonalizedRecommendations = (assessment: CKDAssessment, shapFeatures: any[]) => {
     const recommendations = [];
     
     // High Creatinine (>1.4)
@@ -227,13 +227,126 @@ export default function Results({ params }: ResultsProps) {
       });
     }
 
-    // Return top 5 recommendations sorted by severity
-    return recommendations
-      .sort((a, b) => (b.severity === 'high' ? 1 : 0) - (a.severity === 'high' ? 1 : 0))
-      .slice(0, 5);
+    // If no SHAP features provided, fall back to hardcoded logic
+    if (!shapFeatures || shapFeatures.length === 0) {
+      // Return top 3 recommendations sorted by severity
+      return recommendations
+        .sort((a, b) => (b.severity === 'high' ? 1 : 0) - (a.severity === 'high' ? 1 : 0))
+        .slice(0, 3);
+    }
+
+    // Use SHAP features to get top 3 most important risk factors
+    const topShapFeatures = shapFeatures
+      .sort((a, b) => Math.abs(b.impact) - Math.abs(a.impact))
+      .slice(0, 3);
+
+    const shapRecommendations = topShapFeatures.map(feature => {
+      const featureName = feature.feature.toLowerCase();
+      
+      // Map SHAP features to recommendations
+      if (featureName.includes('creatinine')) {
+        return {
+          factor: t("High Serum Creatinine", "उच्च सीरम क्रिएटिनिन"),
+          value: feature.feature.match(/\((.*?)\)/)?.[1] || `${assessment.serumCreatinine} mg/dL`,
+          severity: "high",
+          shapImpact: Math.abs(feature.impact),
+          causes: t(
+            "Kidney damage, dehydration, certain medications, high protein diet",
+            "गुर्दे की क्षति, निर्जलीकरण, कुछ दवाएं, उच्च प्रोटीन आहार"
+          ),
+          remedies: t(
+            "Reduce protein intake, stay hydrated, avoid NSAIDs, monitor kidney function regularly",
+            "प्रोटीन का सेवन कम करें, हाइड्रेटेड रहें, NSAIDs से बचें, नियमित रूप से गुर्दे की जांच कराएं"
+          ),
+          treatment: t(
+            "Consult nephrologist, ACE inhibitors if prescribed, dietary counseling",
+            "नेफ्रोलॉजिस्ट से सलाह लें, यदि निर्धारित हो तो ACE अवरोधक, आहार परामर्श"
+          )
+        };
+      } else if (featureName.includes('hemoglobin')) {
+        return {
+          factor: t("Low Hemoglobin (Anemia)", "कम हीमोग्लोबिन (एनीमिया)"),
+          value: feature.feature.match(/\((.*?)\)/)?.[1] || `${assessment.hemoglobin} g/dL`,
+          severity: "moderate",
+          shapImpact: Math.abs(feature.impact),
+          causes: t(
+            "Kidney disease, iron deficiency, chronic inflammation, poor nutrition",
+            "गुर्दे की बीमारी, आयरन की कमी, पुरानी सूजन, खराब पोषण"
+          ),
+          remedies: t(
+            "Iron-rich foods, vitamin B12/folate supplements, treat underlying kidney disease",
+            "आयरन युक्त खाद्य पदार्थ, विटामिन B12/फोलेट सप्लीमेंट, अंतर्निहित गुर्दे की बीमारी का इलाज"
+          ),
+          treatment: t(
+            "Iron supplements, EPO injections if severe, treat CKD cause",
+            "आयरन सप्लीमेंट, यदि गंभीर हो तो EPO इंजेक्शन, CKD के कारण का इलाज"
+          )
+        };
+      } else if (featureName.includes('urea')) {
+        return {
+          factor: t("High Blood Urea", "उच्च रक्त यूरिया"),
+          value: feature.feature.match(/\((.*?)\)/)?.[1] || `${assessment.bloodUrea} mg/dL`,
+          severity: "moderate", 
+          shapImpact: Math.abs(feature.impact),
+          causes: t(
+            "Kidney function decline, dehydration, high protein diet, certain medications",
+            "गुर्दे की कार्यप्रणाली में गिरावट, निर्जलीकरण, उच्च प्रोटीन आहार, कुछ दवाएं"
+          ),
+          remedies: t(
+            "Moderate protein diet, adequate hydration, avoid nephrotoxic drugs",
+            "मध्यम प्रोटीन आहार, पर्याप्त हाइड्रेशन, नेफ्रोटॉक्सिक दवाओं से बचें"
+          ),
+          treatment: t(
+            "Kidney function monitoring, dietary counseling, manage underlying conditions",
+            "गुर्दे की कार्यप्रणाली की निगरानी, आहार परामर्श, अंतर्निहित स्थितियों का प्रबंधन"
+          )
+        };
+      } else if (featureName.includes('age')) {
+        return {
+          factor: t("Age-Related Risk", "आयु संबंधी जोखिम"),
+          value: feature.feature.match(/\((.*?)\)/)?.[1] || `${assessment.age} years`,
+          severity: "moderate",
+          shapImpact: Math.abs(feature.impact),
+          causes: t(
+            "Natural aging process, decreased kidney function, accumulation of health issues",
+            "प्राकृतिक उम्र बढ़ने की प्रक्रिया, गुर्दे की कार्यप्रणाली में कमी, स्वास्थ्य समस्याओं का संचय"
+          ),
+          remedies: t(
+            "Regular health checkups, gentle exercise, balanced nutrition, medication compliance",
+            "नियमित स्वास्थ्य जांच, हल्का व्यायाम, संतुलित पोषण, दवाओं का अनुपालन"
+          ),
+          treatment: t(
+            "Preventive care, regular kidney monitoring, manage comorbidities",
+            "निवारक देखभाल, नियमित गुर्दे की निगरानी, सहरुग्णता का प्रबंधन"
+          )
+        };
+      } else {
+        // Default recommendation for any other SHAP feature
+        return {
+          factor: feature.feature,
+          value: feature.feature.match(/\((.*?)\)/)?.[1] || "Abnormal",
+          severity: Math.abs(feature.impact) > 0.3 ? "high" : "moderate",
+          shapImpact: Math.abs(feature.impact),
+          causes: t(
+            "Multiple factors contributing to kidney disease risk",
+            "गुर्दे की बीमारी के जोखिम में योगदान देने वाले कई कारक"
+          ),
+          remedies: t(
+            "Follow medical advice, maintain healthy lifestyle, regular monitoring",
+            "चिकित्सा सलाह का पालन करें, स्वस्थ जीवनशैली बनाए रखें, नियमित निगरानी"
+          ),
+          treatment: t(
+            "Consult healthcare provider for specific management plan",
+            "विशिष्ट प्रबंधन योजना के लिए स्वास्थ्य सेवा प्रदाता से सलाह लें"
+          )
+        };
+      }
+    });
+
+    return shapRecommendations;
   };
 
-  const personalizedRecommendations = getPersonalizedRecommendations(assessment);
+  const personalizedRecommendations = getPersonalizedRecommendations(assessment, shapFeatures);
 
   const getRiskBadgeVariant = (level: string) => {
     const lowerLevel = level.toLowerCase();
