@@ -83,26 +83,26 @@ export default function DietPlan({ params }: DietPlanProps) {
     <div className="max-w-4xl mx-auto">
       <Card>
         <CardHeader className="text-center">
-          <CardTitle className="text-3xl font-bold">{t("Personalized Diet Plan", "व्यक्तिगत आहार योजना")}</CardTitle>
+          <CardTitle className="text-2xl sm:text-3xl font-bold">{t("Personalized Diet Plan", "व्यक्तिगत आहार योजना")}</CardTitle>
           <p className="text-gray-600">
             {t("Based on your CKD risk assessment and analysis of your health parameters", "आपके CKD जोखिम मूल्यांकन और स्वास्थ्य पैरामीटर के विश्लेषण के आधार पर")}
           </p>
         </CardHeader>
         <CardContent>
           {/* Diet Type Toggle */}
-          <div className="flex justify-center mb-8">
-            <div className="bg-gray-100 p-1 rounded-lg">
+          <div className="flex justify-center mb-6 sm:mb-8">
+            <div className="bg-gray-100 p-1 rounded-lg w-full sm:w-auto">
               <Button
                 variant={dietType === 'vegetarian' ? 'default' : 'ghost'}
                 onClick={() => toggleDietType('vegetarian')}
-                className="px-6 py-2"
+                className="flex-1 sm:flex-none sm:px-6 py-2"
               >
                 {t("Vegetarian", "शाकाहारी")}
               </Button>
               <Button
                 variant={dietType === 'non-vegetarian' ? 'default' : 'ghost'}
                 onClick={() => toggleDietType('non-vegetarian')}
-                className="px-6 py-2"
+                className="flex-1 sm:flex-none sm:px-6 py-2"
               >
                 {t("Non-Vegetarian", "मांसाहारी")}
               </Button>
@@ -110,7 +110,7 @@ export default function DietPlan({ params }: DietPlanProps) {
           </div>
 
           {/* Diet Content */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8 mb-6 sm:mb-8">
             {/* Foods to Eat */}
             <Card className="border-green-200 bg-green-50">
               <CardHeader>
@@ -153,7 +153,7 @@ export default function DietPlan({ params }: DietPlanProps) {
           </div>
 
           {/* Water Intake Advice */}
-          <Card className="border-blue-200 bg-blue-50 mb-8">
+          <Card className="border-blue-200 bg-blue-50 mb-6 sm:mb-8">
             <CardHeader>
               <CardTitle className="flex items-center text-blue-800">
                 <Droplets className="mr-3 h-5 w-5" />
@@ -173,7 +173,7 @@ export default function DietPlan({ params }: DietPlanProps) {
 
           {/* Download Button */}
           <div className="text-center">
-            <Button size="lg" onClick={downloadDietPlan} className="px-8 py-4 text-lg bg-green-600 hover:bg-green-700">
+            <Button size="lg" onClick={downloadDietPlan} className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg bg-green-600 hover:bg-green-700">
               <Download className="mr-3 h-5 w-5" />
               {t("Download PDF Diet Plan", "पीडीएफ आहार योजना डाउनलोड करें")}
             </Button>

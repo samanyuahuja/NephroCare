@@ -103,7 +103,7 @@ export default function Diagnosis() {
     <div className="max-w-4xl mx-auto">
       <Card>
         <CardHeader className="text-center">
-          <CardTitle className="text-3xl font-bold">
+          <CardTitle className="text-2xl sm:text-3xl font-bold">
             {t("CKD Risk Assessment", "सीकेडी जोखिम मूल्यांकन")}
           </CardTitle>
           <p className="text-gray-600">
@@ -115,13 +115,13 @@ export default function Diagnosis() {
         </CardHeader>
         
         {/* Symptom Checker Section */}
-        <div className="mx-6 mb-6">
+        <div className="mx-4 sm:mx-6 mb-6">
           <Collapsible open={isSymptomCheckerOpen} onOpenChange={setIsSymptomCheckerOpen}>
             <CollapsibleTrigger asChild>
-              <Button variant="outline" className="w-full justify-between">
+              <Button variant="outline" className="w-full justify-between text-sm sm:text-base">
                 <div className="flex items-center">
                   <Stethoscope className="mr-2 h-4 w-4" />
-                  {t("Don't know your values? Check the symptom checker", "अपनी मान नहीं जानते? लक्षण चेकर देखें")}
+                  <span className="truncate">{t("Don't know your values? Check the symptom checker", "अपनी मान नहीं जानते? लक्षण चेकर देखें")}</span>
                 </div>
                 <ChevronDown className={`h-4 w-4 transition-transform ${isSymptomCheckerOpen ? 'rotate-180' : ''}`} />
               </Button>
@@ -138,9 +138,9 @@ export default function Diagnosis() {
                   </p>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 text-xs sm:text-sm">
 
-                    <div className="bg-white p-3 rounded-lg border">
+                    <div className="bg-white p-2 sm:p-3 rounded-lg border">
                       <div className="font-semibold text-red-600 mb-1">BP ≥ 150</div>
                       <div className="text-gray-600">{t("Swelling, breathlessness, fatigue", "सूजन, सांस की तकलीफ, थकान")}</div>
                     </div>
@@ -234,10 +234,10 @@ export default function Diagnosis() {
           {/* Report Value Locator Section */}
           <Collapsible open={isReportGuideOpen} onOpenChange={setIsReportGuideOpen}>
             <CollapsibleTrigger asChild>
-              <Button variant="outline" className="w-full justify-between">
+              <Button variant="outline" className="w-full justify-between text-sm sm:text-base">
                 <div className="flex items-center">
                   <FileText className="mr-2 h-4 w-4" />
-                  {t("Need help finding values in your medical report?", "अपनी मेडिकल रिपोर्ट में मान खोजने में सहायता चाहिए?")}
+                  <span className="truncate">{t("Need help finding values in your medical report?", "अपनी मेडिकल रिपोर्ट में मान खोजने में सहायता चाहिए?")}</span>
                 </div>
                 <ChevronDown className={`h-4 w-4 transition-transform ${isReportGuideOpen ? 'rotate-180' : ''}`} />
               </Button>
@@ -255,9 +255,9 @@ export default function Diagnosis() {
                   </p>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 text-xs sm:text-sm">
 
-                    <div className="bg-white p-4 rounded-lg border">
+                    <div className="bg-white p-3 sm:p-4 rounded-lg border">
                       <div className="font-semibold text-green-700 mb-2">Blood Pressure (BP)</div>
                       <div className="text-gray-600">{t("In the doctor's notes or 'Vital Signs' section (e.g., 120/80 mmHg)", "डॉक्टर के नोट्स या 'वाइटल साइन्स' सेक्शन में (जैसे, 120/80 mmHg)")}</div>
                     </div>
@@ -360,7 +360,7 @@ export default function Diagnosis() {
                     {t("Patient Information", "रोगी की जानकारी")}
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                   <FormField
                     control={form.control}
                     name="patientName"
@@ -492,7 +492,7 @@ export default function Diagnosis() {
                     {t("Laboratory Results", "प्रयोगशाला परिणाम")}
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                   <FormField
                     control={form.control}
                     name="redBloodCells"
@@ -867,7 +867,7 @@ export default function Diagnosis() {
                     Medical Conditions
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                   <FormField
                     control={form.control}
                     name="hypertension"

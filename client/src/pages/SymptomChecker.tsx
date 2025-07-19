@@ -244,9 +244,9 @@ export default function SymptomChecker() {
 
   if (showResults && assessment) {
     return (
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-primary mb-4">Symptom Assessment Results</h1>
+      <div className="container mx-auto px-4 py-6 sm:py-8 max-w-4xl">
+        <div className="text-center mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-primary mb-4">Symptom Assessment Results</h1>
           <p className="text-muted-foreground">
             Based on your selected symptoms, here's your kidney health assessment
           </p>
@@ -260,7 +260,7 @@ export default function SymptomChecker() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
               <div className="text-center">
                 <p className="text-sm text-muted-foreground">Symptoms Selected</p>
                 <p className="text-2xl font-bold">{selectedSymptoms.length}</p>
@@ -279,7 +279,7 @@ export default function SymptomChecker() {
 
             <div className="mb-6">
               <h4 className="font-semibold mb-3">Selected Symptoms:</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {assessment.selectedSymptoms.map(symptom => (
                   <div key={symptom.id} className="flex items-center p-2 bg-muted/50 rounded">
                     <Badge variant="outline" className="mr-2">
@@ -305,7 +305,7 @@ export default function SymptomChecker() {
           </CardContent>
         </Card>
 
-        <div className="flex gap-4 justify-center">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
           <Button onClick={() => setShowResults(false)} variant="outline">
             Check Again
           </Button>
@@ -319,9 +319,9 @@ export default function SymptomChecker() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-primary mb-4">CKD Symptom Checker</h1>
+    <div className="container mx-auto px-4 py-6 sm:py-8 max-w-4xl">
+      <div className="text-center mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-primary mb-4">CKD Symptom Checker</h1>
         <p className="text-muted-foreground">
           Select symptoms you're experiencing to get an initial kidney health assessment
         </p>
@@ -335,10 +335,10 @@ export default function SymptomChecker() {
           </p>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {symptoms.map((symptom) => (
               <Collapsible key={symptom.id}>
-                <div className="flex items-start space-x-3 p-3 border rounded-lg hover:bg-muted/50">
+                <div className="flex items-start space-x-2 sm:space-x-3 p-2 sm:p-3 border rounded-lg hover:bg-muted/50">
                   <Checkbox
                     id={symptom.id}
                     checked={selectedSymptoms.includes(symptom.id)}
