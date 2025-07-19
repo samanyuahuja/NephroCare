@@ -20,6 +20,7 @@ export default function Diagnosis() {
   const { toast } = useToast();
   const { language } = useLanguage();
   const [isSymptomCheckerOpen, setIsSymptomCheckerOpen] = useState(false);
+  const [isReportGuideOpen, setIsReportGuideOpen] = useState(false);
 
   const form = useForm<InsertCKDAssessment>({
     resolver: zodResolver(insertCKDAssessmentSchema),
@@ -210,6 +211,123 @@ export default function Diagnosis() {
                     <div className="bg-white p-3 rounded-lg border">
                       <div className="font-semibold text-red-600 mb-1">Pedal Edema: Yes</div>
                       <div className="text-gray-600">{t("Swelling in feet/legs", "पैरों/टांगों में सूजन")}</div>
+                    </div>
+
+                  </div>
+                </CardContent>
+              </Card>
+            </CollapsibleContent>
+          </Collapsible>
+
+          {/* Report Value Locator Section */}
+          <Collapsible open={isReportGuideOpen} onOpenChange={setIsReportGuideOpen}>
+            <CollapsibleTrigger asChild>
+              <Button variant="outline" className="w-full justify-between">
+                <div className="flex items-center">
+                  <FileText className="mr-2 h-4 w-4" />
+                  {t("Need help finding values in your medical report?", "अपनी मेडिकल रिपोर्ट में मान खोजने में सहायता चाहिए?")}
+                </div>
+                <ChevronDown className={`h-4 w-4 transition-transform ${isReportGuideOpen ? 'rotate-180' : ''}`} />
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="mt-4">
+              <Card className="bg-green-50 border-green-200">
+                <CardHeader>
+                  <CardTitle className="text-lg text-green-800">
+                    {t("Medical Report Value Locator", "मेडिकल रिपोर्ट वैल्यू लोकेटर")}
+                  </CardTitle>
+                  <p className="text-sm text-green-600">
+                    {t(
+                        "Find these values in your medical reports to complete the assessment accurately.",
+                        "मूल्यांकन सटीक रूप से पूरा करने के लिए अपनी मेडिकल रिपोर्ट में ये मान खोजें।")}
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+
+                    <div className="bg-white p-4 rounded-lg border">
+                      <div className="font-semibold text-green-700 mb-2">Blood Pressure (BP)</div>
+                      <div className="text-gray-600">{t("In the doctor's notes or 'Vital Signs' section (e.g., 120/80 mmHg)", "डॉक्टर के नोट्स या 'वाइटल साइन्स' सेक्शन में (जैसे, 120/80 mmHg)")}</div>
+                    </div>
+
+                    <div className="bg-white p-4 rounded-lg border">
+                      <div className="font-semibold text-green-700 mb-2">Albumin</div>
+                      <div className="text-gray-600">{t("Found in 'Urine Test' - look for protein levels or 'Albumin' (0-5 scale)", "'यूरिन टेस्ट' में मिलता है - प्रोटीन लेवल या 'एल्ब्यूमिन' देखें (0-5 स्केल)")}</div>
+                    </div>
+
+                    <div className="bg-white p-4 rounded-lg border">
+                      <div className="font-semibold text-green-700 mb-2">Sugar</div>
+                      <div className="text-gray-600">{t("In 'Urine Test' section - shows sugar levels in urine", "'यूरिन टेस्ट' सेक्शन में - मूत्र में चीनी का स्तर दिखाता है")}</div>
+                    </div>
+
+                    <div className="bg-white p-4 rounded-lg border">
+                      <div className="font-semibold text-green-700 mb-2">Red Blood Cells (RBC)</div>
+                      <div className="text-gray-600">{t("In 'Urine Microscopy' section - listed as 'RBC' or 'Red Cells'", "'यूरिन माइक्रोस्कोपी' सेक्शन में - 'RBC' या 'Red Cells' के रूप में सूचीबद्ध")}</div>
+                    </div>
+
+                    <div className="bg-white p-4 rounded-lg border">
+                      <div className="font-semibold text-green-700 mb-2">Pus Cells</div>
+                      <div className="text-gray-600">{t("In 'Urine Microscopy' - shows if there's any infection", "'यूरिन माइक्रोस्कोपी' में - दिखाता है कि कोई संक्रमण है या नहीं")}</div>
+                    </div>
+
+                    <div className="bg-white p-4 rounded-lg border">
+                      <div className="font-semibold text-green-700 mb-2">Blood Glucose Random</div>
+                      <div className="text-gray-600">{t("In 'Blood Sugar' section - random blood sugar level", "'ब्लड शुगर' सेक्शन में - रैंडम ब्लड शुगर लेवल")}</div>
+                    </div>
+
+                    <div className="bg-white p-4 rounded-lg border">
+                      <div className="font-semibold text-green-700 mb-2">Blood Urea</div>
+                      <div className="text-gray-600">{t("Found in 'Kidney Function Test' (KFT) - look for 'Urea' or 'Blood Urea'", "'किडनी फंक्शन टेस्ट' (KFT) में मिलता है - 'यूरिया' या 'ब्लड यूरिया' देखें")}</div>
+                    </div>
+
+                    <div className="bg-white p-4 rounded-lg border">
+                      <div className="font-semibold text-green-700 mb-2">Serum Creatinine</div>
+                      <div className="text-gray-600">{t("In 'Kidney Function Test' - tells how well kidneys are working", "'किडनी फंक्शन टेस्ट' में - बताता है कि किडनी कितनी अच्छी तरह काम कर रही है")}</div>
+                    </div>
+
+                    <div className="bg-white p-4 rounded-lg border">
+                      <div className="font-semibold text-green-700 mb-2">Sodium</div>
+                      <div className="text-gray-600">{t("Look under 'Electrolytes' - may be written as 'Na+'", "'इलेक्ट्रोलाइट्स' के तहत देखें - 'Na+' के रूप में लिखा जा सकता है")}</div>
+                    </div>
+
+                    <div className="bg-white p-4 rounded-lg border">
+                      <div className="font-semibold text-green-700 mb-2">Potassium</div>
+                      <div className="text-gray-600">{t("In 'Electrolytes' section - may be written as 'K+'", "'इलेक्ट्रोलाइट्स' सेक्शन में - 'K+' के रूप में लिखा जा सकता है")}</div>
+                    </div>
+
+                    <div className="bg-white p-4 rounded-lg border">
+                      <div className="font-semibold text-green-700 mb-2">Hemoglobin</div>
+                      <div className="text-gray-600">{t("In 'Complete Blood Count' or 'CBC' test - shows if you have anemia", "'कम्प्लीट ब्लड काउंट' या 'CBC' टेस्ट में - दिखाता है कि आपको एनीमिया है या नहीं")}</div>
+                    </div>
+
+                    <div className="bg-white p-4 rounded-lg border">
+                      <div className="font-semibold text-green-700 mb-2">White Blood Cells (WBC)</div>
+                      <div className="text-gray-600">{t("In CBC - may be written as 'WBC count'", "CBC में - 'WBC count' के रूप में लिखा जा सकता है")}</div>
+                    </div>
+
+                    <div className="bg-white p-4 rounded-lg border">
+                      <div className="font-semibold text-green-700 mb-2">Red Blood Cells Count (RBC)</div>
+                      <div className="text-gray-600">{t("In CBC - look for 'RBC count'", "CBC में - 'RBC count' देखें")}</div>
+                    </div>
+
+                    <div className="bg-white p-4 rounded-lg border">
+                      <div className="font-semibold text-green-700 mb-2">Hypertension</div>
+                      <div className="text-gray-600">{t("If you have high BP or take BP medicine, check doctor's summary", "यदि आपका BP हाई है या BP की दवा लेते हैं, तो डॉक्टर की सारांश जांचें")}</div>
+                    </div>
+
+                    <div className="bg-white p-4 rounded-lg border">
+                      <div className="font-semibold text-green-700 mb-2">Diabetes</div>
+                      <div className="text-gray-600">{t("If you take insulin or have high blood sugar, check doctor's notes", "यदि आप इंसुलिन लेते हैं या हाई ब्लड शुगर है, तो डॉक्टर के नोट्स जांचें")}</div>
+                    </div>
+
+                    <div className="bg-white p-4 rounded-lg border">
+                      <div className="font-semibold text-green-700 mb-2">Appetite</div>
+                      <div className="text-gray-600">{t("Doctors may write this in their notes during check-up", "डॉक्टर इसे चेक-अप के दौरान अपने नोट्स में लिख सकते हैं")}</div>
+                    </div>
+
+                    <div className="bg-white p-4 rounded-lg border">
+                      <div className="font-semibold text-green-700 mb-2">Swelling in Feet</div>
+                      <div className="text-gray-600">{t("Not in tests - doctors check this in physical exam", "टेस्ट में नहीं - डॉक्टर इसे फिजिकल एग्जाम में चेक करते हैं")}</div>
                     </div>
 
                   </div>

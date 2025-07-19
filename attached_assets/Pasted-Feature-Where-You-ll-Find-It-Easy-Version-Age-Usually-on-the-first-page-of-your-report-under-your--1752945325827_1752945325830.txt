@@ -1,0 +1,48 @@
+Feature
+Where You’ll Find It (Easy Version)
+Age
+Usually on the first page of your report under your name or personal details.
+Blood Pressure (bp)
+In the doctor’s notes or in the “Vital Signs” section (e.g., 120/80 mmHg).
+Specific Gravity (sg)
+In the “Urine Test” or “Urine Routine” section — look for “SG” or “Specific Gravity.”
+Albumin (al)
+Found in the “Urine Test” — look for protein levels or “Albumin.” It’s often a number from 0 to 5.
+Sugar (su)
+Also in the “Urine Test” section — it shows how much sugar is in your urine.
+Red Blood Cells (rbc)
+In the “Urine Microscopy” section — listed as “RBC” or “Red Cells.”
+Pus Cells (pc)
+Also in “Urine Microscopy” — shows if there’s any infection.
+Pus Cell Clumps (pcc)
+In the same section as above — it may say “Clumps present” if there’s an infection.
+Blood Glucose Random (bgr)
+In the “Blood Sugar” section — this is your sugar level when tested randomly.
+Blood Urea (bu)
+Found in the “Kidney Function Test” (KFT) — look for “Urea” or “Blood Urea.”
+Serum Creatinine (sc)
+Also in the “Kidney Function Test” — this tells how well your kidneys are working.
+Sodium (sod)
+Look under “Electrolytes” — Sodium may be written as “Na+” too.
+Potassium (pot)
+In the same “Electrolytes” section — Potassium may be written as “K+.”
+Hemoglobin (hemo)
+In the “Complete Blood Count” or “CBC” test — shows if you’re low on blood (anemia).
+White Blood Cells (wbcc)
+Also in CBC — may be written as “WBC count.”
+Red Blood Cells Count (rbcc)
+In CBC — look for “RBC count.”
+Hypertension (htn)
+If you’ve been told you have high BP, or take BP medicine, check your doctor’s summary.
+Diabetes (dm)
+If you take insulin or have high blood sugar, this will be in the doctor’s notes or sugar test.
+Appetite (appet)
+Doctors may write this in their notes during your check-up.
+Swelling in Feet (pe)
+Not in tests — doctors check this in physical exam or observation.
+BU/SC Ratio
+You can calculate this by dividing your urea (BU) by creatinine (SC).
+High Creatinine (high_creatinine)
+If creatinine is above 1.2 — then it’s “high.” Your app will show this.
+Hemoglobin × BU (hemo_bu)
+Your app will multiply your hemoglobin and urea to get this value.
