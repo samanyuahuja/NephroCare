@@ -74,6 +74,23 @@ export const insertCKDAssessmentSchema = createInsertSchema(ckdAssessments).omit
   createdAt: true,
 }).extend({
   patientName: z.string().min(1, "Patient name is required"),
+  albumin: z.union([z.number().min(0).max(5), z.literal("unknown")]),
+  sugar: z.union([z.number().min(0).max(5), z.literal("unknown")]),
+  redBloodCells: z.enum(["normal", "abnormal", "unknown"]),
+  pusCell: z.enum(["normal", "abnormal", "unknown"]),
+  bloodGlucoseRandom: z.union([z.number().min(70).max(400), z.literal("unknown")]),
+  bloodUrea: z.union([z.number().min(7).max(100), z.literal("unknown")]),
+  serumCreatinine: z.union([z.number().min(0.6).max(10.0), z.literal("unknown")]),
+  sodium: z.union([z.number().min(130).max(150), z.literal("unknown")]),
+  potassium: z.union([z.number().min(3.0).max(6.0), z.literal("unknown")]),
+  hemoglobin: z.union([z.number().min(8.0).max(18.0), z.literal("unknown")]),
+  wbcCount: z.union([z.number().positive(), z.literal("unknown")]),
+  rbcCount: z.union([z.number().positive(), z.literal("unknown")]),
+  hypertension: z.enum(["no", "yes", "unknown"]),
+  diabetesMellitus: z.enum(["no", "yes", "unknown"]),
+  appetite: z.enum(["good", "poor", "unknown"]),
+  pedalEdema: z.enum(["no", "yes", "unknown"]),
+  anemia: z.enum(["no", "yes", "unknown"]),
 });
 
 export const insertDietPlanSchema = createInsertSchema(dietPlans).omit({

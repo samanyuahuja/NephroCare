@@ -298,7 +298,7 @@ export default function Diagnosis() {
                                 if (e.target.checked) {
                                   field.onChange("unknown");
                                 } else {
-                                  field.onChange("");
+                                  field.onChange(145); // Reset to default value
                                 }
                               }}
                               checked={field.value === "unknown"}
@@ -339,7 +339,7 @@ export default function Diagnosis() {
                                 if (e.target.checked) {
                                   field.onChange("unknown");
                                 } else {
-                                  field.onChange("");
+                                  field.onChange(35); // Reset to default value
                                 }
                               }}
                               checked={field.value === "unknown"}
@@ -381,7 +381,7 @@ export default function Diagnosis() {
                                 if (e.target.checked) {
                                   field.onChange("unknown");
                                 } else {
-                                  field.onChange("");
+                                  field.onChange(1.8); // Reset to default value
                                 }
                               }}
                               checked={field.value === "unknown"}
@@ -422,7 +422,7 @@ export default function Diagnosis() {
                                 if (e.target.checked) {
                                   field.onChange("unknown");
                                 } else {
-                                  field.onChange("");
+                                  field.onChange(135); // Reset to default value
                                 }
                               }}
                               checked={field.value === "unknown"}
@@ -464,7 +464,7 @@ export default function Diagnosis() {
                                 if (e.target.checked) {
                                   field.onChange("unknown");
                                 } else {
-                                  field.onChange("");
+                                  field.onChange(4.5); // Reset to default value
                                 }
                               }}
                               checked={field.value === "unknown"}
@@ -506,7 +506,7 @@ export default function Diagnosis() {
                                 if (e.target.checked) {
                                   field.onChange("unknown");
                                 } else {
-                                  field.onChange("");
+                                  field.onChange(12); // Reset to default value
                                 }
                               }}
                               checked={field.value === "unknown"}
@@ -544,7 +544,7 @@ export default function Diagnosis() {
                                 if (e.target.checked) {
                                   field.onChange("unknown");
                                 } else {
-                                  field.onChange("");
+                                  field.onChange(7600); // Reset to default value
                                 }
                               }}
                               checked={field.value === "unknown"}
@@ -580,7 +580,7 @@ export default function Diagnosis() {
                                 if (e.target.checked) {
                                   field.onChange("unknown");
                                 } else {
-                                  field.onChange("");
+                                  field.onChange(5.2); // Reset to default value
                                 }
                               }}
                               checked={field.value === "unknown"}
