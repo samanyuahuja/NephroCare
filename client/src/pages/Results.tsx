@@ -18,9 +18,19 @@ export default function Results({ params }: ResultsProps) {
   const assessmentId = parseInt(params.id);
   const { language } = useLanguage();
 
+  // Check if user has access to this assessment
+  const hasAccess = () => {
+    try {
+      const storedIds = JSON.parse(localStorage.getItem('userAssessmentIds') || '[]');
+      return storedIds.includes(assessmentId);
+    } catch {
+      return false;
+    }
+  };
+
   const { data: assessment, isLoading, error } = useQuery<CKDAssessment>({
     queryKey: ["/api/ckd-assessment", assessmentId],
-    enabled: !isNaN(assessmentId),
+    enabled: !isNaN(assessmentId) && hasAccess(),
   });
 
   if (isLoading) {
@@ -28,6 +38,24 @@ export default function Results({ params }: ResultsProps) {
       <div className="flex justify-center items-center min-h-96">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
+    );
+  }
+
+  if (!hasAccess()) {
+    return (
+      <Card className="max-w-md mx-auto">
+        <CardContent className="pt-6 text-center">
+          <p className="text-red-600">
+            {t("Access denied. You can only view your own assessment results.", 
+               "पहुंच अस्वीकृत। आप केवल अपने स्वयं के मूल्यांकन परिणाम देख सकते हैं।")}
+          </p>
+          <Link href="/diagnosis">
+            <Button className="mt-4">
+              {t("Take New Assessment", "नया मूल्यांकन लें")}
+            </Button>
+          </Link>
+        </CardContent>
+      </Card>
     );
   }
 

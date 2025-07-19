@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,12 +14,40 @@ const Browse = () => {
   
   const t = (en: string, hi: string) => (language === 'hi' ? hi : en);
 
+  // Get assessment IDs from localStorage
+  const getStoredAssessmentIds = (): number[] => {
+    try {
+      const stored = localStorage.getItem('userAssessmentIds');
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  };
+
+  const [userAssessmentIds] = useState(getStoredAssessmentIds());
+
   const { data: assessments, isLoading: assessmentsLoading } = useQuery<CKDAssessment[]>({
-    queryKey: ["/api/ckd-assessments"],
+    queryKey: ["/api/ckd-assessments", "filtered"],
+    queryFn: async () => {
+      if (userAssessmentIds.length === 0) return [];
+      
+      const allAssessments = await fetch("/api/ckd-assessments").then(res => res.json());
+      return allAssessments.filter((assessment: CKDAssessment) => 
+        userAssessmentIds.includes(assessment.id)
+      );
+    },
   });
 
   const { data: dietPlans, isLoading: dietPlansLoading } = useQuery<DietPlan[]>({
-    queryKey: ["/api/diet-plans"],
+    queryKey: ["/api/diet-plans", "filtered"],
+    queryFn: async () => {
+      if (userAssessmentIds.length === 0) return [];
+      
+      const allDietPlans = await fetch("/api/diet-plans").then(res => res.json());
+      return allDietPlans.filter((plan: DietPlan) => 
+        userAssessmentIds.includes(plan.assessmentId!)
+      );
+    },
   });
 
   const formatDateTime = (dateString: string | null) => {

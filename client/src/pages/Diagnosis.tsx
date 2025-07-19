@@ -55,6 +55,11 @@ export default function Diagnosis() {
       return response.json();
     },
     onSuccess: (data) => {
+      // Store assessment ID in localStorage for privacy
+      const storedIds = JSON.parse(localStorage.getItem('userAssessmentIds') || '[]');
+      const updatedIds = [...storedIds, data.id];
+      localStorage.setItem('userAssessmentIds', JSON.stringify(updatedIds));
+      
       toast({
         title: "Assessment Complete",
         description: "Your CKD risk assessment has been generated successfully.",
