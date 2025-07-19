@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { Brain, ChartLine, Utensils, Stethoscope } from "lucide-react";
+import { Brain, ChartLine, Utensils, Stethoscope, Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLanguage, t } from "@/hooks/useLanguage";
@@ -10,23 +10,68 @@ export default function Home() {
   return (
     <div className="space-y-12">
       {/* Hero Section */}
-      <div className="medical-gradient rounded-2xl text-white p-12">
-        <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6">
-            {t("CKD Prediction & Personalized Care", "सीकेडी भविष्यवाणी और व्यक्तिगत देखभाल")}
-          </h1>
-          <p className="text-xl md:text-2xl mb-8 text-blue-100">
-            {t(
-              "Get early insights into your kidney health with advanced diagnostics, explainable results, and a smart diet planner.",
-              "उन्नत निदान, समझने योग्य परिणामों और स्मार्ट आहार योजनाकार के साथ अपने गुर्दे के स्वास्थ्य में प्रारंभिक अंतर्दृष्टि प्राप्त करें।"
-            )}
-          </p>
-          <Link href="/diagnosis">
-            <Button size="lg" variant="secondary" className="text-lg px-8 py-4">
-              <Stethoscope className="mr-3 h-5 w-5" />
-              {t("Start Assessment", "मूल्यांकन शुरू करें")}
-            </Button>
-          </Link>
+      <div className="bg-gradient-to-br from-blue-50 via-white to-blue-50 rounded-3xl p-16 shadow-2xl border border-blue-100">
+        <div className="max-w-5xl mx-auto text-center">
+          {/* Main Title with Enhanced Typography */}
+          <div className="mb-10">
+            <h1 className="text-6xl md:text-8xl lg:text-9xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-blue-600 to-blue-800 mb-6 tracking-tight leading-none">
+              {t("NephroCare", "नेफ्रोकेयर")}
+            </h1>
+            <div className="w-32 h-2 bg-gradient-to-r from-blue-500 to-blue-700 mx-auto rounded-full shadow-lg"></div>
+          </div>
+          
+          {/* Enhanced Subheader */}
+          <div className="mb-12">
+            <p className="text-3xl md:text-4xl font-bold text-gray-800 mb-4 leading-tight">
+              {t(
+                "Advanced CKD Prediction & Healthcare Guidance",
+                "उन्नत सीकेडी भविष्यवाणी और स्वास्थ्य देखभाल मार्गदर्शन"
+              )}
+            </p>
+            <p className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed font-medium">
+              {t(
+                "Powered by machine learning algorithms for early detection and personalized recommendations",
+                "प्रारंभिक पहचान और व्यक्तिगत सिफारिशों के लिए मशीन लर्निंग एल्गोरिदम द्वारा संचालित"
+              )}
+            </p>
+          </div>
+
+          {/* Enhanced CTA Buttons */}
+          <div className="flex flex-col lg:flex-row gap-6 justify-center items-center mb-16">
+            <Link href="/diagnosis">
+              <Button className="group relative bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 hover:from-blue-700 hover:via-blue-800 hover:to-blue-900 text-white px-12 py-6 text-xl font-black rounded-3xl shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-110 hover:-translate-y-2 border-0 min-w-[300px] animate-pulse hover:animate-none">
+                <div className="absolute inset-0 bg-white opacity-20 rounded-3xl transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></div>
+                <div className="relative flex items-center justify-center">
+                  <Activity className="mr-4 h-7 w-7 group-hover:rotate-180 transition-transform duration-500" />
+                  {t("START ASSESSMENT NOW", "अभी मूल्यांकन शुरू करें")}
+                </div>
+                <div className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-blue-400 to-blue-600 opacity-75 blur group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-tilt"></div>
+              </Button>
+            </Link>
+            
+            <Link href="/symptom-checker">
+              <Button variant="outline" className="group px-10 py-5 text-lg font-bold rounded-2xl border-3 border-blue-600 text-blue-700 hover:bg-blue-600 hover:text-white transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 shadow-xl hover:shadow-2xl min-w-[240px] bg-white/80 backdrop-blur-sm">
+                <Stethoscope className="mr-3 h-6 w-6 group-hover:bounce transition-all duration-300" />
+                {t("Check Symptoms", "लक्षण जांचें")}
+              </Button>
+            </Link>
+          </div>
+
+          {/* Trust Indicators */}
+          <div className="flex flex-wrap justify-center items-center gap-8 text-sm text-gray-500 font-semibold">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+              {t("Machine Learning Powered", "मशीन लर्निंग संचालित")}
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
+              {t("Clinically Validated", "चिकित्सकीय रूप से सत्यापित")}
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-purple-500 rounded-full animate-pulse"></div>
+              {t("Personalized Results", "व्यक्तिगत परिणाम")}
+            </div>
+          </div>
         </div>
       </div>
 
