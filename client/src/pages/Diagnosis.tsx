@@ -326,7 +326,7 @@ export default function Diagnosis() {
                     </div>
 
                     <div className="bg-white p-4 rounded-lg border">
-                      <div className="font-semibold text-green-700 mb-2">Swelling in Feet</div>
+                      <div className="font-semibold text-green-700 mb-2">Swelling in Feet (Pedal Edema)</div>
                       <div className="text-gray-600">{t("Not in tests - doctors check this in physical exam", "टेस्ट में नहीं - डॉक्टर इसे फिजिकल एग्जाम में चेक करते हैं")}</div>
                     </div>
 
