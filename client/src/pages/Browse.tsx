@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,20 +14,40 @@ const Browse = () => {
   
   const t = (en: string, hi: string) => (language === 'hi' ? hi : en);
 
-  // Get assessment IDs from localStorage
-  const getStoredAssessmentIds = (): number[] => {
-    try {
-      const stored = localStorage.getItem('userAssessmentIds');
-      return stored ? JSON.parse(stored) : [];
-    } catch {
-      return [];
-    }
-  };
+  // Get assessment IDs from localStorage with reactive updates
+  const [userAssessmentIds, setUserAssessmentIds] = useState<number[]>([]);
 
-  const [userAssessmentIds] = useState(getStoredAssessmentIds());
+  useEffect(() => {
+    const getStoredAssessmentIds = (): number[] => {
+      try {
+        const stored = localStorage.getItem('userAssessmentIds');
+        return stored ? JSON.parse(stored) : [];
+      } catch {
+        return [];
+      }
+    };
+
+    const updateAssessmentIds = () => {
+      setUserAssessmentIds(getStoredAssessmentIds());
+    };
+
+    // Initial load
+    updateAssessmentIds();
+
+    // Listen for storage changes (from other tabs/windows)
+    window.addEventListener('storage', updateAssessmentIds);
+
+    // Custom event for same-tab updates
+    window.addEventListener('assessmentIdsUpdated', updateAssessmentIds);
+
+    return () => {
+      window.removeEventListener('storage', updateAssessmentIds);
+      window.removeEventListener('assessmentIdsUpdated', updateAssessmentIds);
+    };
+  }, []);
 
   const { data: assessments, isLoading: assessmentsLoading } = useQuery<CKDAssessment[]>({
-    queryKey: ["/api/ckd-assessments", "filtered"],
+    queryKey: ["/api/ckd-assessments", "filtered", userAssessmentIds],
     queryFn: async () => {
       if (userAssessmentIds.length === 0) return [];
       
@@ -39,7 +59,7 @@ const Browse = () => {
   });
 
   const { data: dietPlans, isLoading: dietPlansLoading } = useQuery<DietPlan[]>({
-    queryKey: ["/api/diet-plans", "filtered"],
+    queryKey: ["/api/diet-plans", "filtered", userAssessmentIds],
     queryFn: async () => {
       if (userAssessmentIds.length === 0) return [];
       

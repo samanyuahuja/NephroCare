@@ -60,6 +60,13 @@ export default function Diagnosis() {
       const updatedIds = [...storedIds, data.id];
       localStorage.setItem('userAssessmentIds', JSON.stringify(updatedIds));
       
+      // Dispatch custom event to notify other components
+      window.dispatchEvent(new CustomEvent('assessmentIdsUpdated'));
+      
+      // Invalidate Browse page queries
+      queryClient.invalidateQueries({ queryKey: ["/api/ckd-assessments", "filtered"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/diet-plans", "filtered"] });
+      
       toast({
         title: "Assessment Complete",
         description: "Your CKD risk assessment has been generated successfully.",
