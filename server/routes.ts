@@ -11,6 +11,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // CKD Assessment endpoint - integrates with Flask backend
   app.post("/api/ckd-assessment", async (req, res) => {
     try {
+      console.log("📝 Received assessment data:", JSON.stringify(req.body, null, 2));
       const validatedData = insertCKDAssessmentSchema.parse(req.body);
       const assessment = await storage.createCKDAssessment(validatedData);
       
@@ -115,7 +116,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.json(updatedAssessment);
       }
     } catch (error) {
-      res.status(400).json({ error: "Invalid assessment data" });
+      console.error("❌ Assessment validation error:", error);
+      res.status(400).json({ error: "Invalid assessment data", details: error instanceof Error ? error.message : error });
     }
   });
 
