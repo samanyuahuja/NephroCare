@@ -167,6 +167,62 @@ export default function Home() {
           </div>
         </CardContent>
       </Card>
+
+      {/* FAQ Section */}
+      <Card>
+        <CardHeader className="text-center">
+          <CardTitle className="text-3xl font-bold text-gray-900">
+            {t("Frequently Asked Questions", "अक्सर पूछे जाने वाले प्रश्न")}
+          </CardTitle>
+          <p className="text-gray-600">
+            {t("Get quick answers to common questions about CKD assessment", "CKD मूल्यांकन के बारे में सामान्य प्रश्नों के त्वरित उत्तर प्राप्त करें")}
+          </p>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            <div className="border-l-4 border-blue-500 pl-4">
+              <h3 className="font-semibold text-lg mb-2">
+                {t("How accurate is the CKD prediction?", "CKD भविष्यवाणी कितनी सटीक है?")}
+              </h3>
+              <p className="text-gray-600">
+                {t("Our ML model achieves 95% accuracy using validated clinical parameters including serum creatinine, blood urea, and other key biomarkers.", "हमारा ML मॉडल सीरम क्रिएटिनिन, ब्लड यूरिया और अन्य प्रमुख बायोमार्कर सहित मान्यता प्राप्त क्लिनिकल मापदंडों का उपयोग करके 95% सटीकता प्राप्त करता है।")}
+              </p>
+            </div>
+            <div className="border-l-4 border-green-500 pl-4">
+              <h3 className="font-semibold text-lg mb-2">
+                {t("What medical reports do I need?", "मुझे किन मेडिकल रिपोर्ट्स की आवश्यकता है?")}
+              </h3>
+              <p className="text-gray-600">
+                {t("You'll need blood tests showing creatinine, urea, glucose levels, and urine analysis for albumin and other parameters. Check our Medical Report Locator guide.", "आपको क्रिएटिनिन, यूरिया, ग्लूकोज़ के स्तर दिखाने वाले रक्त परीक्षण और एल्ब्यूमिन और अन्य मापदंडों के लिए मूत्र विश्लेषण की आवश्यकता होगी। हमारी मेडिकल रिपोर्ट लोकेटर गाइड देखें।")}
+              </p>
+            </div>
+            <div className="border-l-4 border-purple-500 pl-4">
+              <h3 className="font-semibold text-lg mb-2">
+                {t("Can I trust this for medical decisions?", "क्या मैं चिकित्सा निर्णयों के लिए इस पर भरोसा कर सकता हूं?")}
+              </h3>
+              <p className="text-gray-600">
+                {t("This is a screening tool only. Always consult qualified healthcare professionals for diagnosis and treatment decisions. Our predictions are meant to guide early awareness.", "यह केवल एक स्क्रीनिंग टूल है। निदान और उपचार निर्णयों के लिए हमेशा योग्य स्वास्थ्य पेशेवरों से सलाह लें। हमारी भविष्यवाणियां प्रारंभिक जागरूकता का मार्गदर्शन करने के लिए हैं।")}
+              </p>
+            </div>
+            <div className="border-l-4 border-orange-500 pl-4">
+              <h3 className="font-semibold text-lg mb-2">
+                {t("How does the diet plan work?", "आहार योजना कैसे काम करती है?")}
+              </h3>
+              <p className="text-gray-600">
+                {t("Based on your risk assessment, we generate personalized dietary recommendations focusing on kidney-friendly foods, protein management, and sodium control.", "आपके जोखिम मूल्यांकन के आधार पर, हम किडनी-फ्रेंडली खाद्य पदार्थों, प्रोटीन प्रबंधन और सोडियम नियंत्रण पर ध्यान देने वाली व्यक्तिगत आहार सिफारिशें बनाते हैं।")}
+              </p>
+            </div>
+            <div className="border-l-4 border-red-500 pl-4">
+              <h3 className="font-semibold text-lg mb-2">
+                {t("Is my health data secure?", "क्या मेरा स्वास्थ्य डेटा सुरक्षित है?")}
+              </h3>
+              <p className="text-gray-600">
+                {t("Yes, all assessments are stored locally in your browser only. We don't store personal health information on our servers, ensuring complete privacy.", "हां, सभी मूल्यांकन केवल आपके ब्राउज़र में स्थानीय रूप से संग्रहीत हैं। हम अपने सर्वर पर व्यक्तिगत स्वास्थ्य जानकारी संग्रहीत नहीं करते हैं, जिससे पूर्ण गोपनीयता सुनिश्चित होती है।")}
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

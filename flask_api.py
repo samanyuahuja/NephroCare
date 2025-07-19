@@ -305,8 +305,107 @@ def chatbot():
             reply = "You're chatting with me now! I'm NephroBot, designed to answer your questions about CKD."
         elif "who made you" in msg:
             reply = "I was created to assist users with CKD-related queries using rule-based responses."
+        
+        # Enhanced medical questions
+        elif "blood urea" in msg or "bun" in msg:
+            reply = "Blood Urea (BUN) measures kidney function. Normal range is 7-20 mg/dL. Higher levels may indicate kidney problems."
+        elif "creatinine levels" in msg or "serum creatinine" in msg:
+            reply = "Normal creatinine levels are 0.6-1.2 mg/dL for adults. Levels above 1.4 mg/dL may suggest kidney damage."
+        elif "albumin" in msg and "urine" in msg:
+            reply = "Albumin in urine (albuminuria) is an early sign of kidney damage. Normal is less than 30 mg/g creatinine."
+        elif "potassium" in msg:
+            reply = "Normal potassium is 3.5-5.0 mEq/L. High potassium can be dangerous with kidney disease and may require dietary restrictions."
+        elif "sodium" in msg:
+            reply = "Normal sodium is 135-145 mEq/L. CKD patients should limit dietary sodium to less than 2300mg per day."
+        elif "hemoglobin" in msg or "anemia" in msg:
+            reply = "CKD often causes anemia (low hemoglobin). Normal hemoglobin is 12-15 g/dL for women, 13-17 g/dL for men."
+        elif "phosphorus" in msg:
+            reply = "Normal phosphorus is 2.5-4.5 mg/dL. High phosphorus in CKD can affect bones and requires dietary control."
+        
+        # Lifestyle and prevention
+        elif "prevent ckd" in msg or "prevention" in msg:
+            reply = "Prevent CKD by controlling diabetes and blood pressure, maintaining healthy weight, not smoking, and staying hydrated."
+        elif "exercise" in msg and "ckd" in msg:
+            reply = "Regular moderate exercise is beneficial for CKD patients. Aim for 30 minutes of walking daily, but consult your doctor first."
+        elif "water" in msg or "hydration" in msg:
+            reply = "Stay well-hydrated but not over-hydrated. CKD patients may need fluid restrictions in later stages. Ask your doctor about fluid limits."
+        elif "smoking" in msg:
+            reply = "Smoking worsens kidney disease progression. Quitting smoking is one of the best things you can do for your kidney health."
+        elif "alcohol" in msg:
+            reply = "Moderate alcohol consumption may be okay for early CKD, but advanced stages may require avoiding alcohol completely."
+        
+        # Stage-specific information
+        elif "stage 1" in msg or "stage one" in msg:
+            reply = "CKD Stage 1: Normal GFR (>90) with kidney damage. Focus on controlling underlying conditions and regular monitoring."
+        elif "stage 2" in msg or "stage two" in msg:
+            reply = "CKD Stage 2: Mild decrease in GFR (60-89) with kidney damage. Continue managing diabetes/hypertension and monitor closely."
+        elif "stage 3" in msg or "stage three" in msg:
+            reply = "CKD Stage 3: Moderate decrease in GFR (30-59). May need specialist care, anemia treatment, and bone health monitoring."
+        elif "stage 4" in msg or "stage four" in msg:
+            reply = "CKD Stage 4: Severe decrease in GFR (15-29). Prepare for kidney replacement therapy and manage complications."
+        elif "stage 5" in msg or "stage five" in msg:
+            reply = "CKD Stage 5: Kidney failure, GFR <15. Requires dialysis or kidney transplant for survival."
+        
+        # Complications and comorbidities
+        elif "diabetes" in msg and "kidney" in msg:
+            reply = "Diabetic kidney disease is the leading cause of CKD. Control blood sugar (HbA1c <7%) to protect your kidneys."
+        elif "high blood pressure" in msg or "hypertension" in msg:
+            reply = "High blood pressure both causes and results from CKD. Target BP is usually <130/80 mmHg for CKD patients."
+        elif "heart disease" in msg:
+            reply = "CKD increases heart disease risk. Manage cholesterol, blood pressure, and take prescribed medications to protect your heart."
+        elif "bone disease" in msg or "bone health" in msg:
+            reply = "CKD can cause bone disease due to phosphorus and calcium imbalances. May need phosphate binders and vitamin D supplements."
+        
+        # Specific foods and nutrition
+        elif "protein" in msg and ("limit" in msg or "restrict" in msg):
+            reply = "Protein restriction may help in advanced CKD (0.6-0.8 g/kg body weight). Always work with a renal dietitian."
+        elif "salt" in msg or "sodium restriction" in msg:
+            reply = "Limit sodium to <2300mg/day (1 teaspoon salt). Avoid processed foods, canned soups, and restaurant meals."
+        elif "fruits" in msg and "ckd" in msg:
+            reply = "Good CKD fruits: apples, berries, grapes (low potassium). Limit: oranges, bananas, melons (high potassium)."
+        elif "vegetables" in msg and "ckd" in msg:
+            reply = "Good CKD vegetables: cabbage, cauliflower, peppers, radishes. Limit: potatoes, tomatoes, spinach (high potassium)."
+        
+        # Testing and monitoring
+        elif "how often" in msg and "test" in msg:
+            reply = "CKD monitoring frequency depends on stage: Stage 1-2 annually, Stage 3 every 6 months, Stage 4-5 every 3 months."
+        elif "egfr" in msg or "gfr test" in msg:
+            reply = "eGFR (estimated Glomerular Filtration Rate) shows how well kidneys filter waste. It's calculated from creatinine, age, and gender."
+        elif "urine test" in msg:
+            reply = "Urine tests check for protein, blood, and other substances. Collect clean-catch midstream sample for accurate results."
+        
+        # Medications and supplements
+        elif "ace inhibitor" in msg or "arb" in msg:
+            reply = "ACE inhibitors and ARBs protect kidneys by lowering blood pressure and reducing protein in urine. Common in CKD treatment."
+        elif "vitamin d" in msg:
+            reply = "CKD patients often need active vitamin D supplements as kidneys can't convert vitamin D properly."
+        elif "iron" in msg and ("supplement" in msg or "deficiency" in msg):
+            reply = "CKD can cause iron deficiency anemia. May need iron supplements, but avoid taking with phosphate binders."
+        elif "nsaid" in msg or "ibuprofen" in msg or "advil" in msg:
+            reply = "Avoid NSAIDs (ibuprofen, naproxen) as they can worsen kidney function. Use acetaminophen for pain relief instead."
+        
+        # Emotional and lifestyle support
+        elif "depression" in msg or "mental health" in msg:
+            reply = "CKD can affect mental health. It's normal to feel overwhelmed. Consider counseling and talk to your healthcare team."
+        elif "family" in msg and ("support" in msg or "help" in msg):
+            reply = "Family support is crucial in CKD management. Educate them about your condition and involve them in care planning."
+        elif "work" in msg and "ckd" in msg:
+            reply = "Many CKD patients continue working. Discuss accommodations with your employer if needed, especially for dialysis schedules."
+        
+        # Emergency situations
+        elif "emergency" in msg or "urgent" in msg:
+            reply = "Seek immediate care for: severe swelling, difficulty breathing, chest pain, very high blood pressure, or decreased urination."
+        elif "when to call doctor" in msg:
+            reply = "Call your doctor for: sudden weight gain (>2 lbs/day), increased swelling, nausea/vomiting, or significant fatigue."
+        
+        # Transplant information
+        elif "transplant" in msg or "kidney transplant" in msg:
+            reply = "Kidney transplant is the best treatment for end-stage CKD. Living donor transplants have better outcomes than deceased donor."
+        elif "living donor" in msg:
+            reply = "Living donor transplants can be from family, friends, or altruistic donors. Donors can live normally with one healthy kidney."
+        
         else:
-            reply = "Sorry, I didn't understand that. Try asking about CKD symptoms, treatment, diet, risk factors, or prevention."
+            reply = "Sorry, I didn't understand that. Try asking about CKD symptoms, stages, diet, medications, testing, or complications."
 
         return jsonify({"reply": reply})
         

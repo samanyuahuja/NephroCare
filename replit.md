@@ -39,6 +39,18 @@ NephroCare is a professional, responsive Chronic Kidney Disease (CKD) prediction
 - Added branded PDF reports with NephroCare branding, comprehensive medical data, risk assessment, and recommendations
 - Integrated PDF download buttons in both Results and Diet Plan pages with proper bilingual support
 - Created beautiful, professional PDF layouts with proper medical report formatting and safety disclaimers
+- Enhanced Home page with comprehensive FAQ section featuring 5 detailed medical questions and bilingual answers
+- Significantly expanded NephroBot chatbot intelligence with 50+ new medical response conditions covering:
+  * Detailed lab value interpretations (creatinine, BUN, albumin, potassium, sodium, hemoglobin, phosphorus)
+  * CKD stage-specific information and management for all 5 stages
+  * Comprehensive lifestyle guidance (exercise, hydration, smoking, alcohol)
+  * Specific dietary advice for fruits, vegetables, protein, and sodium restrictions
+  * Medication guidance (ACE inhibitors, ARBs, NSAIDs, supplements)
+  * Testing and monitoring frequencies based on CKD stage
+  * Complication management (diabetes, hypertension, heart disease, bone health)
+  * Emergency situations and when to contact healthcare providers
+  * Kidney transplant and living donor information
+  * Mental health and family support considerations
 
 ## User Preferences
 
