@@ -235,12 +235,20 @@ export default function Results({ params }: ResultsProps) {
         .slice(0, 3);
     }
 
-    // Use SHAP features to get top 3 most important risk factors
-    const topShapFeatures = shapFeatures
-      .sort((a, b) => Math.abs(b.impact) - Math.abs(a.impact))
+    // Use SHAP features to get top 3 features that are negatively affecting (increasing risk)
+    const negativeFeatures = shapFeatures
+      .filter(feature => feature.impact > 0) // Positive impact means increasing risk (negative for health)
+      .sort((a, b) => b.impact - a.impact) // Sort by highest risk contribution first
       .slice(0, 3);
 
-    const shapRecommendations = topShapFeatures.map(feature => {
+    // If no negative features found, fallback to hardcoded recommendations
+    if (negativeFeatures.length === 0) {
+      return recommendations
+        .sort((a, b) => (b.severity === 'high' ? 1 : 0) - (a.severity === 'high' ? 1 : 0))
+        .slice(0, 3);
+    }
+
+    const shapRecommendations = negativeFeatures.map(feature => {
       const featureName = feature.feature.toLowerCase();
       
       // Map SHAP features to recommendations
