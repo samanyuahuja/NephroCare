@@ -4,7 +4,7 @@ import {
   dietPlans, 
   chatMessages,
   type User, 
-  type InsertUser,
+  type UpsertUser,
   type CKDAssessment,
   type InsertCKDAssessment,
   type DietPlan,
@@ -17,41 +17,49 @@ import { db } from "./db";
 import { eq, desc } from "drizzle-orm";
 
 export interface IStorage {
-  getUser(id: number): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
+  getUser(id: string): Promise<User | undefined>;
+  upsertUser(user: UpsertUser): Promise<User>;
   
-  createCKDAssessment(assessment: InsertCKDAssessment): Promise<CKDAssessment>;
+  createCKDAssessment(assessment: InsertCKDAssessment, userId: string): Promise<CKDAssessment>;
   getCKDAssessment(id: number): Promise<CKDAssessment | undefined>;
   updateCKDAssessmentResults(id: number, riskScore: number, riskLevel: string, shapFeatures: string): Promise<CKDAssessment | undefined>;
   getAllCKDAssessments(): Promise<CKDAssessment[]>;
+  getUserCKDAssessments(userId: string): Promise<CKDAssessment[]>;
   
   createDietPlan(dietPlan: InsertDietPlan): Promise<DietPlan>;
   getDietPlanByAssessmentId(assessmentId: number): Promise<DietPlan | undefined>;
   getAllDietPlans(): Promise<DietPlan[]>;
+  getUserDietPlans(userId: string): Promise<DietPlan[]>;
   
-  createChatMessage(message: InsertChatMessage): Promise<ChatMessage>;
+  createChatMessage(message: InsertChatMessage, userId: string): Promise<ChatMessage>;
   getChatMessages(): Promise<ChatMessage[]>;
+  getUserChatMessages(userId: string): Promise<ChatMessage[]>;
 }
 
 export class DatabaseStorage implements IStorage {
-  async getUser(id: number): Promise<User | undefined> {
+  async getUser(id: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
-    return user || undefined;
-  }
-
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.username, username));
-    return user || undefined;
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const [user] = await db.insert(users).values(insertUser).returning();
     return user;
   }
 
-  async createCKDAssessment(assessment: InsertCKDAssessment): Promise<CKDAssessment> {
-    const [result] = await db.insert(ckdAssessments).values(assessment).returning();
+  async upsertUser(userData: UpsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(userData)
+      .onConflictDoUpdate({
+        target: users.id,
+        set: {
+          ...userData,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    return user;
+  }
+
+  async createCKDAssessment(assessment: InsertCKDAssessment, userId: string): Promise<CKDAssessment> {
+    const assessmentWithUserId = { ...assessment, userId };
+    const [result] = await db.insert(ckdAssessments).values(assessmentWithUserId).returning();
     return result;
   }
 
@@ -71,6 +79,12 @@ export class DatabaseStorage implements IStorage {
 
   async getAllCKDAssessments(): Promise<CKDAssessment[]> {
     return await db.select().from(ckdAssessments).orderBy(desc(ckdAssessments.createdAt));
+  }
+
+  async getUserCKDAssessments(userId: string): Promise<CKDAssessment[]> {
+    return await db.select().from(ckdAssessments)
+      .where(eq(ckdAssessments.userId, userId))
+      .orderBy(desc(ckdAssessments.createdAt));
   }
 
   async createDietPlan(dietPlan: InsertDietPlan): Promise<DietPlan> {
@@ -103,10 +117,32 @@ export class DatabaseStorage implements IStorage {
     return result as DietPlan[];
   }
 
-  async createChatMessage(message: InsertChatMessage): Promise<ChatMessage> {
+  async getUserDietPlans(userId: string): Promise<DietPlan[]> {
+    // Join with assessments to get patient names for user's diet plans only
+    const result = await db
+      .select({
+        id: dietPlans.id,
+        assessmentId: dietPlans.assessmentId,
+        dietType: dietPlans.dietType,
+        foodsToEat: dietPlans.foodsToEat,
+        foodsToAvoid: dietPlans.foodsToAvoid,
+        waterIntakeAdvice: dietPlans.waterIntakeAdvice,
+        createdAt: dietPlans.createdAt,
+        patientName: ckdAssessments.patientName
+      })
+      .from(dietPlans)
+      .leftJoin(ckdAssessments, eq(dietPlans.assessmentId, ckdAssessments.id))
+      .where(eq(ckdAssessments.userId, userId))
+      .orderBy(desc(dietPlans.createdAt));
+    
+    return result as DietPlan[];
+  }
+
+  async createChatMessage(message: InsertChatMessage, userId: string): Promise<ChatMessage> {
     const nephroResponse = this.generateNephroBotResponse(message.message);
     const chatData = {
       ...message,
+      userId,
       response: nephroResponse
     };
     const [chat] = await db.insert(chatMessages).values(chatData).returning();
@@ -134,6 +170,12 @@ export class DatabaseStorage implements IStorage {
 
   async getChatMessages(): Promise<ChatMessage[]> {
     return await db.select().from(chatMessages).orderBy(desc(chatMessages.createdAt));
+  }
+
+  async getUserChatMessages(userId: string): Promise<ChatMessage[]> {
+    return await db.select().from(chatMessages)
+      .where(eq(chatMessages.userId, userId))
+      .orderBy(chatMessages.createdAt);
   }
 }
 
