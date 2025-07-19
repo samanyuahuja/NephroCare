@@ -155,7 +155,7 @@ const History = () => {
                   </div>
                   
                   <div className="flex gap-2">
-                    <Link href={`/results?id=${assessment.id}`}>
+                    <Link href={`/results/${assessment.id}`}>
                       <Button variant="outline" size="sm">
                         <TrendingUp className="h-4 w-4 mr-2" />
                         {t("View Results", "परिणाम देखें")}
