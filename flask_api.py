@@ -427,4 +427,4 @@ if __name__ == '__main__':
     print(f"🧠 Models loaded: {rf_model is not None and scaler is not None}")
     
     # Start Flask app
-    app.run(host='0.0.0.0', port=8080, debug=False)
+    app.run(host='0.0.0.0', port=5001, debug=False)

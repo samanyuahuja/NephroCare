@@ -270,7 +270,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Direct chat endpoint - doesn't store messages, just returns Flask response
+  // Direct chat endpoint - simple chatbot responses
   app.post("/api/chat-direct", async (req, res) => {
     try {
       const { message } = req.body;
@@ -279,30 +279,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Message is required" });
       }
 
-      // Try Flask chatbot
-      try {
-        const flaskResponse = await fetch(`${FLASK_API_URL}/api/chatbot`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ message })
-        });
+      // Simple NephroBot responses
+      const msg = message.toLowerCase();
+      let reply = "I understand you're asking about kidney health. Could you be more specific? I can help with CKD stages, symptoms, diet, medications, lab results, or lifestyle questions.";
 
-        if (flaskResponse.ok) {
-          const flaskData = await flaskResponse.json();
-          if (flaskData.reply) {
-            return res.json({ reply: flaskData.reply });
-          }
-        }
-      } catch (fetchError) {
-        console.log('⚠️ Flask chatbot unavailable, using fallback response');
+      if (msg.includes("hello") || msg.includes("hi") || msg.includes("hey")) {
+        reply = "Hello! I'm NephroBot, your kidney health assistant. I can help you understand CKD, symptoms, treatments, and lifestyle changes. What would you like to know?";
+      } else if (msg.includes("what is ckd") || msg.includes("chronic kidney disease")) {
+        reply = "Chronic Kidney Disease (CKD) is a condition where kidneys gradually lose function over time. It's classified into 5 stages based on eGFR (kidney filtration rate). Early detection and treatment can slow progression.";
+      } else if (msg.includes("symptoms")) {
+        reply = "Common CKD symptoms include:\n• Fatigue and weakness\n• Swelling in legs, ankles, or feet\n• Changes in urination\n• Foamy urine (protein)\n• Nausea and loss of appetite\n• Muscle cramps\n• High blood pressure\n\nEarly stages often have no symptoms - that's why regular testing is important.";
+      } else if (msg.includes("diet") || msg.includes("food")) {
+        reply = "CKD diet focuses on:\n• Limit protein (0.6-0.8g/kg body weight)\n• Reduce sodium (<2,300mg/day)\n• Control potassium if elevated\n• Limit phosphorus (dairy, nuts, seeds)\n• Stay hydrated unless fluid-restricted\n• Work with a renal dietitian for personalized plans.";
+      } else if (msg.includes("stages")) {
+        reply = "CKD has 5 stages:\n• Stage 1: eGFR ≥90 (normal function with kidney damage)\n• Stage 2: eGFR 60-89 (mild decrease)\n• Stage 3a: eGFR 45-59 (moderate decrease)\n• Stage 3b: eGFR 30-44 (moderate to severe)\n• Stage 4: eGFR 15-29 (severe decrease)\n• Stage 5: eGFR <15 (kidney failure)";
+      } else if (msg.includes("help")) {
+        reply = "I can help you with:\n• CKD stages and symptoms\n• Diet and lifestyle recommendations\n• Lab test explanations\n• Medication information\n• When to see a doctor\n• Treatment options\n\nAsk me anything about kidney health!";
       }
 
-      // Fallback response if Flask is not available
-      return res.json({ 
-        reply: "I'm currently having trouble connecting to my medical knowledge base. Please try again in a moment, or contact your healthcare provider for immediate medical concerns." 
-      });
+      return res.json({ reply });
       
     } catch (error) {
       res.status(500).json({ error: "Failed to process message" });
