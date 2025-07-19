@@ -209,6 +209,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get All Diet Plans
+  app.get("/api/diet-plans", async (req, res) => {
+    try {
+      const dietPlans = await storage.getAllDietPlans();
+      res.json(dietPlans);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to retrieve diet plans" });
+    }
+  });
+
   // Chat endpoint - integrates with Flask chatbot or uses NephroBot responses
   app.post("/api/chat", async (req, res) => {
     try {

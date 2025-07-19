@@ -114,11 +114,6 @@ export default function Diagnosis() {
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
-                    
-                    <div className="bg-white p-3 rounded-lg border">
-                      <div className="font-semibold text-red-600 mb-1">Age ≥ 55</div>
-                      <div className="text-gray-600">{t("Older patients more likely to report chronic symptoms", "बुजुर्ग मरीजों में पुराने लक्षणों की रिपोर्ट की संभावना अधिक")}</div>
-                    </div>
 
                     <div className="bg-white p-3 rounded-lg border">
                       <div className="font-semibold text-red-600 mb-1">BP ≥ 150</div>

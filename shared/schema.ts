@@ -108,7 +108,9 @@ export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type CKDAssessment = typeof ckdAssessments.$inferSelect;
 export type InsertCKDAssessment = z.infer<typeof insertCKDAssessmentSchema>;
-export type DietPlan = typeof dietPlans.$inferSelect;
+export type DietPlan = typeof dietPlans.$inferSelect & {
+  patientName?: string; // Added from joined query
+};
 export type InsertDietPlan = z.infer<typeof insertDietPlanSchema>;
 export type ChatMessage = typeof chatMessages.$inferSelect;
 export type InsertChatMessage = z.infer<typeof insertChatMessageSchema>;

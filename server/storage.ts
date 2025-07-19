@@ -28,6 +28,7 @@ export interface IStorage {
   
   createDietPlan(dietPlan: InsertDietPlan): Promise<DietPlan>;
   getDietPlanByAssessmentId(assessmentId: number): Promise<DietPlan | undefined>;
+  getAllDietPlans(): Promise<DietPlan[]>;
   
   createChatMessage(message: InsertChatMessage): Promise<ChatMessage>;
   getChatMessages(): Promise<ChatMessage[]>;
@@ -80,6 +81,26 @@ export class DatabaseStorage implements IStorage {
   async getDietPlanByAssessmentId(assessmentId: number): Promise<DietPlan | undefined> {
     const [plan] = await db.select().from(dietPlans).where(eq(dietPlans.assessmentId, assessmentId));
     return plan || undefined;
+  }
+
+  async getAllDietPlans(): Promise<DietPlan[]> {
+    // Join with assessments to get patient names
+    const result = await db
+      .select({
+        id: dietPlans.id,
+        assessmentId: dietPlans.assessmentId,
+        dietType: dietPlans.dietType,
+        foodsToEat: dietPlans.foodsToEat,
+        foodsToAvoid: dietPlans.foodsToAvoid,
+        waterIntakeAdvice: dietPlans.waterIntakeAdvice,
+        createdAt: dietPlans.createdAt,
+        patientName: ckdAssessments.patientName
+      })
+      .from(dietPlans)
+      .leftJoin(ckdAssessments, eq(dietPlans.assessmentId, ckdAssessments.id))
+      .orderBy(desc(dietPlans.createdAt));
+    
+    return result as DietPlan[];
   }
 
   async createChatMessage(message: InsertChatMessage): Promise<ChatMessage> {
