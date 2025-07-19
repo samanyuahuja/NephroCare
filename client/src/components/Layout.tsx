@@ -148,12 +148,16 @@ export default function Layout({ children }: LayoutProps) {
               </ul>
             </div>
             <div>
-              <h3 className="text-white font-semibold mb-4">{t("Support", "सहायता")}</h3>
+              <h3 className="text-white font-semibold mb-4">{t("Contact & Support", "संपर्क और सहायता")}</h3>
               <ul className="space-y-2 text-gray-400">
+                <li>{t("Developer: Samanyu Ahuja", "डेवलपर: समन्यु अहुजा")}</li>
+                <li>
+                  <a href="mailto:nephrocareai@gmail.com" className="hover:text-white transition-colors">
+                    nephrocareai@gmail.com
+                  </a>
+                </li>
                 <li>{t("Medical Guidance", "चिकित्सा मार्गदर्शन")}</li>
                 <li>{t("Health Resources", "स्वास्थ्य संसाधन")}</li>
-                <li>{t("Early Detection", "शीघ्र निदान")}</li>
-                <li>{t("Treatment Support", "उपचार सहायता")}</li>
               </ul>
             </div>
           </div>
