@@ -26,70 +26,77 @@ export default function Layout({ children }: LayoutProps) {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Navigation */}
-      <nav className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+      <nav className="bg-white dark:bg-gray-900 shadow-lg border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
             <Link href="/" className="flex items-center space-x-3">
               <Activity className="h-8 w-8 text-primary" />
-              <span className="text-xl font-bold text-gray-900">NephroCare</span>
+              <span className="text-xl font-bold text-gray-900 dark:text-white">NephroCare</span>
             </Link>
 
             {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-6">
+            <div className="hidden lg:flex items-center space-x-1">
               {navItems.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                     location === item.href
-                      ? "text-primary bg-blue-50"
-                      : "text-gray-600 hover:text-primary"
+                      ? "text-primary bg-primary/10 shadow-sm"
+                      : "text-gray-600 dark:text-gray-300 hover:text-primary hover:bg-gray-50 dark:hover:bg-gray-800"
                   }`}
                 >
                   {item.label}
                 </Link>
               ))}
-              <div className="h-4 border-l border-gray-300 mx-2"></div>
-              <LanguageToggle />
             </div>
 
-            {/* Mobile Menu */}
-            <div className="md:hidden">
-              <Sheet open={isOpen} onOpenChange={setIsOpen}>
-                <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon">
-                    <Menu className="h-6 w-6" />
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="right" className="w-72">
-                  <div className="flex items-center space-x-3 mb-8">
-                    <Activity className="h-8 w-8 text-primary" />
-                    <span className="text-xl font-bold">NephroCare</span>
-                  </div>
-                  <nav className="space-y-4">
-                    {navItems.map((item) => (
-                      <Link
-                        key={item.href}
-                        href={item.href}
-                        className={`block px-3 py-2 rounded-md text-base font-medium transition-colors ${
-                          location === item.href
-                            ? "text-primary bg-blue-50"
-                            : "text-gray-600 hover:text-primary"
-                        }`}
-                        onClick={() => setIsOpen(false)}
-                      >
-                        {item.label}
-                      </Link>
-                    ))}
-                    <div className="pt-4 border-t border-gray-200">
-                      <LanguageToggle />
+            {/* Right Side Actions */}
+            <div className="flex items-center space-x-4">
+              <div className="hidden lg:block">
+                <LanguageToggle />
+              </div>
+
+              {/* Mobile Menu Button */}
+              <div className="lg:hidden">
+                <Sheet open={isOpen} onOpenChange={setIsOpen}>
+                  <SheetTrigger asChild>
+                    <Button variant="ghost" size="icon" className="text-gray-600 dark:text-gray-300 hover:text-primary">
+                      <Menu className="h-6 w-6" />
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent side="right" className="w-80">
+                    <div className="flex items-center space-x-3 mb-8">
+                      <Activity className="h-8 w-8 text-primary" />
+                      <span className="text-xl font-bold text-gray-900 dark:text-white">NephroCare</span>
                     </div>
-                  </nav>
-                </SheetContent>
-              </Sheet>
+                    <nav className="space-y-2">
+                      {navItems.map((item) => (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          className={`block px-4 py-3 rounded-lg text-base font-medium transition-all duration-200 ${
+                            location === item.href
+                              ? "text-primary bg-primary/10 shadow-sm"
+                              : "text-gray-600 dark:text-gray-300 hover:text-primary hover:bg-gray-50 dark:hover:bg-gray-800"
+                          }`}
+                          onClick={() => setIsOpen(false)}
+                        >
+                          {item.label}
+                        </Link>
+                      ))}
+                      <div className="pt-6 border-t border-gray-200 dark:border-gray-700 mt-6">
+                        <div className="flex justify-center">
+                          <LanguageToggle />
+                        </div>
+                      </div>
+                    </nav>
+                  </SheetContent>
+                </Sheet>
+              </div>
             </div>
           </div>
         </div>
