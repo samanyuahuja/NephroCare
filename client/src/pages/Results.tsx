@@ -8,6 +8,7 @@ import { useLanguage, t } from "@/hooks/useLanguage";
 import { SHAPPlot } from "@/components/charts/SHAPPlot";
 import { PDPPlot } from "@/components/charts/PDPPlot";
 import { LIMEExplanation } from "@/components/charts/LIMEExplanation";
+import { generateAssessmentPDF } from "@/lib/pdfGenerator";
 import type { CKDAssessment } from "@shared/schema";
 
 interface ResultsProps {
@@ -392,50 +393,7 @@ export default function Results({ params }: ResultsProps) {
   };
 
   const downloadReport = () => {
-    // Generate and download PDF report
-    const reportData = {
-      riskScore,
-      riskLevel,
-      assessment,
-      shapFeatures
-    };
-    
-    // Create a simple text report for now
-    const reportText = `
-CKD Risk Assessment Report
-==========================
-
-Patient Information:
-- Age: ${assessment.age}
-- Blood Pressure: ${assessment.bloodPressure}
-- Serum Creatinine: ${assessment.serumCreatinine}
-- Hemoglobin: ${assessment.hemoglobin}
-
-Risk Assessment:
-- Risk Score: ${riskScore}%
-- Risk Level: ${riskLevel}
-
-Top Risk Factors:
-${shapFeatures.map((f: any) => `- ${f.feature}: ${f.impact > 0 ? '+' : ''}${(f.impact * 100).toFixed(1)}%`).join('\n')}
-
-Recommendations:
-- Consult with a nephrologist for comprehensive evaluation
-- Follow personalized diet plan recommendations
-- Monitor kidney function regularly
-- Maintain healthy lifestyle habits
-
-This report is for informational purposes only and should not replace professional medical advice.
-    `;
-
-    const blob = new Blob([reportText], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `ckd-assessment-report-${assessmentId}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    generateAssessmentPDF(assessment);
   };
 
   return (
@@ -464,12 +422,31 @@ This report is for informational purposes only and should not replace profession
             {riskLevel}
           </Badge>
           
-          <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+          <p className="text-gray-600 text-lg max-w-2xl mx-auto mb-6">
             Based on your medical parameters, our ML model indicates a {riskLevel.toLowerCase()} 
             for Chronic Kidney Disease. {riskLevel.toLowerCase().includes('high') ? 
             'Please consult with a healthcare professional for proper medical evaluation.' :
             'Continue monitoring your kidney health and maintain healthy lifestyle habits.'}
           </p>
+          
+          <div className="flex flex-wrap gap-4 justify-center">
+            <Button onClick={downloadReport} className="bg-blue-600 hover:bg-blue-700">
+              <Download className="mr-2 h-4 w-4" />
+              {t("Download PDF Report", "पीडीएफ रिपोर्ट डाउनलोड करें")}
+            </Button>
+            <Link href={`/diet-plan/${assessmentId}`}>
+              <Button variant="outline" className="border-green-600 text-green-600 hover:bg-green-50">
+                <Utensils className="mr-2 h-4 w-4" />
+                {t("Get Diet Plan", "आहार योजना प्राप्त करें")}
+              </Button>
+            </Link>
+            <Link href="/chatbot">
+              <Button variant="outline" className="border-purple-600 text-purple-600 hover:bg-purple-50">
+                <MessageCircle className="mr-2 h-4 w-4" />
+                {t("Chat with NephroBot", "नेफ्रोबॉट से चैट करें")}
+              </Button>
+            </Link>
+          </div>
         </CardContent>
       </Card>
 

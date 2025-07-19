@@ -33,6 +33,12 @@ NephroCare is a professional, responsive Chronic Kidney Disease (CKD) prediction
 - Improved desktop navbar with professional styling and proper language toggle visibility
 - Removed SG (Specific Gravity) and PCC (Pus Cell Clumps) fields as they are not used in ML model features
 - Fixed sugar field default value from 0 to 1 to prevent validation issues
+- Added comprehensive Medical Report Value Locator dropdown below symptom checker with bilingual support
+- Excluded PCC, SG, and last 3 ML features (BU/SC Ratio, High Creatinine, Hemoglobin × BU) from report locator as requested
+- Implemented professional PDF generation system using jsPDF for both assessment reports and diet plans
+- Added branded PDF reports with NephroCare branding, comprehensive medical data, risk assessment, and recommendations
+- Integrated PDF download buttons in both Results and Diet Plan pages with proper bilingual support
+- Created beautiful, professional PDF layouts with proper medical report formatting and safety disclaimers
 
 ## User Preferences
 
