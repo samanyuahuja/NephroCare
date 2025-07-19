@@ -8,7 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { User, FlaskConical, FileText, BarChart3 } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { User, FlaskConical, FileText, BarChart3, ChevronDown, Stethoscope } from "lucide-react";
 import { insertCKDAssessmentSchema, type InsertCKDAssessment } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -18,6 +19,7 @@ export default function Diagnosis() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const { language } = useLanguage();
+  const [isSymptomCheckerOpen, setIsSymptomCheckerOpen] = useState(false);
 
   const form = useForm<InsertCKDAssessment>({
     resolver: zodResolver(insertCKDAssessmentSchema),
@@ -86,6 +88,130 @@ export default function Diagnosis() {
             )}
           </p>
         </CardHeader>
+        
+        {/* Symptom Checker Section */}
+        <div className="mx-6 mb-6">
+          <Collapsible open={isSymptomCheckerOpen} onOpenChange={setIsSymptomCheckerOpen}>
+            <CollapsibleTrigger asChild>
+              <Button variant="outline" className="w-full justify-between">
+                <div className="flex items-center">
+                  <Stethoscope className="mr-2 h-4 w-4" />
+                  {t("Don't know your values? Check the symptom checker", "अपनी मान नहीं जानते? लक्षण चेकर देखें")}
+                </div>
+                <ChevronDown className={`h-4 w-4 transition-transform ${isSymptomCheckerOpen ? 'rotate-180' : ''}`} />
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="mt-4">
+              <Card className="bg-blue-50 border-blue-200">
+                <CardHeader>
+                  <CardTitle className="text-lg text-blue-800">
+                    {t("CKD Symptom Guide", "सीकेडी लक्षण गाइड")}
+                  </CardTitle>
+                  <p className="text-sm text-blue-600">
+                    {t("If you experience these symptoms with the listed values, consult a healthcare provider immediately.", 
+                        "यदि आप सूचीबद्ध मानों के साथ इन लक्षणों का अनुभव करते हैं, तो तुरंत स्वास्थ्य सेवा प्रदाता से सलाह लें।")}
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
+                    
+                    <div className="bg-white p-3 rounded-lg border">
+                      <div className="font-semibold text-red-600 mb-1">Age ≥ 55</div>
+                      <div className="text-gray-600">{t("Older patients more likely to report chronic symptoms", "बुजुर्ग मरीजों में पुराने लक्षणों की रिपोर्ट की संभावना अधिक")}</div>
+                    </div>
+
+                    <div className="bg-white p-3 rounded-lg border">
+                      <div className="font-semibold text-red-600 mb-1">BP ≥ 150</div>
+                      <div className="text-gray-600">{t("Swelling, breathlessness, fatigue", "सूजन, सांस की तकलीफ, थकान")}</div>
+                    </div>
+
+                    <div className="bg-white p-3 rounded-lg border">
+                      <div className="font-semibold text-red-600 mb-1">Albumin 2–4</div>
+                      <div className="text-gray-600">{t("Swelling in ankles, foamy urine", "टखनों में सूजन, झागदार मूत्र")}</div>
+                    </div>
+
+                    <div className="bg-white p-3 rounded-lg border">
+                      <div className="font-semibold text-red-600 mb-1">Sugar 2–5</div>
+                      <div className="text-gray-600">{t("Excessive thirst, frequent urination", "अत्यधिक प्यास, बार-बार पेशाब")}</div>
+                    </div>
+
+                    <div className="bg-white p-3 rounded-lg border">
+                      <div className="font-semibold text-red-600 mb-1">RBC Abnormal</div>
+                      <div className="text-gray-600">{t("Pink/red urine, back pain", "गुलाबी/लाल मूत्र, पीठ दर्द")}</div>
+                    </div>
+
+                    <div className="bg-white p-3 rounded-lg border">
+                      <div className="font-semibold text-red-600 mb-1">PC Abnormal</div>
+                      <div className="text-gray-600">{t("Burning sensation while urinating", "पेशाब करते समय जलन")}</div>
+                    </div>
+
+                    <div className="bg-white p-3 rounded-lg border">
+                      <div className="font-semibold text-red-600 mb-1">Blood Glucose ≥ 160</div>
+                      <div className="text-gray-600">{t("Fatigue, excessive hunger/thirst", "थकान, अत्यधिक भूख/प्यास")}</div>
+                    </div>
+
+                    <div className="bg-white p-3 rounded-lg border">
+                      <div className="font-semibold text-red-600 mb-1">Blood Urea ≥ 40</div>
+                      <div className="text-gray-600">{t("Loss of appetite, confusion", "भूख न लगना, भ्रम")}</div>
+                    </div>
+
+                    <div className="bg-white p-3 rounded-lg border">
+                      <div className="font-semibold text-red-600 mb-1">Creatinine ≥ 1.8</div>
+                      <div className="text-gray-600">{t("Nausea, vomiting, low urine output", "मतली, उल्टी, कम मूत्र उत्पादन")}</div>
+                    </div>
+
+                    <div className="bg-white p-3 rounded-lg border">
+                      <div className="font-semibold text-red-600 mb-1">Sodium ≤ 130 or ≥ 145</div>
+                      <div className="text-gray-600">{t("Confusion, fatigue, weakness", "भ्रम, थकान, कमजोरी")}</div>
+                    </div>
+
+                    <div className="bg-white p-3 rounded-lg border">
+                      <div className="font-semibold text-red-600 mb-1">Potassium ≥ 5.5</div>
+                      <div className="text-gray-600">{t("Palpitations, muscle weakness", "दिल की धड़कन, मांसपेशियों की कमजोरी")}</div>
+                    </div>
+
+                    <div className="bg-white p-3 rounded-lg border">
+                      <div className="font-semibold text-red-600 mb-1">Hemoglobin ≤ 9</div>
+                      <div className="text-gray-600">{t("Fatigue, pale skin", "थकान, पीली त्वचा")}</div>
+                    </div>
+
+                    <div className="bg-white p-3 rounded-lg border">
+                      <div className="font-semibold text-red-600 mb-1">WBC Count ≥ 11000</div>
+                      <div className="text-gray-600">{t("Fever, signs of infection", "बुखार, संक्रमण के लक्षण")}</div>
+                    </div>
+
+                    <div className="bg-white p-3 rounded-lg border">
+                      <div className="font-semibold text-red-600 mb-1">RBC Count ≤ 3.5</div>
+                      <div className="text-gray-600">{t("Anemia-related tiredness", "एनीमिया संबंधी थकान")}</div>
+                    </div>
+
+                    <div className="bg-white p-3 rounded-lg border">
+                      <div className="font-semibold text-red-600 mb-1">Hypertension: Yes</div>
+                      <div className="text-gray-600">{t("High BP history or medication", "उच्च रक्तचाप का इतिहास या दवा")}</div>
+                    </div>
+
+                    <div className="bg-white p-3 rounded-lg border">
+                      <div className="font-semibold text-red-600 mb-1">Diabetes: Yes</div>
+                      <div className="text-gray-600">{t("Excessive urination/thirst, weight loss", "अत्यधिक पेशाब/प्यास, वजन कम होना")}</div>
+                    </div>
+
+                    <div className="bg-white p-3 rounded-lg border">
+                      <div className="font-semibold text-red-600 mb-1">Appetite: Poor</div>
+                      <div className="text-gray-600">{t("General fatigue, weight loss", "सामान्य थकान, वजन कम होना")}</div>
+                    </div>
+
+                    <div className="bg-white p-3 rounded-lg border">
+                      <div className="font-semibold text-red-600 mb-1">Pedal Edema: Yes</div>
+                      <div className="text-gray-600">{t("Swelling in feet/legs", "पैरों/टांगों में सूजन")}</div>
+                    </div>
+
+                  </div>
+                </CardContent>
+              </Card>
+            </CollapsibleContent>
+          </Collapsible>
+        </div>
+
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
