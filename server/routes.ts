@@ -13,37 +13,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log("📝 Received assessment data:", JSON.stringify(req.body, null, 2));
       const validatedData = insertCKDAssessmentSchema.parse(req.body);
-      const assessment = await storage.createCKDAssessment(validatedData);
       
-      // Helper function to get value or default for "unknown" selections
-      const getValueOrDefault = (value: any, defaultValue: any) => {
-        return value === "unknown" ? defaultValue : value;
+      // Transform "unknown" values to defaults before database storage
+      const transformedData = {
+        ...validatedData,
+        albumin: validatedData.albumin === "unknown" ? 1 : validatedData.albumin,
+        sugar: validatedData.sugar === "unknown" ? 0 : validatedData.sugar,
+        redBloodCells: validatedData.redBloodCells === "unknown" ? "normal" : validatedData.redBloodCells,
+        pusCell: validatedData.pusCell === "unknown" ? "normal" : validatedData.pusCell,
+        bloodGlucoseRandom: validatedData.bloodGlucoseRandom === "unknown" ? 120 : validatedData.bloodGlucoseRandom,
+        bloodUrea: validatedData.bloodUrea === "unknown" ? 30 : validatedData.bloodUrea,
+        serumCreatinine: validatedData.serumCreatinine === "unknown" ? 1.2 : validatedData.serumCreatinine,
+        sodium: validatedData.sodium === "unknown" ? 140 : validatedData.sodium,
+        potassium: validatedData.potassium === "unknown" ? 4.5 : validatedData.potassium,
+        hemoglobin: validatedData.hemoglobin === "unknown" ? 13 : validatedData.hemoglobin,
+        wbcCount: validatedData.wbcCount === "unknown" ? 7500 : validatedData.wbcCount,
+        rbcCount: validatedData.rbcCount === "unknown" ? 5.0 : validatedData.rbcCount,
+        hypertension: validatedData.hypertension === "unknown" ? "no" : validatedData.hypertension,
+        diabetesMellitus: validatedData.diabetesMellitus === "unknown" ? "no" : validatedData.diabetesMellitus,
+        appetite: validatedData.appetite === "unknown" ? "good" : validatedData.appetite,
+        pedalEdema: validatedData.pedalEdema === "unknown" ? "no" : validatedData.pedalEdema,
+        anemia: validatedData.anemia === "unknown" ? "no" : validatedData.anemia,
       };
-
-      // Convert frontend data format to Flask format (all strings for URLSearchParams)
-      // Apply default values for "Don't Know" options based on your Flask defaults
+      
+      const assessment = await storage.createCKDAssessment(transformedData);
+      
+      // Convert to Flask format for ML prediction (use transformed data with defaults applied)
       const flaskData = {
-        age: validatedData.age.toString(),
-        bp: validatedData.bloodPressure.toString(),
-        al: getValueOrDefault(validatedData.albumin, 1).toString(),
-        su: getValueOrDefault(validatedData.sugar, 0).toString(),
-        rbc: getValueOrDefault(validatedData.redBloodCells, "normal") === "normal" ? "normal" : "abnormal",
-        pc: getValueOrDefault(validatedData.pusCell, "normal") === "normal" ? "normal" : "abnormal",
+        age: transformedData.age.toString(),
+        bp: transformedData.bloodPressure.toString(),
+        al: transformedData.albumin.toString(),
+        su: transformedData.sugar.toString(),
+        rbc: transformedData.redBloodCells === "normal" ? "normal" : "abnormal",
+        pc: transformedData.pusCell === "normal" ? "normal" : "abnormal",
         ba: "notpresent", // Default value
-        bgr: getValueOrDefault(validatedData.bloodGlucoseRandom, 120).toString(),
-        bu: getValueOrDefault(validatedData.bloodUrea, 30).toString(),
-        sc: getValueOrDefault(validatedData.serumCreatinine, 1.2).toString(),
-        sod: getValueOrDefault(validatedData.sodium, 140).toString(),
-        pot: getValueOrDefault(validatedData.potassium, 4.5).toString(),
-        hemo: getValueOrDefault(validatedData.hemoglobin, 13).toString(),
-        wbcc: getValueOrDefault(validatedData.wbcCount, 7500).toString(),
-        rbcc: getValueOrDefault(validatedData.rbcCount, 5.0).toString(),
-        htn: getValueOrDefault(validatedData.hypertension, "no"),
-        dm: getValueOrDefault(validatedData.diabetesMellitus, "no"),
+        bgr: transformedData.bloodGlucoseRandom.toString(),
+        bu: transformedData.bloodUrea.toString(),
+        sc: transformedData.serumCreatinine.toString(),
+        sod: transformedData.sodium.toString(),
+        pot: transformedData.potassium.toString(),
+        hemo: transformedData.hemoglobin.toString(),
+        wbcc: transformedData.wbcCount.toString(),
+        rbcc: transformedData.rbcCount.toString(),
+        htn: transformedData.hypertension,
+        dm: transformedData.diabetesMellitus,
         cad: "no", // Default value
-        appet: getValueOrDefault(validatedData.appetite, "good"),
-        pe: getValueOrDefault(validatedData.pedalEdema, "no"),
-        ane: getValueOrDefault(validatedData.anemia, "no")
+        appet: transformedData.appetite,
+        pe: transformedData.pedalEdema,
+        ane: transformedData.anemia
       };
 
       try {
@@ -70,7 +87,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Use Python clinical prediction results
           const riskScore = pythonResult.probability;
           const riskLevel = pythonResult.risk_level;
-          const shapFeatures = generateSHAPFeatures(validatedData); // Keep SHAP for visualization
+          const shapFeatures = generateSHAPFeatures(transformedData); // Keep SHAP for visualization
           
           const updatedAssessment = await storage.updateCKDAssessmentResults(
             assessment.id, 
@@ -86,9 +103,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log(`⚠️ ML model predictor failed: ${pythonError?.message || pythonError}, using fallback`);
           
           // Fallback to original calculation
-          const riskScore = calculateCKDRisk(validatedData);
+          const riskScore = calculateCKDRisk(transformedData);
           const riskLevel = getRiskLevel(riskScore);
-          const shapFeatures = generateSHAPFeatures(validatedData);
+          const shapFeatures = generateSHAPFeatures(transformedData);
           
           const updatedAssessment = await storage.updateCKDAssessmentResults(
             assessment.id, 
@@ -102,9 +119,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } catch (importError) {
         // Fallback if import fails
         console.log('⚠️ Could not import child_process, using basic calculation');
-        const riskScore = calculateCKDRisk(validatedData);
+        const riskScore = calculateCKDRisk(transformedData);
         const riskLevel = getRiskLevel(riskScore);
-        const shapFeatures = generateSHAPFeatures(validatedData);
+        const shapFeatures = generateSHAPFeatures(transformedData);
         
         const updatedAssessment = await storage.updateCKDAssessmentResults(
           assessment.id, 
