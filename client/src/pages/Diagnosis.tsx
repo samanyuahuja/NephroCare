@@ -56,28 +56,40 @@ export default function Diagnosis() {
       return response.json();
     },
     onSuccess: (data) => {
-      // Store assessment ID in localStorage for privacy
-      const storedIds = JSON.parse(localStorage.getItem('userAssessmentIds') || '[]');
-      const updatedIds = [...storedIds, data.id];
-      localStorage.setItem('userAssessmentIds', JSON.stringify(updatedIds));
-      
-      // Dispatch custom event to notify other components
-      window.dispatchEvent(new CustomEvent('assessmentIdsUpdated'));
-      
-      // Invalidate Browse page queries
-      queryClient.invalidateQueries({ queryKey: ["/api/ckd-assessments", "filtered"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/diet-plans", "filtered"] });
-      
-      toast({
-        title: "Assessment Complete",
-        description: "Your CKD risk assessment has been generated successfully.",
-      });
-      setLocation(`/results/${data.id}`);
+      try {
+        // Store assessment ID in localStorage for privacy
+        const storedIds = JSON.parse(localStorage.getItem('userAssessmentIds') || '[]');
+        const updatedIds = [...storedIds, data.id];
+        localStorage.setItem('userAssessmentIds', JSON.stringify(updatedIds));
+        
+        console.log('Assessment stored with ID:', data.id, 'Updated IDs:', updatedIds);
+        
+        // Dispatch custom event to notify other components
+        window.dispatchEvent(new CustomEvent('assessmentIdsUpdated'));
+        
+        // Invalidate Browse page queries
+        queryClient.invalidateQueries({ queryKey: ["/api/ckd-assessments", "filtered"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/diet-plans", "filtered"] });
+        
+        toast({
+          title: t("Assessment Complete", "मूल्यांकन पूर्ण"),
+          description: t("Your CKD risk assessment has been generated successfully.", "आपका CKD जोखिम मूल्यांकन सफलतापूर्वक बनाया गया है।"),
+        });
+        
+        // Add a small delay to ensure localStorage is properly updated
+        setTimeout(() => {
+          setLocation(`/results/${data.id}`);
+        }, 100);
+      } catch (error) {
+        console.error('Error storing assessment:', error);
+        setLocation(`/results/${data.id}`);
+      }
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Assessment submission error:', error);
       toast({
-        title: "Assessment Failed",
-        description: "There was an error processing your assessment. Please try again.",
+        title: t("Assessment Failed", "मूल्यांकन विफल"),
+        description: t("There was an error processing your assessment. Please try again.", "आपके मूल्यांकन को संसाधित करने में त्रुटि हुई। कृपया पुन: प्रयास करें।"),
         variant: "destructive",
       });
     },

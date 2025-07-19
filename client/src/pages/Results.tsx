@@ -46,15 +46,26 @@ export default function Results({ params }: ResultsProps) {
     return (
       <Card className="max-w-md mx-auto">
         <CardContent className="pt-6 text-center">
-          <p className="text-red-600">
+          <p className="text-red-600 mb-4">
             {t("Access denied. You can only view your own assessment results.", 
                "पहुंच अस्वीकृत। आप केवल अपने स्वयं के मूल्यांकन परिणाम देख सकते हैं।")}
           </p>
-          <Link href="/diagnosis">
-            <Button className="mt-4">
-              {t("Take New Assessment", "नया मूल्यांकन लें")}
-            </Button>
-          </Link>
+          <p className="text-gray-600 text-sm mb-4">
+            {t("If you just completed an assessment, please check your Browse page or try refreshing.", 
+               "यदि आपने अभी मूल्यांकन पूरा किया है, तो कृपया अपना ब्राउज़ पृष्ठ देखें या रीफ्रेश करने का प्रयास करें।")}
+          </p>
+          <div className="space-y-2">
+            <Link href="/browse">
+              <Button variant="outline" className="w-full">
+                {t("View Your Assessments", "अपने मूल्यांकन देखें")}
+              </Button>
+            </Link>
+            <Link href="/diagnosis">
+              <Button className="w-full">
+                {t("Take New Assessment", "नया मूल्यांकन लें")}
+              </Button>
+            </Link>
+          </div>
         </CardContent>
       </Card>
     );

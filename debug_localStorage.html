@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug localStorage</title>
+</head>
+<body>
+    <h1>NephroCare Assessment Debug</h1>
+    <p>Your last assessment (ID: 15) was completed successfully with High Risk (71.1%)</p>
+    
+    <script>
+        // Add assessment ID 15 to localStorage
+        const storedIds = JSON.parse(localStorage.getItem('userAssessmentIds') || '[]');
+        if (!storedIds.includes(15)) {
+            storedIds.push(15);
+            localStorage.setItem('userAssessmentIds', JSON.stringify(storedIds));
+            console.log('Added assessment ID 15 to localStorage:', storedIds);
+        }
+        
+        // Trigger the custom event
+        window.dispatchEvent(new CustomEvent('assessmentIdsUpdated'));
+        
+        // Navigate to results page
+        setTimeout(() => {
+            window.location.href = '/results/15';
+        }, 500);
+    </script>
+</body>
+</html>
