@@ -74,7 +74,6 @@ export default function Home() {
           </div>
         </div>
       </div>
-
       {/* Features Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <Card className="medical-card">
@@ -134,7 +133,6 @@ export default function Home() {
           </CardContent>
         </Card>
       </div>
-
       {/* Statistics Section */}
       <Card>
         <CardContent className="p-8">
@@ -159,8 +157,8 @@ export default function Home() {
               <div className="text-gray-600">{t("Assessments", "मूल्यांकन")}</div>
             </div>
             <div>
-              <div className="text-3xl font-bold text-primary mb-2">500+</div>
-              <div className="text-gray-600">{t("Healthcare Partners", "स्वास्थ्य साझेदार")}</div>
+              <div className="text-3xl font-bold text-primary mb-2">1000+</div>
+              <div className="text-gray-600">{t("Hours of Development", "विकास के घंटे")}</div>
             </div>
             <div>
               <div className="text-3xl font-bold text-primary mb-2">24/7</div>
