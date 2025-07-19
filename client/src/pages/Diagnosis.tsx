@@ -168,16 +168,22 @@ export default function Diagnosis() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Albumin (0-5 scale)</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            min="0"
-                            max="5"
-                            {...field}
-                            onChange={(e) => field.onChange(parseInt(e.target.value))}
-                            className={field.value && parseInt(field.value) > 3 ? "border-red-400" : ""}
-                          />
-                        </FormControl>
+                        <Select onValueChange={field.onChange} defaultValue={field.value?.toString()}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select albumin level" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="0">0 - Normal</SelectItem>
+                            <SelectItem value="1">1 - Trace</SelectItem>
+                            <SelectItem value="2">2 - Low</SelectItem>
+                            <SelectItem value="3">3 - Moderate</SelectItem>
+                            <SelectItem value="4">4 - High</SelectItem>
+                            <SelectItem value="5">5 - Very High</SelectItem>
+                            <SelectItem value="unknown">{t("Don't Know", "मुझे नहीं पता")}</SelectItem>
+                          </SelectContent>
+                        </Select>
                         {field.value && parseInt(field.value) > 3 && (
                           <p className="text-sm text-red-600">Warning: High proteinuria - indicates kidney damage</p>
                         )}
@@ -190,16 +196,22 @@ export default function Diagnosis() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Sugar (0-5 scale)</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            min="0"
-                            max="5"
-                            {...field}
-                            onChange={(e) => field.onChange(parseInt(e.target.value))}
-                            className={field.value && parseInt(field.value) > 2 ? "border-red-400" : ""}
-                          />
-                        </FormControl>
+                        <Select onValueChange={field.onChange} defaultValue={field.value?.toString()}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select sugar level" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="0">0 - Normal</SelectItem>
+                            <SelectItem value="1">1 - Trace</SelectItem>
+                            <SelectItem value="2">2 - Low</SelectItem>
+                            <SelectItem value="3">3 - Moderate</SelectItem>
+                            <SelectItem value="4">4 - High</SelectItem>
+                            <SelectItem value="5">5 - Very High</SelectItem>
+                            <SelectItem value="unknown">{t("Don't Know", "मुझे नहीं पता")}</SelectItem>
+                          </SelectContent>
+                        </Select>
                         {field.value && parseInt(field.value) > 2 && (
                           <p className="text-sm text-red-600">Warning: May signal diabetes - major CKD risk factor</p>
                         )}
@@ -233,6 +245,7 @@ export default function Diagnosis() {
                           <SelectContent>
                             <SelectItem value="normal">Normal</SelectItem>
                             <SelectItem value="abnormal">Abnormal</SelectItem>
+                            <SelectItem value="unknown">{t("Don't Know", "मुझे नहीं पता")}</SelectItem>
                           </SelectContent>
                         </Select>
                       </FormItem>
@@ -253,6 +266,7 @@ export default function Diagnosis() {
                           <SelectContent>
                             <SelectItem value="normal">Normal</SelectItem>
                             <SelectItem value="abnormal">Abnormal</SelectItem>
+                            <SelectItem value="unknown">{t("Don't Know", "मुझे नहीं पता")}</SelectItem>
                           </SelectContent>
                         </Select>
                       </FormItem>
@@ -265,16 +279,21 @@ export default function Diagnosis() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Blood Glucose Random (mg/dL)</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            min="70"
-                            max="400"
-                            {...field}
-                            onChange={(e) => field.onChange(parseInt(e.target.value))}
-                            className={field.value && parseInt(field.value) > 200 ? "border-red-400" : ""}
-                          />
-                        </FormControl>
+                        <Select onValueChange={field.onChange} defaultValue={field.value?.toString()}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select or enter value" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="70">70 - Normal</SelectItem>
+                            <SelectItem value="100">100 - Good</SelectItem>
+                            <SelectItem value="120">120 - Fair</SelectItem>
+                            <SelectItem value="150">150 - High</SelectItem>
+                            <SelectItem value="200">200 - Very High</SelectItem>
+                            <SelectItem value="unknown">{t("Don't Know", "मुझे नहीं पता")}</SelectItem>
+                          </SelectContent>
+                        </Select>
                         {field.value && parseInt(field.value) > 200 && (
                           <p className="text-sm text-red-600">Warning: Uncontrolled diabetes - very high CKD risk</p>
                         )}
@@ -287,16 +306,21 @@ export default function Diagnosis() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Blood Urea (mg/dL)</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            min="7"
-                            max="100"
-                            {...field}
-                            onChange={(e) => field.onChange(parseInt(e.target.value))}
-                            className={field.value && parseInt(field.value) > 40 ? "border-red-400" : ""}
-                          />
-                        </FormControl>
+                        <Select onValueChange={field.onChange} defaultValue={field.value?.toString()}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select blood urea level" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="15">15 - Normal</SelectItem>
+                            <SelectItem value="25">25 - Good</SelectItem>
+                            <SelectItem value="30">30 - Fair</SelectItem>
+                            <SelectItem value="40">40 - High</SelectItem>
+                            <SelectItem value="60">60 - Very High</SelectItem>
+                            <SelectItem value="unknown">{t("Don't Know", "मुझे नहीं पता")}</SelectItem>
+                          </SelectContent>
+                        </Select>
                         {field.value && parseInt(field.value) > 40 && (
                           <p className="text-sm text-red-600">Warning: Kidney function loss indicated</p>
                         )}
@@ -309,17 +333,21 @@ export default function Diagnosis() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Serum Creatinine (mg/dL)</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            step="0.1"
-                            min="0.6"
-                            max="10.0"
-                            {...field}
-                            onChange={(e) => field.onChange(parseFloat(e.target.value))}
-                            className={field.value && parseFloat(field.value) > 1.5 ? "border-red-400" : ""}
-                          />
-                        </FormControl>
+                        <Select onValueChange={field.onChange} defaultValue={field.value?.toString()}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select creatinine level" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="0.8">0.8 - Normal</SelectItem>
+                            <SelectItem value="1.0">1.0 - Good</SelectItem>
+                            <SelectItem value="1.2">1.2 - Fair</SelectItem>
+                            <SelectItem value="1.5">1.5 - High</SelectItem>
+                            <SelectItem value="2.0">2.0 - Very High</SelectItem>
+                            <SelectItem value="unknown">{t("Don't Know", "मुझे नहीं पता")}</SelectItem>
+                          </SelectContent>
+                        </Select>
                         {field.value && parseFloat(field.value) > 1.5 && (
                           <p className="text-sm text-red-600">Warning: Declining kidney function - urgent evaluation needed</p>
                         )}
@@ -332,16 +360,19 @@ export default function Diagnosis() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Sodium (mEq/L)</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            min="130"
-                            max="150"
-                            {...field}
-                            onChange={(e) => field.onChange(parseInt(e.target.value))}
-                            className={field.value && (parseInt(field.value) < 130 || parseInt(field.value) > 150) ? "border-red-400" : ""}
-                          />
-                        </FormControl>
+                        <Select onValueChange={field.onChange} defaultValue={field.value?.toString()}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select sodium level" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="135">135 - Normal</SelectItem>
+                            <SelectItem value="140">140 - Good</SelectItem>
+                            <SelectItem value="145">145 - Fair</SelectItem>
+                            <SelectItem value="unknown">{t("Don't Know", "मुझे नहीं पता")}</SelectItem>
+                          </SelectContent>
+                        </Select>
                         {field.value && (parseInt(field.value) < 130 || parseInt(field.value) > 150) && (
                           <p className="text-sm text-red-600">Warning: Electrolyte imbalance - medical attention needed</p>
                         )}
@@ -354,17 +385,20 @@ export default function Diagnosis() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Potassium (mEq/L)</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            step="0.1"
-                            min="3.0"
-                            max="6.0"
-                            {...field}
-                            onChange={(e) => field.onChange(parseFloat(e.target.value))}
-                            className={field.value && parseFloat(field.value) > 5.5 ? "border-red-400" : ""}
-                          />
-                        </FormControl>
+                        <Select onValueChange={field.onChange} defaultValue={field.value?.toString()}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select potassium level" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="3.5">3.5 - Low</SelectItem>
+                            <SelectItem value="4.0">4.0 - Normal</SelectItem>
+                            <SelectItem value="4.5">4.5 - Good</SelectItem>
+                            <SelectItem value="5.0">5.0 - High</SelectItem>
+                            <SelectItem value="unknown">{t("Don't Know", "मुझे नहीं पता")}</SelectItem>
+                          </SelectContent>
+                        </Select>
                         {field.value && parseFloat(field.value) > 5.5 && (
                           <p className="text-sm text-red-600">Warning: Hyperkalemia risk - dangerous for heart</p>
                         )}
@@ -377,17 +411,20 @@ export default function Diagnosis() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Hemoglobin (g/dL)</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            step="0.1"
-                            min="8.0"
-                            max="18.0"
-                            {...field}
-                            onChange={(e) => field.onChange(parseFloat(e.target.value))}
-                            className={field.value && parseFloat(field.value) < 10 ? "border-red-400" : ""}
-                          />
-                        </FormControl>
+                        <Select onValueChange={field.onChange} defaultValue={field.value?.toString()}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select hemoglobin level" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="10">10 - Low</SelectItem>
+                            <SelectItem value="12">12 - Normal</SelectItem>
+                            <SelectItem value="13">13 - Good</SelectItem>
+                            <SelectItem value="15">15 - High</SelectItem>
+                            <SelectItem value="unknown">{t("Don't Know", "मुझे नहीं पता")}</SelectItem>
+                          </SelectContent>
+                        </Select>
                         {field.value && parseFloat(field.value) < 10 && (
                           <p className="text-sm text-red-600">Warning: Anemia detected - common in CKD patients</p>
                         )}
@@ -400,13 +437,19 @@ export default function Diagnosis() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>WBC Count</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            {...field}
-                            onChange={(e) => field.onChange(parseInt(e.target.value))}
-                          />
-                        </FormControl>
+                        <Select onValueChange={field.onChange} defaultValue={field.value?.toString()}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select WBC count" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="5000">5000 - Normal</SelectItem>
+                            <SelectItem value="7500">7500 - Good</SelectItem>
+                            <SelectItem value="10000">10000 - High</SelectItem>
+                            <SelectItem value="unknown">{t("Don't Know", "मुझे नहीं पता")}</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </FormItem>
                     )}
                   />
@@ -416,14 +459,19 @@ export default function Diagnosis() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>RBC Count</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            step="0.1"
-                            {...field}
-                            onChange={(e) => field.onChange(parseFloat(e.target.value))}
-                          />
-                        </FormControl>
+                        <Select onValueChange={field.onChange} defaultValue={field.value?.toString()}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select RBC count" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="4.0">4.0 - Normal</SelectItem>
+                            <SelectItem value="4.5">4.5 - Good</SelectItem>
+                            <SelectItem value="5.0">5.0 - High</SelectItem>
+                            <SelectItem value="unknown">{t("Don't Know", "मुझे नहीं पता")}</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </FormItem>
                     )}
                   />
@@ -454,6 +502,7 @@ export default function Diagnosis() {
                           <SelectContent>
                             <SelectItem value="no">No</SelectItem>
                             <SelectItem value="yes">Yes</SelectItem>
+                            <SelectItem value="unknown">{t("Don't Know", "मुझे नहीं पता")}</SelectItem>
                           </SelectContent>
                         </Select>
                       </FormItem>
@@ -474,6 +523,7 @@ export default function Diagnosis() {
                           <SelectContent>
                             <SelectItem value="no">No</SelectItem>
                             <SelectItem value="yes">Yes</SelectItem>
+                            <SelectItem value="unknown">{t("Don't Know", "मुझे नहीं पता")}</SelectItem>
                           </SelectContent>
                         </Select>
                       </FormItem>
@@ -494,6 +544,7 @@ export default function Diagnosis() {
                           <SelectContent>
                             <SelectItem value="good">Good</SelectItem>
                             <SelectItem value="poor">Poor</SelectItem>
+                            <SelectItem value="unknown">{t("Don't Know", "मुझे नहीं पता")}</SelectItem>
                           </SelectContent>
                         </Select>
                       </FormItem>
@@ -514,6 +565,7 @@ export default function Diagnosis() {
                           <SelectContent>
                             <SelectItem value="no">No</SelectItem>
                             <SelectItem value="yes">Yes</SelectItem>
+                            <SelectItem value="unknown">{t("Don't Know", "मुझे नहीं पता")}</SelectItem>
                           </SelectContent>
                         </Select>
                       </FormItem>
@@ -534,6 +586,7 @@ export default function Diagnosis() {
                           <SelectContent>
                             <SelectItem value="no">No</SelectItem>
                             <SelectItem value="yes">Yes</SelectItem>
+                            <SelectItem value="unknown">{t("Don't Know", "मुझे नहीं पता")}</SelectItem>
                           </SelectContent>
                         </Select>
                       </FormItem>

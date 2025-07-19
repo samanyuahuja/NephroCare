@@ -14,31 +14,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertCKDAssessmentSchema.parse(req.body);
       const assessment = await storage.createCKDAssessment(validatedData);
       
+      // Helper function to get value or default for "unknown" selections
+      const getValueOrDefault = (value: any, defaultValue: any) => {
+        return value === "unknown" ? defaultValue : value;
+      };
+
       // Convert frontend data format to Flask format (all strings for URLSearchParams)
+      // Apply default values for "Don't Know" options based on your Flask defaults
       const flaskData = {
         age: validatedData.age.toString(),
         bp: validatedData.bloodPressure.toString(),
-        sg: validatedData.specificGravity.toString(),
-        al: validatedData.albumin.toString(),
-        su: validatedData.sugar.toString(),
-        rbc: validatedData.redBloodCells === "normal" ? "normal" : "abnormal",
-        pc: validatedData.pusCell === "normal" ? "normal" : "abnormal",
-        pcc: validatedData.pusCellClumps === "not_present" ? "notpresent" : "present",
+        al: getValueOrDefault(validatedData.albumin, 1).toString(),
+        su: getValueOrDefault(validatedData.sugar, 0).toString(),
+        rbc: getValueOrDefault(validatedData.redBloodCells, "normal") === "normal" ? "normal" : "abnormal",
+        pc: getValueOrDefault(validatedData.pusCell, "normal") === "normal" ? "normal" : "abnormal",
         ba: "notpresent", // Default value
-        bgr: validatedData.bloodGlucoseRandom.toString(),
-        bu: validatedData.bloodUrea.toString(),
-        sc: validatedData.serumCreatinine.toString(),
-        sod: validatedData.sodium.toString(),
-        pot: validatedData.potassium.toString(),
-        hemo: validatedData.hemoglobin.toString(),
-        wbcc: validatedData.wbcCount.toString(),
-        rbcc: validatedData.rbcCount.toString(),
-        htn: validatedData.hypertension,
-        dm: validatedData.diabetesMellitus,
+        bgr: getValueOrDefault(validatedData.bloodGlucoseRandom, 120).toString(),
+        bu: getValueOrDefault(validatedData.bloodUrea, 30).toString(),
+        sc: getValueOrDefault(validatedData.serumCreatinine, 1.2).toString(),
+        sod: getValueOrDefault(validatedData.sodium, 140).toString(),
+        pot: getValueOrDefault(validatedData.potassium, 4.5).toString(),
+        hemo: getValueOrDefault(validatedData.hemoglobin, 13).toString(),
+        wbcc: getValueOrDefault(validatedData.wbcCount, 7500).toString(),
+        rbcc: getValueOrDefault(validatedData.rbcCount, 5.0).toString(),
+        htn: getValueOrDefault(validatedData.hypertension, "no"),
+        dm: getValueOrDefault(validatedData.diabetesMellitus, "no"),
         cad: "no", // Default value
-        appet: validatedData.appetite,
-        pe: validatedData.pedalEdema,
-        ane: validatedData.anemia
+        appet: getValueOrDefault(validatedData.appetite, "good"),
+        pe: getValueOrDefault(validatedData.pedalEdema, "no"),
+        ane: getValueOrDefault(validatedData.anemia, "no")
       };
 
       try {
