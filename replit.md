@@ -4,7 +4,7 @@
 
 NephroCare is a professional, responsive Chronic Kidney Disease (CKD) prediction website that provides early insights into kidney health. The application features advanced diagnostics with trained machine learning models, explainable results with SHAP/LIME analysis, and a smart diet planner for personalized care recommendations.
 
-## Recent Changes (January 17-18, 2025)
+## Recent Changes (January 17-19, 2025)
 
 - Integrated user's Flask app.py containing trained ML models (logistic regression and random forest)
 - Successfully connected trained models with Node.js backend using Python model predictor
@@ -26,6 +26,13 @@ NephroCare is a professional, responsive Chronic Kidney Disease (CKD) prediction
 - Created comprehensive About CKD page with medical information, stages, symptoms, and prevention
 - Fixed language toggle functionality with proper state management and localStorage persistence
 - Added Hindi translations for key sections and working language switching system
+- Implemented comprehensive assessment history with PostgreSQL integration and patient name tracking
+- Enhanced Home page design with striking gradient title effects and professional assessment button
+- Created Browse section combining assessment results and diet plan history with tabbed interface
+- Removed separate History tab in favor of consolidated Browse section for better UX
+- Improved desktop navbar with professional styling and proper language toggle visibility
+- Removed SG (Specific Gravity) and PCC (Pus Cell Clumps) fields as they are not used in ML model features
+- Fixed sugar field default value from 0 to 1 to prevent validation issues
 
 ## User Preferences
 

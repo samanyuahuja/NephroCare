@@ -25,12 +25,10 @@ export default function Diagnosis() {
       patientName: "",
       age: 45,
       bloodPressure: 120,
-      specificGravity: 1.020,
       albumin: 1,
-      sugar: 0,
+      sugar: 1,
       redBloodCells: "normal",
-      pusCell: "normal", 
-      pusCellClumps: "not_present",
+      pusCell: "normal",
       bacteria: "not_present",
       bloodGlucoseRandom: 145,
       bloodUrea: 35,
@@ -163,29 +161,7 @@ export default function Diagnosis() {
                       </FormItem>
                     )}
                   />
-                  <FormField
-                    control={form.control}
-                    name="specificGravity"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Specific Gravity</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            step="0.001"
-                            min="1.000"
-                            max="1.035"
-                            {...field}
-                            onChange={(e) => field.onChange(parseFloat(e.target.value))}
-                            className={field.value && (parseFloat(field.value) < 1.005 || parseFloat(field.value) > 1.030) ? "border-red-400" : ""}
-                          />
-                        </FormControl>
-                        {field.value && (parseFloat(field.value) < 1.005 || parseFloat(field.value) > 1.030) && (
-                          <p className="text-sm text-red-600">Warning: Abnormal specific gravity - kidney function concern</p>
-                        )}
-                      </FormItem>
-                    )}
-                  />
+
                   <FormField
                     control={form.control}
                     name="albumin"
@@ -282,26 +258,7 @@ export default function Diagnosis() {
                       </FormItem>
                     )}
                   />
-                  <FormField
-                    control={form.control}
-                    name="pusCellClumps"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Pus Cell Clumps</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="not_present">Not Present</SelectItem>
-                            <SelectItem value="present">Present</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </FormItem>
-                    )}
-                  />
+
                   <FormField
                     control={form.control}
                     name="bloodGlucoseRandom"

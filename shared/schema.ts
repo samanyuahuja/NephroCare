@@ -14,14 +14,12 @@ export const ckdAssessments = pgTable("ckd_assessments", {
   patientName: text("patient_name").notNull(),
   age: integer("age").notNull(),
   bloodPressure: integer("blood_pressure").notNull(),
-  specificGravity: real("specific_gravity").notNull(),
   albumin: integer("albumin").notNull(),
   sugar: integer("sugar").notNull(),
   
   // Lab Results  
   redBloodCells: text("red_blood_cells").notNull(),
   pusCell: text("pus_cell").notNull(),
-  pusCellClumps: text("pus_cell_clumps").notNull(),
   bloodGlucoseRandom: integer("blood_glucose_random").notNull(),
   bloodUrea: integer("blood_urea").notNull(),
   serumCreatinine: real("serum_creatinine").notNull(),
