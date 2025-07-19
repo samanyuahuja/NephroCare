@@ -51,6 +51,11 @@ NephroCare is a professional, responsive Chronic Kidney Disease (CKD) prediction
   * Emergency situations and when to contact healthcare providers
   * Kidney transplant and living donor information
   * Mental health and family support considerations
+- Modified chatbot to use browser-only localStorage storage instead of server-side persistence for privacy
+- Added Reset Chat button with refresh functionality to clear conversation history
+- Created direct Flask API endpoint that doesn't store messages on server
+- Enhanced chatbot UI with bilingual support and better responsive design
+- Ensured all chat conversations remain completely private and browser-local only
 
 ## User Preferences
 

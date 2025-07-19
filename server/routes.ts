@@ -270,6 +270,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Direct chat endpoint - doesn't store messages, just returns Flask response
+  app.post("/api/chat-direct", async (req, res) => {
+    try {
+      const { message } = req.body;
+      
+      if (!message) {
+        return res.status(400).json({ error: "Message is required" });
+      }
+
+      // Try Flask chatbot
+      try {
+        const flaskResponse = await fetch(`${FLASK_API_URL}/api/chatbot`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ message })
+        });
+
+        if (flaskResponse.ok) {
+          const flaskData = await flaskResponse.json();
+          if (flaskData.reply) {
+            return res.json({ reply: flaskData.reply });
+          }
+        }
+      } catch (fetchError) {
+        console.log('⚠️ Flask chatbot unavailable, using fallback response');
+      }
+
+      // Fallback response if Flask is not available
+      return res.json({ 
+        reply: "I'm currently having trouble connecting to my medical knowledge base. Please try again in a moment, or contact your healthcare provider for immediate medical concerns." 
+      });
+      
+    } catch (error) {
+      res.status(500).json({ error: "Failed to process message" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
