@@ -1,30 +1,15 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
 import { insertCKDAssessmentSchema, insertDietPlanSchema, insertChatMessageSchema } from "@shared/schema";
 
 // Flask backend URL - points to our Python Flask API
 const FLASK_API_URL = process.env.FLASK_API_URL || "http://localhost:8080";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Setup authentication middleware
-  await setupAuth(app);
-
-  // Auth routes
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
-      res.json(user);
-    } catch (error) {
-      console.error("Error fetching user:", error);
-      res.status(500).json({ message: "Failed to fetch user" });
-    }
-  });
   
   // CKD Assessment endpoint - integrates with Flask backend
-  app.post("/api/ckd-assessment", isAuthenticated, async (req, res) => {
+  app.post("/api/ckd-assessment", async (req, res) => {
     try {
       console.log("📝 Received assessment data:", JSON.stringify(req.body, null, 2));
       const validatedData = insertCKDAssessmentSchema.parse(req.body);
@@ -51,8 +36,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         anemia: validatedData.anemia === "unknown" ? "no" : validatedData.anemia,
       };
       
-      const userId = (req as any).user.claims.sub;
-      const assessment = await storage.createCKDAssessment(transformedData, userId);
+      const assessment = await storage.createCKDAssessment(transformedData);
       
       // Convert to Flask format for ML prediction (use transformed data with defaults applied)
       const flaskData = {
@@ -170,11 +154,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get user CKD Assessments (history)
-  app.get("/api/ckd-assessments", isAuthenticated, async (req, res) => {
+  // Get all CKD Assessments (history)
+  app.get("/api/ckd-assessments", async (req, res) => {
     try {
-      const userId = (req as any).user.claims.sub;
-      const assessments = await storage.getUserCKDAssessments(userId);
+      const assessments = await storage.getAllCKDAssessments();
       res.json(assessments);
     } catch (error) {
       res.status(500).json({ error: "Failed to retrieve assessment history" });
@@ -182,7 +165,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Generate Diet Plan
-  app.post("/api/diet-plan", isAuthenticated, async (req, res) => {
+  app.post("/api/diet-plan", async (req, res) => {
     try {
       const { assessmentId, dietType } = req.body;
       
@@ -226,11 +209,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get User Diet Plans
-  app.get("/api/diet-plans", isAuthenticated, async (req, res) => {
+  // Get All Diet Plans
+  app.get("/api/diet-plans", async (req, res) => {
     try {
-      const userId = (req as any).user.claims.sub;
-      const dietPlans = await storage.getUserDietPlans(userId);
+      const dietPlans = await storage.getAllDietPlans();
       res.json(dietPlans);
     } catch (error) {
       res.status(500).json({ error: "Failed to retrieve diet plans" });
@@ -238,9 +220,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Chat endpoint - integrates with Flask chatbot or uses NephroBot responses
-  app.post("/api/chat", isAuthenticated, async (req, res) => {
+  app.post("/api/chat", async (req, res) => {
     try {
-      const userId = (req as any).user.claims.sub;
       const validatedData = insertChatMessageSchema.parse(req.body);
       
       // Try Flask chatbot first, fallback to local NephroBot
@@ -272,7 +253,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Use local NephroBot responses
-      const chatMessage = await storage.createChatMessage(validatedData, userId);
+      const chatMessage = await storage.createChatMessage(validatedData);
       res.json(chatMessage);
     } catch (error) {
       res.status(400).json({ error: "Invalid message data" });

@@ -1,32 +1,15 @@
-import { pgTable, text, serial, integer, real, boolean, timestamp, varchar, jsonb, index } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, real, boolean, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-// Session storage table for Replit Auth
-export const sessions = pgTable(
-  "sessions",
-  {
-    sid: varchar("sid").primaryKey(),
-    sess: jsonb("sess").notNull(),
-    expire: timestamp("expire").notNull(),
-  },
-  (table) => [index("IDX_session_expire").on(table.expire)],
-);
-
-// User storage table for Replit Auth
 export const users = pgTable("users", {
-  id: varchar("id").primaryKey().notNull(),
-  email: varchar("email").unique(),
-  firstName: varchar("first_name"),
-  lastName: varchar("last_name"),
-  profileImageUrl: varchar("profile_image_url"),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+  id: serial("id").primaryKey(),
+  username: text("username").notNull().unique(),
+  password: text("password").notNull(),
 });
 
 export const ckdAssessments = pgTable("ckd_assessments", {
   id: serial("id").primaryKey(),
-  userId: varchar("user_id").references(() => users.id),
   // Patient Info
   patientName: text("patient_name").notNull(),
   age: integer("age").notNull(),
@@ -73,18 +56,14 @@ export const dietPlans = pgTable("diet_plans", {
 
 export const chatMessages = pgTable("chat_messages", {
   id: serial("id").primaryKey(),
-  userId: varchar("user_id").references(() => users.id),
   message: text("message").notNull(),
   response: text("response").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const upsertUserSchema = z.object({
-  id: z.string(),
-  email: z.string().email().optional(),
-  firstName: z.string().optional(),
-  lastName: z.string().optional(),
-  profileImageUrl: z.string().url().optional(),
+export const insertUserSchema = createInsertSchema(users).pick({
+  username: true,
+  password: true,
 });
 
 export const insertCKDAssessmentSchema = createInsertSchema(ckdAssessments).omit({
@@ -125,7 +104,7 @@ export const insertChatMessageSchema = createInsertSchema(chatMessages).omit({
   createdAt: true,
 });
 
-export type UpsertUser = z.infer<typeof upsertUserSchema>;
+export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type CKDAssessment = typeof ckdAssessments.$inferSelect;
 export type InsertCKDAssessment = z.infer<typeof insertCKDAssessmentSchema>;

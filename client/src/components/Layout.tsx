@@ -59,16 +59,6 @@ export default function Layout({ children }: LayoutProps) {
               <div className="hidden lg:block">
                 <LanguageToggle />
               </div>
-              
-              {/* Logout Button */}
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => window.location.href = "/api/logout"}
-                className="hidden lg:flex"
-              >
-                Sign Out
-              </Button>
 
               {/* Mobile Menu Button */}
               <div className="lg:hidden">
@@ -98,17 +88,10 @@ export default function Layout({ children }: LayoutProps) {
                           {item.label}
                         </Link>
                       ))}
-                      <div className="pt-6 border-t border-gray-200 dark:border-gray-700 mt-6 space-y-4">
+                      <div className="pt-6 border-t border-gray-200 dark:border-gray-700 mt-6">
                         <div className="flex justify-center">
                           <LanguageToggle />
                         </div>
-                        <Button 
-                          variant="outline" 
-                          onClick={() => window.location.href = "/api/logout"}
-                          className="w-full"
-                        >
-                          Sign Out
-                        </Button>
                       </div>
                     </nav>
                   </SheetContent>
