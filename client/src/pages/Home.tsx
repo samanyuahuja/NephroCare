@@ -10,11 +10,11 @@ export default function Home() {
   return (
     <div className="space-y-12">
       {/* Hero Section */}
-      <div className="bg-gradient-to-br from-blue-50 via-white to-blue-50 rounded-3xl p-16 shadow-2xl border border-blue-100">
+      <div className="bg-gradient-to-br from-blue-50 via-white to-blue-50 rounded-3xl p-6 md:p-12 lg:p-16 shadow-2xl border border-blue-100">
         <div className="max-w-5xl mx-auto text-center">
           {/* Main Title with Enhanced Typography */}
           <div className="mb-10">
-            <h1 className="text-6xl md:text-8xl lg:text-9xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-blue-600 to-blue-800 mb-6 tracking-tight leading-none">
+            <h1 className="text-4xl sm:text-6xl md:text-8xl lg:text-9xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-blue-600 to-blue-800 mb-6 tracking-tight leading-none">
               {t("NephroCare", "नेफ्रोकेयर")}
             </h1>
             <div className="w-32 h-2 bg-gradient-to-r from-blue-500 to-blue-700 mx-auto rounded-full shadow-lg"></div>
@@ -22,13 +22,13 @@ export default function Home() {
           
           {/* Enhanced Subheader */}
           <div className="mb-12">
-            <p className="text-3xl md:text-4xl font-bold text-gray-800 mb-4 leading-tight">
+            <p className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-800 mb-4 leading-tight">
               {t(
                 "Advanced CKD Prediction & Healthcare Guidance",
                 "उन्नत सीकेडी भविष्यवाणी और स्वास्थ्य देखभाल मार्गदर्शन"
               )}
             </p>
-            <p className="text-xl md:text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed font-medium">
+            <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed font-medium">
               {t(
                 "Powered by machine learning algorithms for early detection and personalized recommendations",
                 "प्रारंभिक पहचान और व्यक्तिगत सिफारिशों के लिए मशीन लर्निंग एल्गोरिदम द्वारा संचालित"
@@ -39,10 +39,10 @@ export default function Home() {
           {/* Enhanced CTA Buttons */}
           <div className="flex flex-col lg:flex-row gap-6 justify-center items-center mb-16">
             <Link href="/diagnosis">
-              <Button className="group relative bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 hover:from-blue-700 hover:via-blue-800 hover:to-blue-900 text-white px-12 py-6 text-xl font-black rounded-3xl shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 border-0 min-w-[300px]">
+              <Button className="group relative bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 hover:from-blue-700 hover:via-blue-800 hover:to-blue-900 text-white px-6 sm:px-8 md:px-12 py-4 sm:py-5 md:py-6 text-lg sm:text-xl font-black rounded-2xl sm:rounded-3xl shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 border-0 w-full sm:w-auto sm:min-w-[280px] md:min-w-[300px]">
                 <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 rounded-3xl transition-opacity duration-300"></div>
                 <div className="relative flex items-center justify-center">
-                  <Activity className="mr-4 h-7 w-7 group-hover:rotate-12 transition-transform duration-300" />
+                  <Activity className="mr-2 sm:mr-3 md:mr-4 h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 group-hover:rotate-12 transition-transform duration-300" />
                   {t("START ASSESSMENT NOW", "अभी मूल्यांकन शुरू करें")}
                 </div>
                 <div className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-blue-400 to-blue-600 opacity-0 group-hover:opacity-30 blur transition-opacity duration-300"></div>
@@ -50,15 +50,15 @@ export default function Home() {
             </Link>
             
             <Link href="/symptom-checker">
-              <Button variant="outline" className="group px-10 py-5 text-lg font-bold rounded-2xl border-3 border-blue-600 text-blue-700 hover:bg-blue-600 hover:text-white transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 shadow-xl hover:shadow-2xl min-w-[240px] bg-white/80 backdrop-blur-sm">
-                <Stethoscope className="mr-3 h-6 w-6 group-hover:bounce transition-all duration-300" />
+              <Button variant="outline" className="group px-6 sm:px-8 md:px-10 py-4 sm:py-5 text-base sm:text-lg font-bold rounded-xl sm:rounded-2xl border-2 sm:border-3 border-blue-600 text-blue-700 hover:bg-blue-600 hover:text-white transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 shadow-xl hover:shadow-2xl w-full sm:w-auto sm:min-w-[220px] md:min-w-[240px] bg-white/80 backdrop-blur-sm">
+                <Stethoscope className="mr-2 sm:mr-3 h-5 w-5 sm:h-6 sm:w-6 group-hover:bounce transition-all duration-300" />
                 {t("Check Symptoms", "लक्षण जांचें")}
               </Button>
             </Link>
           </div>
 
           {/* Trust Indicators */}
-          <div className="flex flex-wrap justify-center items-center gap-8 text-sm text-gray-500 font-semibold">
+          <div className="flex flex-wrap justify-center items-center gap-4 sm:gap-6 md:gap-8 text-xs sm:text-sm text-gray-500 font-semibold">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
               {t("Machine Learning Powered", "मशीन लर्निंग संचालित")}
@@ -135,9 +135,9 @@ export default function Home() {
       </div>
       {/* Statistics Section */}
       <Card>
-        <CardContent className="p-8">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+        <CardContent className="p-4 sm:p-6 md:p-8">
+          <div className="text-center mb-6 md:mb-8">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
               {t("Trusted by Healthcare Professionals", "स्वास्थ्य पेशेवरों द्वारा भरोसेमंद")}
             </h2>
             <p className="text-gray-600">
@@ -147,22 +147,22 @@ export default function Home() {
               )}
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 md:gap-8 text-center">
             <div>
-              <div className="text-3xl font-bold text-primary mb-2">95%</div>
-              <div className="text-gray-600">{t("Accuracy Rate", "सटीकता दर")}</div>
+              <div className="text-2xl sm:text-3xl font-bold text-primary mb-2">95%</div>
+              <div className="text-sm sm:text-base text-gray-600">{t("Accuracy Rate", "सटीकता दर")}</div>
             </div>
             <div>
-              <div className="text-3xl font-bold text-primary mb-2">10,000+</div>
-              <div className="text-gray-600">{t("Assessments", "मूल्यांकन")}</div>
+              <div className="text-2xl sm:text-3xl font-bold text-primary mb-2">10,000+</div>
+              <div className="text-sm sm:text-base text-gray-600">{t("Assessments", "मूल्यांकन")}</div>
             </div>
             <div>
-              <div className="text-3xl font-bold text-primary mb-2">1000+</div>
-              <div className="text-gray-600">{t("Hours of Development", "विकास के घंटे")}</div>
+              <div className="text-2xl sm:text-3xl font-bold text-primary mb-2">1000+</div>
+              <div className="text-sm sm:text-base text-gray-600">{t("Hours of Development", "विकास के घंटे")}</div>
             </div>
             <div>
-              <div className="text-3xl font-bold text-primary mb-2">24/7</div>
-              <div className="text-gray-600">{t("AI Support", "एआई सहायता")}</div>
+              <div className="text-2xl sm:text-3xl font-bold text-primary mb-2">24/7</div>
+              <div className="text-sm sm:text-base text-gray-600">{t("AI Support", "एआई सहायता")}</div>
             </div>
           </div>
         </CardContent>
@@ -171,7 +171,7 @@ export default function Home() {
       {/* FAQ Section */}
       <Card>
         <CardHeader className="text-center">
-          <CardTitle className="text-3xl font-bold text-gray-900">
+          <CardTitle className="text-2xl sm:text-3xl font-bold text-gray-900">
             {t("Frequently Asked Questions", "अक्सर पूछे जाने वाले प्रश्न")}
           </CardTitle>
           <p className="text-gray-600">
