@@ -118,12 +118,12 @@ export default function Diagnosis() {
         <div className="mx-4 sm:mx-6 mb-6">
           <Collapsible open={isSymptomCheckerOpen} onOpenChange={setIsSymptomCheckerOpen}>
             <CollapsibleTrigger asChild>
-              <Button variant="outline" className="w-full justify-between text-sm sm:text-base">
-                <div className="flex items-center">
-                  <Stethoscope className="mr-2 h-4 w-4" />
-                  <span className="truncate">{t("Don't know your values? Check the symptom checker", "अपनी मान नहीं जानते? लक्षण चेकर देखें")}</span>
+              <Button variant="outline" className="w-full justify-between text-xs sm:text-sm md:text-base py-2 sm:py-3 px-3 sm:px-4">
+                <div className="flex items-center min-w-0 flex-1">
+                  <Stethoscope className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                  <span className="truncate text-left">{t("Don't know your values? Check the symptom checker", "अपनी मान नहीं जानते? लक्षण चेकर देखें")}</span>
                 </div>
-                <ChevronDown className={`h-4 w-4 transition-transform ${isSymptomCheckerOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown className={`h-3 w-3 sm:h-4 sm:w-4 transition-transform flex-shrink-0 ml-1 sm:ml-2 ${isSymptomCheckerOpen ? 'rotate-180' : ''}`} />
               </Button>
             </CollapsibleTrigger>
             <CollapsibleContent className="mt-4">
@@ -234,12 +234,12 @@ export default function Diagnosis() {
           {/* Report Value Locator Section */}
           <Collapsible open={isReportGuideOpen} onOpenChange={setIsReportGuideOpen}>
             <CollapsibleTrigger asChild>
-              <Button variant="outline" className="w-full justify-between text-sm sm:text-base">
-                <div className="flex items-center">
-                  <FileText className="mr-2 h-4 w-4" />
-                  <span className="truncate">{t("Need help finding values in your medical report?", "अपनी मेडिकल रिपोर्ट में मान खोजने में सहायता चाहिए?")}</span>
+              <Button variant="outline" className="w-full justify-between text-xs sm:text-sm md:text-base py-2 sm:py-3 px-3 sm:px-4">
+                <div className="flex items-center min-w-0 flex-1">
+                  <FileText className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                  <span className="truncate text-left">{t("Need help finding values in your medical report?", "अपनी मेडिकल रिपोर्ट में मान खोजने में सहायता चाहिए?")}</span>
                 </div>
-                <ChevronDown className={`h-4 w-4 transition-transform ${isReportGuideOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown className={`h-3 w-3 sm:h-4 sm:w-4 transition-transform flex-shrink-0 ml-1 sm:ml-2 ${isReportGuideOpen ? 'rotate-180' : ''}`} />
               </Button>
             </CollapsibleTrigger>
             <CollapsibleContent className="mt-4">

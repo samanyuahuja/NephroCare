@@ -393,10 +393,10 @@ export default function SymptomChecker() {
         <Button 
           onClick={handleSubmit} 
           disabled={selectedSymptoms.length === 0}
-          className="px-8 py-3 text-lg"
+          className="w-full sm:w-auto px-4 sm:px-8 py-2 sm:py-3 text-base sm:text-lg"
         >
-          <AlertCircle className="mr-2 h-5 w-5" />
-          Get Assessment ({selectedSymptoms.length} symptoms selected)
+          <AlertCircle className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+          <span className="truncate">Get Assessment ({selectedSymptoms.length} symptoms selected)</span>
         </Button>
         
         <p className="text-xs text-muted-foreground mt-4 max-w-2xl mx-auto">
