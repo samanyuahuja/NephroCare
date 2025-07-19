@@ -22,30 +22,26 @@ export default function AboutCKD() {
         <CardHeader>
           <CardTitle className="flex items-center">
             <Heart className="mr-3 h-5 w-5 text-red-500" />
-            What is Chronic Kidney Disease?
+            {t("What is Chronic Kidney Disease?", "क्रोनिक किडनी रोग क्या है?")}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-muted-foreground">
-            Chronic Kidney Disease (CKD) is a long-term condition where the kidneys gradually lose their 
-            ability to filter waste and excess water from the blood. Unlike acute kidney injury, CKD 
-            develops slowly over months or years and is usually irreversible.
+            {t("Chronic Kidney Disease (CKD) is a long-term condition where the kidneys gradually lose their ability to filter waste and excess water from the blood. Unlike acute kidney injury, CKD develops slowly over months or years and is usually irreversible.", "क्रोनिक किडनी रोग (सीकेडी) एक दीर्घकालिक स्थिति है जहां गुर्दे धीरे-धीरे रक्त से अपशिष्ट और अतिरिक्त पानी को फिल्टर करने की अपनी क्षमता खो देते हैं। तीव्र गुर्दे की चोट के विपरीत, सीकेडी महीनों या वर्षों में धीरे-धीरे विकसित होता है और आमतौर पर अपरिवर्तनीय होता है।")}
           </p>
           
           <p className="text-muted-foreground">
-            Your kidneys filter about 50 gallons of blood every day, removing toxins and maintaining 
-            the right balance of water, salts, and minerals in your body. When kidney function declines, 
-            harmful wastes can build up, leading to serious health complications.
+            {t("Your kidneys filter about 50 gallons of blood every day, removing toxins and maintaining the right balance of water, salts, and minerals in your body. When kidney function declines, harmful wastes can build up, leading to serious health complications.", "आपके गुर्दे प्रतिदिन लगभग 50 गैलन रक्त को फिल्टर करते हैं, विषाक्त पदार्थों को हटाते हैं और आपके शरीर में पानी, नमक और खनिजों का सही संतुलन बनाए रखते हैं। जब गुर्दे की कार्यक्षमता घटती है, तो हानिकारक अपशिष्ट जमा हो सकते हैं, जिससे गंभीर स्वास्थ्य जटिलताएं हो सकती हैं।")}
           </p>
 
           <div className="bg-blue-50 p-4 rounded-lg">
-            <h4 className="font-semibold mb-2 text-blue-900">Key Facts About CKD:</h4>
+            <h4 className="font-semibold mb-2 text-blue-900">{t("Key Facts About CKD:", "सीकेडी के बारे में मुख्य तथ्य:")}</h4>
             <ul className="text-sm text-blue-800 space-y-1">
-              <li>• Affects over 850 million people worldwide</li>
-              <li>• Often called a "silent killer" - symptoms appear late</li>
-              <li>• Leading cause of kidney failure requiring dialysis</li>
-              <li>• Major risk factor for heart disease and stroke</li>
-              <li>• Early detection can slow or prevent progression</li>
+              <li>• {t("Affects over 850 million people worldwide", "दुनियाभर में 85 करोड़ से अधिक लोगों को प्रभावित करता है")}</li>
+              <li>• {t("Often called a \"silent killer\" - symptoms appear late", "अक्सर \"मूक हत्यारा\" कहा जाता है - लक्षण देर से दिखाई देते हैं")}</li>
+              <li>• {t("Leading cause of kidney failure requiring dialysis", "डायलिसिस की आवश्यकता वाली गुर्दे की विफलता का प्रमुख कारण")}</li>
+              <li>• {t("Major risk factor for heart disease and stroke", "हृदय रोग और स्ट्रोक के लिए प्रमुख जोखिम कारक")}</li>
+              <li>• {t("Early detection can slow or prevent progression", "प्रारंभिक पहचान प्रगति को धीमा या रोक सकती है")}</li>
             </ul>
           </div>
         </CardContent>
@@ -56,13 +52,12 @@ export default function AboutCKD() {
         <CardHeader>
           <CardTitle className="flex items-center">
             <TrendingDown className="mr-3 h-5 w-5 text-orange-500" />
-            CKD Stages (1-5)
+            {t("CKD Stages (1-5)", "सीकेडी चरण (1-5)")}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           <p className="text-muted-foreground mb-4">
-            CKD is classified into 5 stages based on estimated Glomerular Filtration Rate (eGFR), 
-            which measures how well your kidneys filter blood.
+            {t("CKD is classified into 5 stages based on estimated Glomerular Filtration Rate (eGFR), which measures how well your kidneys filter blood.", "सीकेडी को अनुमानित ग्लोमेरुलर फिल्ट्रेशन रेट (ईजीएफआर) के आधार पर 5 चरणों में वर्गीकृत किया गया है, जो मापता है कि आपके गुर्दे कितनी अच्छी तरह रक्त को फिल्टर करते हैं।")}
           </p>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -5,6 +5,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { AlertCircle, Info, Stethoscope, CheckCircle, AlertTriangle } from "lucide-react";
 import { useLocation } from "wouter";
+import { useLanguage, t } from "@/hooks/useLanguage";
 import {
   Collapsible,
   CollapsibleContent,
@@ -137,6 +138,7 @@ interface AssessmentResult {
 
 export default function SymptomChecker() {
   const [, setLocation] = useLocation();
+  const { language } = useLanguage();
   const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([]);
   const [showResults, setShowResults] = useState(false);
   const [assessment, setAssessment] = useState<AssessmentResult | null>(null);
@@ -246,9 +248,9 @@ export default function SymptomChecker() {
     return (
       <div className="container mx-auto px-4 py-6 sm:py-8 max-w-4xl">
         <div className="text-center mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-primary mb-4">Symptom Assessment Results</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-primary mb-4">{t("Symptom Assessment Results", "लक्षण मूल्यांकन परिणाम")}</h1>
           <p className="text-muted-foreground">
-            Based on your selected symptoms, here's your kidney health assessment
+            {t("Based on your selected symptoms, here's your kidney health assessment", "आपके चुने गए लक्षणों के आधार पर, यहाँ आपका गुर्दे स्वास्थ्य मूल्यांकन है")}
           </p>
         </div>
 
@@ -307,11 +309,11 @@ export default function SymptomChecker() {
 
         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
           <Button onClick={() => setShowResults(false)} variant="outline">
-            Check Again
+            {t("Check Again", "फिर से जांचें")}
           </Button>
           <Button onClick={() => setLocation("/diagnosis")} className="flex items-center">
             <Stethoscope className="mr-2 h-4 w-4" />
-            Start Full Assessment
+            {t("Start Full Assessment", "पूर्ण मूल्यांकन शुरू करें")}
           </Button>
         </div>
       </div>
@@ -321,17 +323,17 @@ export default function SymptomChecker() {
   return (
     <div className="container mx-auto px-4 py-6 sm:py-8 max-w-4xl">
       <div className="text-center mb-6 sm:mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-primary mb-4">CKD Symptom Checker</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-primary mb-4">{t("CKD Symptom Checker", "सीकेडी लक्षण जांचकर्ता")}</h1>
         <p className="text-muted-foreground">
-          Select symptoms you're experiencing to get an initial kidney health assessment
+          {t("Select symptoms you're experiencing to get an initial kidney health assessment", "प्रारंभिक गुर्दे स्वास्थ्य मूल्यांकन प्राप्त करने के लिए आप जो लक्षण अनुभव कर रहे हैं उन्हें चुनें")}
         </p>
       </div>
 
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle>Common CKD-Related Symptoms</CardTitle>
+          <CardTitle>{t("Common CKD-Related Symptoms", "सामान्य सीकेडी संबंधित लक्षण")}</CardTitle>
           <p className="text-sm text-muted-foreground">
-            Click on symptoms you're currently experiencing. Each has detailed medical information.
+            {t("Click on symptoms you're currently experiencing. Each has detailed medical information.", "उन लक्षणों पर क्लिक करें जो आप वर्तमान में अनुभव कर रहे हैं। प्रत्येक में विस्तृत चिकित्सा जानकारी है।")}
           </p>
         </CardHeader>
         <CardContent>
@@ -400,8 +402,7 @@ export default function SymptomChecker() {
         </Button>
         
         <p className="text-xs text-muted-foreground mt-4 max-w-2xl mx-auto">
-          This tool provides preliminary guidance only. Always consult healthcare professionals 
-          for proper diagnosis and treatment. Emergency symptoms require immediate medical attention.
+          {t("This tool provides preliminary guidance only. Always consult healthcare professionals for proper diagnosis and treatment. Emergency symptoms require immediate medical attention.", "यह उपकरण केवल प्रारंभिक मार्गदर्शन प्रदान करता है। उचित निदान और उपचार के लिए हमेशा स्वास्थ्य पेशेवरों से सलाह लें। आपातकालीन लक्षणों के लिए तत्काल चिकित्सा ध्यान की आवश्यकता होती है।")}
         </p>
       </div>
     </div>
