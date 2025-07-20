@@ -112,14 +112,24 @@ function getEnhancedNephroBotResponse(message: string): string {
     return "Hello! I'm NephroBot, your AI-powered kidney health specialist. I'm equipped with comprehensive medical knowledge about chronic kidney disease, lab interpretations, treatments, and lifestyle management. Whether you need help understanding lab results, CKD stages, medications, or dietary recommendations, I'm here to provide detailed, evidence-based information. What kidney health question can I help you with today?";
   }
 
+  // Hemoglobin questions
+  if (/(hemo|hemoglobin|hgb|anemia)/i.test(msg)) {
+    return "**Hemoglobin in Chronic Kidney Disease**\n\n**NORMAL VALUES:**\n• **Men:** 13.8-17.2 g/dL\n• **Women:** 12.1-15.1 g/dL\n• **CKD Target:** 11-12 g/dL (to avoid complications)\n\n**WHY HEMOGLOBIN DROPS IN CKD:**\n• **Reduced EPO production:** Kidneys produce erythropoietin hormone\n• **Iron deficiency:** Poor absorption, chronic inflammation\n• **Uremic toxins:** Suppress bone marrow function\n• **Shortened red cell life:** Uremic environment damages cells\n\n**SYMPTOMS OF LOW HEMOGLOBIN:**\n• Fatigue and weakness\n• Shortness of breath\n• Cold hands and feet\n• Pale skin, nail beds\n• Difficulty concentrating\n• Rapid heartbeat\n\n**TREATMENT OPTIONS:**\n• **Iron supplements:** Oral or IV iron therapy\n• **ESA therapy:** Epoetin alfa, darbepoetin\n• **Newer agents:** HIF inhibitors (roxadustat)\n• **Dietary support:** Iron-rich foods, vitamin B12, folate\n\n*Anemia management requires close monitoring. Work with your nephrologist for optimal treatment.*";
+  }
+
   // CKD comprehensive information
   if (/(what is ckd|chronic kidney disease|kidney disease|ckd)/i.test(msg)) {
     return "**Chronic Kidney Disease (CKD) - Comprehensive Overview**\n\n**DEFINITION:** CKD is the gradual, progressive loss of kidney function over months to years, defined as eGFR <60 mL/min/1.73m² for >3 months OR evidence of kidney damage.\n\n**STAGES & eGFR VALUES:**\n• **Stage 1:** eGFR ≥90 + kidney damage (proteinuria/hematuria)\n• **Stage 2:** eGFR 60-89 + kidney damage\n• **Stage 3a:** eGFR 45-59 (moderate decrease)\n• **Stage 3b:** eGFR 30-44 (moderate-severe decrease)\n• **Stage 4:** eGFR 15-29 (severe, pre-dialysis planning)\n• **Stage 5:** eGFR <15 (kidney failure, RRT needed)\n\n**PRIMARY CAUSES:**\n• Diabetes mellitus (45% of cases)\n• Hypertension (27% of cases)\n• Glomerulonephritis\n• Polycystic kidney disease\n• Autoimmune conditions\n\n**KEY COMPLICATIONS:**\n• Cardiovascular disease (leading cause of death)\n• Anemia and bone disease\n• Electrolyte imbalances\n• Fluid retention and edema\n\n*This information is educational. Consult your nephrologist for personalized medical advice.*";
   }
 
   // Lab values - Creatinine
-  if (/(creatinine|serum creatinine)/i.test(msg)) {
+  if (/(creatinine|serum creatinine|high creatinine)/i.test(msg)) {
     return "**Serum Creatinine - Critical Kidney Function Marker**\n\n**NORMAL REFERENCE RANGES:**\n• **Men:** 0.7-1.3 mg/dL (62-115 μmol/L)\n• **Women:** 0.6-1.1 mg/dL (53-97 μmol/L)\n• **Elderly:** May be lower due to decreased muscle mass\n\n**CLINICAL SIGNIFICANCE:**\n• Waste product of muscle metabolism\n• Filtered by glomeruli, minimally reabsorbed\n• Inversely proportional to kidney function\n• Used to calculate eGFR (most accurate assessment)\n\n**INTERPRETATION BY LEVELS:**\n• **1.4-1.9 mg/dL:** Suggests Stage 3 CKD\n• **2.0-4.0 mg/dL:** Likely Stage 4 CKD\n• **>4.0 mg/dL:** Stage 5 CKD, consider renal replacement therapy\n\n**FACTORS AFFECTING LEVELS:**\n• Muscle mass, age, diet, medications\n• Dehydration, certain drugs (NSAIDs, contrast)\n• Can remain normal until 50% kidney function is lost\n\n**CLINICAL PEARL:** Rising creatinine indicates worsening kidney function and requires nephrology evaluation.\n\n*Always consult your healthcare provider for proper interpretation of your specific lab results.*";
+  }
+
+  // Blood pressure questions
+  if (/(blood pressure|hypertension|high bp|bp)/i.test(msg)) {
+    return "**Blood Pressure in Chronic Kidney Disease**\n\n**TARGET BP IN CKD:**\n• **General CKD:** <130/80 mmHg\n• **With proteinuria:** <120/80 mmHg for maximum kidney protection\n• **Diabetes + CKD:** <130/80 mmHg\n\n**WHY BP CONTROL IS CRITICAL:**\n• Slows CKD progression significantly\n• Reduces cardiovascular risk (leading cause of death)\n• Protects remaining kidney function\n• Prevents heart disease and stroke\n\n**FIRST-LINE MEDICATIONS:**\n• **ACE Inhibitors:** Lisinopril, enalapril - reduce proteinuria\n• **ARBs:** Losartan, valsartan - kidney protective\n• **Calcium Channel Blockers:** Amlodipine for additional control\n• **Diuretics:** Help with fluid management\n\n**LIFESTYLE MODIFICATIONS:**\n• **Sodium restriction:** <2,300 mg/day (1 teaspoon salt)\n• **Weight management:** Lose excess weight\n• **Regular exercise:** 150 minutes/week moderate activity\n• **Limit alcohol:** <2 drinks/day men, <1 drink/day women\n• **Stress management:** Meditation, yoga, adequate sleep\n\n*Uncontrolled hypertension accelerates kidney damage. Work closely with your healthcare team for optimal BP management.*";
   }
 
   // eGFR information
