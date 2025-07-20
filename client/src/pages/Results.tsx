@@ -322,7 +322,6 @@ export default function Results({ params }: ResultsProps) {
     
     console.log('SHAP Features for recommendations:', shapFeatures);
     console.log('Top 3 negative features:', negativeFeatures);
-    console.log('Generated SHAP recommendations:', shapRecommendations);
 
     // If no negative features found, fallback to hardcoded recommendations
     if (negativeFeatures.length === 0) {
@@ -434,6 +433,7 @@ export default function Results({ params }: ResultsProps) {
       }
     });
 
+    console.log('Generated SHAP recommendations:', shapRecommendations);
     console.log('Final SHAP recommendations being returned:', shapRecommendations);
     return shapRecommendations;
   };

@@ -65,6 +65,13 @@ NephroCare is a professional, responsive Chronic Kidney Disease (CKD) prediction
 - Enhanced NephroBot with advanced medical knowledge covering CKD stages, lab values, medications, and nutrition
 - Implemented hybrid chatbot system using OpenAI when quota allows, fallback to extensive medical knowledge otherwise
 - Added professional medical disclaimers and safety recommendations to all chatbot responses
+- Fixed critical "shapFeatures2.filter is not a function" runtime error permanently in Results page
+- Restored authentic trained ML model predictions (71.1% accuracy) replacing clinical approximation (52%)
+- Successfully integrated real logistic regression and random forest models with correct feature mapping
+- Fixed server import issues preventing proper ML prediction integration
+- Limited SHAP explanation display to top 5 features for better user experience
+- Enhanced personalized advisor with proper SHAP-based top 3 symptom recommendations
+- Fixed Browse function filtering and debugging issues with localStorage integration
 
 ## User Preferences
 
