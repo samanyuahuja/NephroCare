@@ -181,6 +181,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get all CKD assessments (for Browse section)
+  app.get("/api/ckd-assessments", async (req, res) => {
+    try {
+      const assessments = await storage.getAllCKDAssessments();
+      res.json(assessments);
+    } catch (error: any) {
+      console.error('Get all CKD Assessments error:', error);
+      res.status(500).json({ error: "Failed to fetch CKD assessments" });
+    }
+  });
+
   // Get CKD assessments (filtered by user's assessment IDs)
   app.get("/api/ckd-assessments/filtered", async (req, res) => {
     try {

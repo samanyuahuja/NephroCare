@@ -62,9 +62,19 @@ const Browse = () => {
       try {
         const response = await fetch("/api/ckd-assessments");
         if (!response.ok) {
-          throw new Error('Failed to fetch assessments');
+          console.error('API response not OK:', response.status, response.statusText);
+          throw new Error(`Failed to fetch assessments: ${response.status}`);
         }
-        const allAssessments = await response.json();
+        const responseText = await response.text();
+        console.log('Raw API response:', responseText);
+        
+        let allAssessments;
+        try {
+          allAssessments = JSON.parse(responseText);
+        } catch (parseError) {
+          console.error('JSON parse error:', parseError);
+          throw new Error('Invalid JSON response from server');
+        }
         console.log('All assessments:', allAssessments?.length || 0);
         console.log('User assessment IDs:', userAssessmentIds);
         

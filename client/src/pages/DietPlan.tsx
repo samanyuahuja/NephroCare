@@ -35,7 +35,7 @@ export default function DietPlan({ params }: DietPlanProps) {
         assessmentId,
         dietType,
         foodsToEat: generateFoodToEat(dietType, assessment),
-        foodsToAvoid: generateFoodToAvoid(assessment),
+        foodsToAvoid: generateFoodToAvoid(dietType, assessment),
         waterIntakeAdvice: generateWaterIntake(assessment),
         specialInstructions: generateSpecialInstructions(assessment)
       };
@@ -164,26 +164,43 @@ export default function DietPlan({ params }: DietPlanProps) {
     return foods.join(", ");
   };
 
-  const generateFoodToAvoid = (assessment?: CKDAssessment) => {
+  const generateFoodToAvoid = (dietType: string, assessment?: CKDAssessment) => {
     if (!assessment) {
       return "High-sodium processed foods, excessive protein, high-potassium fruits in excess";
     }
 
     const avoidFoods = [];
     
-    // Base CKD restrictions
+    // Base CKD restrictions with diet-specific modifications
     avoidFoods.push("High-sodium foods (processed foods, canned soups, pickles, papad)");
-    avoidFoods.push("Excessive protein sources (red meat, excessive dal, soy products)");
+    
+    if (dietType === 'vegetarian') {
+      avoidFoods.push("Excessive protein sources (red meat, excessive dal, soy products in large amounts)");
+      avoidFoods.push("High-protein vegetarian foods in excess (paneer, cheese, nuts)");
+    } else {
+      avoidFoods.push("Excessive protein sources (red meat, organ meats, processed meats)");
+      avoidFoods.push("High-fat animal proteins (fatty cuts of meat, full-fat dairy)");
+    }
 
-    // High Serum Creatinine - avoid protein and processed foods
+    // High Serum Creatinine - avoid protein and processed foods (diet-specific)
     if (assessment.serumCreatinine && parseFloat(assessment.serumCreatinine.toString()) > 1.5) {
-      avoidFoods.push("All red meat, fish, excessive protein");
+      if (dietType === 'vegetarian') {
+        avoidFoods.push("Excessive plant proteins (large portions of dal, legumes, tofu)");
+        avoidFoods.push("High-protein nuts and seeds in large quantities");
+      } else {
+        avoidFoods.push("All red meat, organ meats, processed fish products");
+        avoidFoods.push("High-protein animal products in excess");
+      }
       avoidFoods.push("Alcohol and processed foods");
     }
 
-    // High Blood Urea - strict protein restriction
+    // High Blood Urea - strict protein restriction (diet-specific)
     if (assessment.bloodUrea && assessment.bloodUrea > 40) {
-      avoidFoods.push("Meat, fish, excessive pulses, soy products");
+      if (dietType === 'vegetarian') {
+        avoidFoods.push("Excessive pulses, dal, soy products, protein-rich legumes");
+      } else {
+        avoidFoods.push("All meat, fish, poultry in large portions, high-protein animal products");
+      }
     }
 
     // High Blood Pressure - sodium restriction
