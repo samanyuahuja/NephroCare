@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertCKDAssessmentSchema, insertDietPlanSchema, insertChatMessageSchema } from "@shared/schema";
 import OpenAI from "openai";
+import { spawn } from 'child_process';
 
 // Initialize OpenAI with API key
 const openai = new OpenAI({ 
@@ -35,12 +36,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // CKD Assessment endpoint
+  // CKD Assessment endpoint with ML prediction
   app.post("/api/ckd-assessment", async (req, res) => {
     try {
       const validatedData = insertCKDAssessmentSchema.parse(req.body);
+      
+      // Create initial assessment
       const assessment = await storage.createCKDAssessment(validatedData);
-      res.json(assessment);
+      
+      // Run ML prediction
+      try {
+        const predictionResult = await runCKDPrediction(validatedData);
+        
+        if (predictionResult.success) {
+          // Update assessment with ML results
+          // Generate SHAP/LIME/PDP visualizations
+          let visualizationData = null;
+          try {
+            const vizProcess = spawn('python3', ['generate_shap_data.py', JSON.stringify({
+              ...modelInput,
+              prediction: predictionResult.probability,
+              risk_level: predictionResult.risk_level
+            })]);
+            
+            let vizOutput = '';
+            vizProcess.stdout.on('data', (data) => {
+              vizOutput += data.toString();
+            });
+            
+            await new Promise((resolve) => {
+              vizProcess.on('close', () => {
+                if (vizOutput) {
+                  try {
+                    visualizationData = JSON.parse(vizOutput);
+                  } catch (parseError) {
+                    console.warn('Visualization parsing failed:', parseError);
+                  }
+                }
+                resolve(null);
+              });
+            });
+          } catch (vizError) {
+            console.warn('Visualization generation failed:', vizError);
+          }
+          
+          const updatedAssessment = await storage.updateCKDAssessmentResults(
+            assessment.id,
+            predictionResult.probability,
+            predictionResult.risk_level,
+            JSON.stringify({
+              prediction: predictionResult.prediction,
+              probability: predictionResult.probability,
+              risk_level: predictionResult.risk_level,
+              risk_color: predictionResult.risk_color,
+              model_used: predictionResult.model_used || 'clinical',
+              timestamp: new Date().toISOString(),
+              visualizations: visualizationData
+            })
+          );
+          
+          res.json(updatedAssessment || assessment);
+        } else {
+          // Return assessment without ML prediction (fallback)
+          console.warn('ML prediction failed, returning basic assessment:', predictionResult.error);
+          res.json(assessment);
+        }
+      } catch (mlError) {
+        console.error('ML prediction error:', mlError);
+        // Return basic assessment even if ML fails
+        res.json(assessment);
+      }
     } catch (error: any) {
       console.error('CKD Assessment error:', error);
       res.status(400).json({ error: error.message || "Failed to create assessment" });
@@ -122,6 +187,124 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   const httpServer = createServer(app);
   return httpServer;
+}
+
+
+
+// ML Prediction Integration
+async function runCKDPrediction(assessmentData: any): Promise<any> {
+  return new Promise((resolve) => {
+    try {
+      
+      // Map assessment data to model format
+      const modelInput = {
+        age: assessmentData.age || 45,
+        bp: assessmentData.bloodPressure || 120,
+        al: assessmentData.albumin === "unknown" ? 1 : assessmentData.albumin,
+        su: assessmentData.sugar === "unknown" ? 1 : assessmentData.sugar,
+        rbc: assessmentData.redBloodCells === "abnormal" ? "abnormal" : "normal",
+        pc: assessmentData.pusCell === "abnormal" ? "abnormal" : "normal",
+        ba: "notpresent", // Default value
+        bgr: assessmentData.bloodGlucoseRandom === "unknown" ? 145 : assessmentData.bloodGlucoseRandom,
+        bu: assessmentData.bloodUrea === "unknown" ? 35 : assessmentData.bloodUrea,
+        sc: assessmentData.serumCreatinine === "unknown" ? 1.8 : assessmentData.serumCreatinine,
+        sod: assessmentData.sodium === "unknown" ? 135 : assessmentData.sodium,
+        pot: assessmentData.potassium === "unknown" ? 4.5 : assessmentData.potassium,
+        hemo: assessmentData.hemoglobin === "unknown" ? 12 : assessmentData.hemoglobin,
+        wbcc: assessmentData.wbcCount === "unknown" ? 7600 : assessmentData.wbcCount,
+        rbcc: assessmentData.rbcCount === "unknown" ? 5.2 : assessmentData.rbcCount,
+        htn: assessmentData.hypertension === "yes" ? "yes" : "no",
+        dm: assessmentData.diabetesMellitus === "yes" ? "yes" : "no",
+        appet: assessmentData.appetite === "poor" ? "poor" : "good",
+        pe: assessmentData.pedalEdema === "yes" ? "yes" : "no",
+        ane: assessmentData.anemia === "yes" ? "yes" : "no"
+      };
+      
+      // Use python_predictor.py (clinical model - more reliable)
+      const pythonProcess = spawn('python3', ['python_predictor.py', JSON.stringify(modelInput)]);
+      
+      let output = '';
+      let error = '';
+      
+      pythonProcess.stdout.on('data', (data) => {
+        output += data.toString();
+      });
+      
+      pythonProcess.stderr.on('data', (data) => {
+        error += data.toString();
+      });
+      
+      pythonProcess.on('close', (code) => {
+        if (code === 0 && output) {
+          try {
+            const result = JSON.parse(output.trim());
+            if (result.success !== false) {
+              resolve({ ...result, success: true });
+              return;
+            }
+          } catch (parseError) {
+            console.error('Error parsing ML output:', parseError);
+          }
+        }
+        
+        // Fallback to model predictor (if clinical fails)
+        console.log('Trying ML model predictor...');
+        const fallbackProcess = spawn('python3', ['model_predictor.py', JSON.stringify(modelInput)]);
+        
+        let fallbackOutput = '';
+        
+        fallbackProcess.stdout.on('data', (data) => {
+          fallbackOutput += data.toString();
+        });
+        
+        fallbackProcess.on('close', (fallbackCode) => {
+          if (fallbackCode === 0 && fallbackOutput) {
+            try {
+              const fallbackResult = JSON.parse(fallbackOutput.trim());
+              resolve({ ...fallbackResult, success: true, model_used: 'clinical_fallback' });
+            } catch (parseError) {
+              resolve({
+                success: false,
+                error: `Fallback prediction parsing failed: ${parseError}`,
+                prediction: 0,
+                probability: 0.0,
+                risk_level: 'Unknown'
+              });
+            }
+          } else {
+            resolve({
+              success: false,
+              error: `Both ML and clinical prediction failed. ML error: ${error}, Fallback code: ${fallbackCode}`,
+              prediction: 0,
+              probability: 0.0,
+              risk_level: 'Error'
+            });
+          }
+        });
+      });
+      
+      // Timeout after 30 seconds
+      setTimeout(() => {
+        pythonProcess.kill();
+        resolve({
+          success: false,
+          error: 'ML prediction timeout',
+          prediction: 0,
+          probability: 0.0,
+          risk_level: 'Timeout'
+        });
+      }, 30000);
+      
+    } catch (error) {
+      resolve({
+        success: false,
+        error: `ML prediction setup failed: ${error}`,
+        prediction: 0,
+        probability: 0.0,
+        risk_level: 'Error'
+      });
+    }
+  });
 }
 
 // AI-powered NephroBot using OpenAI GPT-4o with intelligent fallback
