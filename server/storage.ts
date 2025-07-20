@@ -23,11 +23,13 @@ export interface IStorage {
   
   createCKDAssessment(assessment: InsertCKDAssessment): Promise<CKDAssessment>;
   getCKDAssessment(id: number): Promise<CKDAssessment | undefined>;
+  getCKDAssessmentsByIds(ids: number[]): Promise<CKDAssessment[]>;
   updateCKDAssessmentResults(id: number, riskScore: number, riskLevel: string, shapFeatures: string): Promise<CKDAssessment | undefined>;
   getAllCKDAssessments(): Promise<CKDAssessment[]>;
   
   createDietPlan(dietPlan: InsertDietPlan): Promise<DietPlan>;
   getDietPlanByAssessmentId(assessmentId: number): Promise<DietPlan | undefined>;
+  getDietPlansByAssessmentIds(assessmentIds: number[]): Promise<DietPlan[]>;
   getAllDietPlans(): Promise<DietPlan[]>;
   
   createChatMessage(message: InsertChatMessage): Promise<ChatMessage>;
@@ -69,6 +71,12 @@ export class DatabaseStorage implements IStorage {
     return updated || undefined;
   }
 
+  async getCKDAssessmentsByIds(ids: number[]): Promise<CKDAssessment[]> {
+    if (ids.length === 0) return [];
+    const { inArray } = await import("drizzle-orm");
+    return await db.select().from(ckdAssessments).where(inArray(ckdAssessments.id, ids)).orderBy(desc(ckdAssessments.createdAt));
+  }
+
   async getAllCKDAssessments(): Promise<CKDAssessment[]> {
     return await db.select().from(ckdAssessments).orderBy(desc(ckdAssessments.createdAt));
   }
@@ -81,6 +89,28 @@ export class DatabaseStorage implements IStorage {
   async getDietPlanByAssessmentId(assessmentId: number): Promise<DietPlan | undefined> {
     const [plan] = await db.select().from(dietPlans).where(eq(dietPlans.assessmentId, assessmentId));
     return plan || undefined;
+  }
+
+  async getDietPlansByAssessmentIds(assessmentIds: number[]): Promise<DietPlan[]> {
+    if (assessmentIds.length === 0) return [];
+    const { inArray } = await import("drizzle-orm");
+    const result = await db
+      .select({
+        id: dietPlans.id,
+        assessmentId: dietPlans.assessmentId,
+        dietType: dietPlans.dietType,
+        foodsToEat: dietPlans.foodsToEat,
+        foodsToAvoid: dietPlans.foodsToAvoid,
+        waterIntakeAdvice: dietPlans.waterIntakeAdvice,
+        createdAt: dietPlans.createdAt,
+        patientName: ckdAssessments.patientName
+      })
+      .from(dietPlans)
+      .leftJoin(ckdAssessments, eq(dietPlans.assessmentId, ckdAssessments.id))
+      .where(inArray(dietPlans.assessmentId, assessmentIds))
+      .orderBy(desc(dietPlans.createdAt));
+    
+    return result as DietPlan[];
   }
 
   async getAllDietPlans(): Promise<DietPlan[]> {
@@ -193,6 +223,14 @@ export class MemStorage implements IStorage {
     return this.ckdAssessments.get(id);
   }
 
+  async getCKDAssessmentsByIds(ids: number[]): Promise<CKDAssessment[]> {
+    return ids.map(id => this.ckdAssessments.get(id)).filter(Boolean) as CKDAssessment[];
+  }
+
+  async getAllCKDAssessments(): Promise<CKDAssessment[]> {
+    return Array.from(this.ckdAssessments.values());
+  }
+
   async updateCKDAssessmentResults(id: number, riskScore: number, riskLevel: string, shapFeatures: string): Promise<CKDAssessment | undefined> {
     const assessment = this.ckdAssessments.get(id);
     if (assessment) {
@@ -219,6 +257,16 @@ export class MemStorage implements IStorage {
     return Array.from(this.dietPlans.values()).find(
       (plan) => plan.assessmentId === assessmentId
     );
+  }
+
+  async getDietPlansByAssessmentIds(assessmentIds: number[]): Promise<DietPlan[]> {
+    return Array.from(this.dietPlans.values()).filter(
+      (plan) => plan.assessmentId && assessmentIds.includes(plan.assessmentId)
+    );
+  }
+
+  async getAllDietPlans(): Promise<DietPlan[]> {
+    return Array.from(this.dietPlans.values());
   }
 
   async createChatMessage(insertMessage: InsertChatMessage): Promise<ChatMessage> {

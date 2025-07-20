@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { User, FlaskConical, FileText, BarChart3, ChevronDown, Stethoscope } from "lucide-react";
 import { insertCKDAssessmentSchema, type InsertCKDAssessment } from "@shared/schema";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage, t } from "@/hooks/useLanguage";
 
@@ -32,7 +32,6 @@ export default function Diagnosis() {
       sugar: 1,
       redBloodCells: "normal",
       pusCell: "normal",
-      bacteria: "not_present",
       bloodGlucoseRandom: 145,
       bloodUrea: 35,
       serumCreatinine: 1.8,
@@ -43,7 +42,6 @@ export default function Diagnosis() {
       rbcCount: 5.2,
       hypertension: "no",
       diabetesMellitus: "no",
-      coronaryArteryDisease: "no",
       appetite: "good",
       pedalEdema: "no",
       anemia: "no",
@@ -390,10 +388,10 @@ export default function Diagnosis() {
                             max="120"
                             {...field}
                             onChange={(e) => field.onChange(parseInt(e.target.value))}
-                            className={field.value && (parseInt(field.value) < 10 || parseInt(field.value) > 90) ? "border-orange-400" : ""}
+                            className={field.value && (field.value < 10 || field.value > 90) ? "border-orange-400" : ""}
                           />
                         </FormControl>
-                        {field.value && (parseInt(field.value) < 10 || parseInt(field.value) > 90) && (
+                        {field.value && (field.value < 10 || field.value > 90) && (
                           <p className="text-sm text-orange-600">Age outside typical range for CKD assessment</p>
                         )}
                       </FormItem>
@@ -412,13 +410,13 @@ export default function Diagnosis() {
                             max="200"
                             {...field}
                             onChange={(e) => field.onChange(parseInt(e.target.value))}
-                            className={field.value && (parseInt(field.value) < 60 || parseInt(field.value) > 140) ? "border-red-400" : ""}
+                            className={field.value && (field.value < 60 || field.value > 140) ? "border-red-400" : ""}
                           />
                         </FormControl>
-                        {field.value && parseInt(field.value) < 60 && (
+                        {field.value && field.value < 60 && (
                           <p className="text-sm text-red-600">Warning: Hypotension - consult doctor immediately</p>
                         )}
-                        {field.value && parseInt(field.value) > 140 && (
+                        {field.value && field.value > 140 && (
                           <p className="text-sm text-red-600">Warning: High blood pressure - major CKD risk factor</p>
                         )}
                       </FormItem>
@@ -431,7 +429,7 @@ export default function Diagnosis() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Albumin (0-5 scale)</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value?.toString()}>
+                        <Select onValueChange={(value) => field.onChange(value === "unknown" ? "unknown" : parseInt(value))} defaultValue={field.value?.toString()}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select albumin level" />
@@ -447,7 +445,7 @@ export default function Diagnosis() {
                             <SelectItem value="unknown">{t("Don't Know", "मुझे नहीं पता")}</SelectItem>
                           </SelectContent>
                         </Select>
-                        {field.value && parseInt(field.value) > 3 && (
+                        {field.value && typeof field.value === "number" && field.value > 3 && (
                           <p className="text-sm text-red-600">Warning: High proteinuria - indicates kidney damage</p>
                         )}
                       </FormItem>
@@ -459,7 +457,7 @@ export default function Diagnosis() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Sugar (0-5 scale)</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value?.toString()}>
+                        <Select onValueChange={(value) => field.onChange(value === "unknown" ? "unknown" : parseInt(value))} defaultValue={field.value?.toString()}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select sugar level" />
@@ -475,7 +473,7 @@ export default function Diagnosis() {
                             <SelectItem value="unknown">{t("Don't Know", "मुझे नहीं पता")}</SelectItem>
                           </SelectContent>
                         </Select>
-                        {field.value && parseInt(field.value) > 2 && (
+                        {field.value && typeof field.value === "number" && field.value > 2 && (
                           <p className="text-sm text-red-600">Warning: May signal diabetes - major CKD risk factor</p>
                         )}
                       </FormItem>

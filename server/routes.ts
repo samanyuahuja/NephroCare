@@ -35,6 +35,91 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // CKD Assessment endpoint
+  app.post("/api/ckd-assessment", async (req, res) => {
+    try {
+      const validatedData = insertCKDAssessmentSchema.parse(req.body);
+      const assessment = await storage.createCKDAssessment(validatedData);
+      res.json(assessment);
+    } catch (error: any) {
+      console.error('CKD Assessment error:', error);
+      res.status(400).json({ error: error.message || "Failed to create assessment" });
+    }
+  });
+
+  // Get CKD assessments (filtered by user's assessment IDs)
+  app.get("/api/ckd-assessments/filtered", async (req, res) => {
+    try {
+      const { ids } = req.query;
+      if (!ids || typeof ids !== 'string') {
+        return res.json([]);
+      }
+      
+      const assessmentIds = JSON.parse(ids);
+      const assessments = await storage.getCKDAssessmentsByIds(assessmentIds);
+      res.json(assessments);
+    } catch (error: any) {
+      console.error('Get CKD Assessments error:', error);
+      res.status(500).json({ error: "Failed to fetch assessments" });
+    }
+  });
+
+  // Get specific CKD assessment
+  app.get("/api/ckd-assessment/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const assessment = await storage.getCKDAssessment(id);
+      if (!assessment) {
+        return res.status(404).json({ error: "Assessment not found" });
+      }
+      res.json(assessment);
+    } catch (error: any) {
+      console.error('Get CKD Assessment error:', error);
+      res.status(500).json({ error: "Failed to fetch assessment" });
+    }
+  });
+
+  // Diet Plan endpoint
+  app.post("/api/diet-plan", async (req, res) => {
+    try {
+      const validatedData = insertDietPlanSchema.parse(req.body);
+      const dietPlan = await storage.createDietPlan(validatedData);
+      res.json(dietPlan);
+    } catch (error: any) {
+      console.error('Diet Plan error:', error);
+      res.status(400).json({ error: error.message || "Failed to create diet plan" });
+    }
+  });
+
+  // Get diet plans (filtered by user's assessment IDs)
+  app.get("/api/diet-plans/filtered", async (req, res) => {
+    try {
+      const { ids } = req.query;
+      if (!ids || typeof ids !== 'string') {
+        return res.json([]);
+      }
+      
+      const assessmentIds = JSON.parse(ids);
+      const dietPlans = await storage.getDietPlansByAssessmentIds(assessmentIds);
+      res.json(dietPlans);
+    } catch (error: any) {
+      console.error('Get Diet Plans error:', error);
+      res.status(500).json({ error: "Failed to fetch diet plans" });
+    }
+  });
+
+  // Chat Messages endpoint (for conversation history)
+  app.post("/api/chat-message", async (req, res) => {
+    try {
+      const validatedData = insertChatMessageSchema.parse(req.body);
+      const chatMessage = await storage.createChatMessage(validatedData);
+      res.json(chatMessage);
+    } catch (error: any) {
+      console.error('Chat Message error:', error);
+      res.status(400).json({ error: error.message || "Failed to create chat message" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
