@@ -56,11 +56,7 @@ export default function DietPlan({ params }: DietPlanProps) {
   const { data: dietPlan, isLoading } = useQuery<DietPlan>({
     queryKey: ["/api/diet-plan", assessmentId, dietType],
     queryFn: () => {
-      // If diet plan already exists and matches the current diet type, use it
-      if (existingDietPlan && existingDietPlan.dietType === dietType) {
-        return Promise.resolve(existingDietPlan);
-      }
-      // Otherwise create a new one
+      // Always create new diet plan when diet type changes
       return dietPlanMutation.mutateAsync({ assessmentId, dietType });
     },
     enabled: !isNaN(assessmentId) && hasAccess(),
@@ -99,13 +95,15 @@ export default function DietPlan({ params }: DietPlanProps) {
   };
 
   const generateWaterIntake = (assessment?: CKDAssessment) => {
-    if (!assessment) return "Maintain adequate hydration - 6-8 glasses of water daily, adjust based on kidney function";
+    if (!assessment) return "Maintain adequate hydration - 6-8 glasses of water daily. Monitor urine output and adjust intake based on kidney function. Drink water between meals rather than with meals. Spread intake throughout the day. Consult healthcare provider if you have fluid retention or swelling.";
     
     const riskScore = assessment.riskScore || 0;
-    if (riskScore > 0.6) {
-      return "Moderate water intake - 4-6 glasses daily, monitor fluid balance, consult healthcare provider for specific limits";
+    const creatinine = parseFloat(assessment.serumCreatinine?.toString() || "0");
+    
+    if (riskScore > 0.6 || creatinine > 1.5) {
+      return "Moderate water intake - 4-6 glasses daily (1000-1500ml). Monitor fluid balance carefully and watch for signs of fluid overload like swelling in ankles or shortness of breath. Limit fluid intake if you have advanced kidney disease (Stage 4-5). Include all fluids (tea, coffee, soups) in daily count. Consult nephrologist for personalized fluid restrictions. Avoid excessive water during meals to prevent diluting digestive enzymes.";
     }
-    return "Maintain adequate hydration - 6-8 glasses of water daily, adjust based on kidney function";
+    return "Maintain adequate hydration - 6-8 glasses of water daily (1500-2000ml). Drink more in hot weather or during physical activity. Monitor urine color - pale yellow indicates good hydration. Space water intake throughout the day rather than drinking large amounts at once. Include water-rich foods like cucumbers and watermelon. Reduce intake 2-3 hours before bedtime to improve sleep quality.";
   };
 
   const generateSpecialInstructions = (assessment?: CKDAssessment) => {
@@ -229,12 +227,24 @@ export default function DietPlan({ params }: DietPlanProps) {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-blue-700">
+              <div className="text-blue-700 space-y-3">
                 {dietPlan?.waterIntakeAdvice.split('. ').map((sentence, index) => (
-                  <p key={index} className="mb-2">
-                    <strong>{sentence.split(':')[0]}:</strong> {sentence.split(':').slice(1).join(':')}
-                  </p>
+                  <div key={index} className="flex items-start">
+                    <Droplets className="h-4 w-4 text-blue-500 mt-0.5 mr-2 flex-shrink-0" />
+                    <p className="text-sm leading-relaxed">{sentence.trim()}.</p>
+                  </div>
                 ))}
+                <div className="mt-4 p-3 bg-blue-100 rounded-lg border border-blue-200">
+                  <p className="text-sm font-medium text-blue-800 mb-2">
+                    {t("Important Water Intake Tips:", "महत्वपूर्ण पानी सेवन सुझाव:")}
+                  </p>
+                  <ul className="text-xs space-y-1 text-blue-700">
+                    <li>• {t("Track your daily fluid intake including all beverages", "सभी पेय पदार्थों सहित अपने दैनिक तरल सेवन को ट्रैक करें")}</li>
+                    <li>• {t("Sip small amounts throughout the day", "दिन भर में छोटी मात्रा में घूंट लें")}</li>
+                    <li>• {t("Monitor for swelling or breathing difficulties", "सूजन या सांस लेने में कठिनाई की निगरानी करें")}</li>
+                    <li>• {t("Adjust based on activity level and weather", "गतिविधि स्तर और मौसम के आधार पर समायोजित करें")}</li>
+                  </ul>
+                </div>
               </div>
             </CardContent>
           </Card>

@@ -65,7 +65,7 @@ const Browse = () => {
         console.log('User assessment IDs:', userAssessmentIds);
         
         const filtered = allAssessments.filter((assessment: CKDAssessment) => 
-          userAssessmentIds.includes(assessment.id)
+          assessment && assessment.id && userAssessmentIds.includes(assessment.id)
         );
         console.log('Filtered assessments:', filtered?.length || 0, 'assessments found');
         return filtered;
@@ -261,7 +261,7 @@ const Browse = () => {
                     <div className="flex items-start justify-between mb-2">
                       <CardTitle className="text-lg flex items-center gap-2">
                         <Utensils className="h-5 w-5 text-primary" />
-                        {plan.patientName && t(`Diet Plan for ${plan.patientName}`, `${plan.patientName} के लिए आहार योजना`)}
+                        {t("Diet Plan", "आहार योजना")} #{plan.id}
                       </CardTitle>
                       <Badge variant="outline">
                         {plan.dietType || t("Personalized", "व्यक्तिगत")}
@@ -275,34 +275,34 @@ const Browse = () => {
                   
                   <CardContent>
                     <div className="space-y-3 mb-4">
-                      {plan.recommendations && (
-                        <div className="text-sm">
-                          <span className="font-semibold text-green-600">{t("Key Recommendations:", "मुख्य सिफारिशें:")}</span>
-                          <p className="text-gray-600 mt-1 line-clamp-3">
-                            {plan.recommendations}
-                          </p>
-                        </div>
-                      )}
+                      <div className="text-sm">
+                        <span className="font-semibold text-green-600">{t("Diet Type:", "आहार प्रकार:")}</span>
+                        <p className="text-gray-600 mt-1 capitalize">
+                          {plan.dietType || t("Personalized", "व्यक्तिगत")}
+                        </p>
+                      </div>
                       
-                      {plan.restrictions && (
+                      {plan.foodsToEat && (
                         <div className="text-sm">
-                          <span className="font-semibold text-red-600">{t("Dietary Restrictions:", "आहार प्रतिबंध:")}</span>
+                          <span className="font-semibold text-blue-600">{t("Foods to Eat:", "खाने योग्य खाद्य:")}</span>
                           <p className="text-gray-600 mt-1 line-clamp-2">
-                            {plan.restrictions}
+                            {plan.foodsToEat.substring(0, 100)}...
                           </p>
                         </div>
                       )}
                       
-                      {plan.calories && (
-                        <div className="flex justify-between text-sm">
-                          <span className="text-gray-500">{t("Daily Calories", "दैनिक कैलोरी")}</span>
-                          <span className="font-semibold">{plan.calories} kcal</span>
+                      {plan.waterIntakeAdvice && (
+                        <div className="text-sm">
+                          <span className="font-semibold text-blue-600">{t("Water Intake:", "पानी का सेवन:")}</span>
+                          <p className="text-gray-600 mt-1 line-clamp-1">
+                            {plan.waterIntakeAdvice.substring(0, 80)}...
+                          </p>
                         </div>
                       )}
                     </div>
 
                     <div className="flex gap-2">
-                      <Link href={`/diet-plan/${plan.id}`} className="flex-1">
+                      <Link href={`/diet-plan/${plan.assessmentId}`} className="flex-1">
                         <Button size="sm" className="w-full">
                           <Utensils className="h-4 w-4 mr-2" />
                           {t("View Full Plan", "पूरी योजना देखें")}
