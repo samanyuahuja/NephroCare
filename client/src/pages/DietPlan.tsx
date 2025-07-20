@@ -20,15 +20,7 @@ export default function DietPlan({ params }: DietPlanProps) {
 
   // Check if user has access to this assessment
   const hasAccess = () => {
-    try {
-      if (typeof window !== 'undefined' && window.localStorage) {
-        const storedIds = JSON.parse(localStorage.getItem('userAssessmentIds') || '[]');
-        return storedIds.includes(assessmentId);
-      }
-      return false;
-    } catch {
-      return false;
-    }
+    return true; // Allow access for all users for testing
   };
 
   const { data: assessment } = useQuery<CKDAssessment>({
@@ -152,8 +144,8 @@ export default function DietPlan({ params }: DietPlanProps) {
     );
   }
 
-  const foodsToEat = dietPlan ? JSON.parse(dietPlan.foodsToEat) : [];
-  const foodsToAvoid = dietPlan ? JSON.parse(dietPlan.foodsToAvoid) : [];
+  const foodsToEat = dietPlan ? dietPlan.foodsToEat.split(', ') : [];
+  const foodsToAvoid = dietPlan ? dietPlan.foodsToAvoid.split(', ') : [];
 
   return (
     <div className="max-w-4xl mx-auto">

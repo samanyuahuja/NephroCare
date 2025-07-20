@@ -56,7 +56,8 @@ export default function Diagnosis() {
     onSuccess: (data) => {
       try {
         // Store assessment ID in localStorage for privacy
-        const storedIds = JSON.parse(localStorage.getItem('userAssessmentIds') || '[]');
+        const stored = localStorage.getItem('userAssessmentIds') || '[]';
+        const storedIds = JSON.parse(stored);
         const updatedIds = [...storedIds, data.id];
         localStorage.setItem('userAssessmentIds', JSON.stringify(updatedIds));
         

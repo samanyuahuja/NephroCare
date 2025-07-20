@@ -20,15 +20,20 @@ const Browse = () => {
   useEffect(() => {
     const getStoredAssessmentIds = (): number[] => {
       try {
-        const stored = localStorage.getItem('userAssessmentIds');
-        return stored ? JSON.parse(stored) : [];
+        if (typeof window !== 'undefined' && window.localStorage) {
+          const stored = localStorage.getItem('userAssessmentIds');
+          return stored ? JSON.parse(stored) : [];
+        }
+        return [];
       } catch {
         return [];
       }
     };
 
     const updateAssessmentIds = () => {
-      setUserAssessmentIds(getStoredAssessmentIds());
+      const ids = getStoredAssessmentIds();
+      setUserAssessmentIds(ids);
+      console.log('Browse: Updated assessment IDs:', ids);
     };
 
     // Initial load
