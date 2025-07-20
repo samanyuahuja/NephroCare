@@ -53,7 +53,7 @@ export default function DietPlan({ params }: DietPlanProps) {
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
-  const { data: dietPlan, isLoading } = useQuery<DietPlan>({
+  const { data: dietPlan, isLoading, refetch } = useQuery<DietPlan>({
     queryKey: ["/api/diet-plan", assessmentId, dietType],
     queryFn: () => {
       // Always create new diet plan when diet type changes
@@ -62,58 +62,261 @@ export default function DietPlan({ params }: DietPlanProps) {
     enabled: !isNaN(assessmentId) && hasAccess(),
   });
 
-  const toggleDietType = (type: 'vegetarian' | 'non-vegetarian') => {
-    setDietType(type);
+  // Function to parse SHAP features for intelligent recommendations
+  const parseShapFeatures = (shapFeatures: string | null) => {
+    if (!shapFeatures) return [];
+    try {
+      return JSON.parse(shapFeatures);
+    } catch {
+      return [];
+    }
   };
 
-  // Helper functions to generate diet plan content
+  const toggleDietType = async (type: 'vegetarian' | 'non-vegetarian') => {
+    setDietType(type);
+    // Force refetch with new diet type
+    setTimeout(() => {
+      refetch();
+    }, 100);
+  };
+
+  // Helper functions to generate SHAP-based comprehensive diet plan
   const generateFoodToEat = (dietType: string, assessment?: CKDAssessment) => {
-    const baseVeg = "Fresh vegetables (spinach, cauliflower, cabbage), low-potassium fruits (apples, berries), whole grains (oats, quinoa), lean proteins (tofu, lentils in moderation)";
-    const baseNonVeg = "Fresh vegetables (spinach, cauliflower, cabbage), low-potassium fruits (apples, berries), whole grains (oats, quinoa), lean proteins (chicken, fish, egg whites)";
-    
-    if (!assessment) return dietType === 'vegetarian' ? baseVeg : baseNonVeg;
-    
-    const riskScore = assessment.riskScore || 0;
-    if (riskScore > 0.6) {
+    if (!assessment) {
       return dietType === 'vegetarian' ? 
-        baseVeg + ", kidney-friendly herbs (parsley, cilantro), low-sodium options" :
-        baseNonVeg + ", kidney-friendly herbs (parsley, cilantro), low-sodium options";
+        "Fresh vegetables, whole grains, moderate protein from plant sources" :
+        "Fresh vegetables, whole grains, lean proteins (chicken, fish, egg whites)";
     }
-    return dietType === 'vegetarian' ? baseVeg : baseNonVeg;
+
+    const foods = [];
+    
+    // Base foods for CKD
+    if (dietType === 'vegetarian') {
+      foods.push("Low-sodium vegetables (cabbage, cauliflower, green beans)");
+      foods.push("Controlled protein sources (tofu, small amounts of paneer)");
+    } else {
+      foods.push("Low-sodium vegetables (cabbage, cauliflower, green beans)");
+      foods.push("Lean proteins (skinless chicken breast, fish, egg whites only)");
+    }
+
+    // SHAP-based recommendations for negative factors
+    const shapFeatures = parseShapFeatures(assessment.shapFeatures);
+    
+    // High Serum Creatinine (>1.5) - reduce protein, add kidney-friendly foods
+    if (assessment.serumCreatinine && parseFloat(assessment.serumCreatinine.toString()) > 1.5) {
+      foods.push("Low-protein vegetables (bottle gourd, ridge gourd, papaya)");
+      foods.push("Watermelon and cucumber for gentle hydration");
+    }
+
+    // High Blood Urea (>40) - very low protein
+    if (assessment.bloodUrea && assessment.bloodUrea > 40) {
+      foods.push("Ultra-low protein vegetables (lauki, tinda, ghiya)");
+      foods.push("Limited whole grains (small portions of rice, oats)");
+    }
+
+    // High Blood Pressure - potassium-rich foods (if potassium normal)
+    if (assessment.bloodPressure && assessment.bloodPressure > 130) {
+      const potassium = parseFloat(assessment.potassium?.toString() || "4");
+      if (potassium <= 5.0) {
+        foods.push("Potassium-rich foods (spinach in moderation, oranges, banana - small portions)");
+      }
+      foods.push("DASH diet foods (oats, beetroot, low-fat options)");
+    }
+
+    // High Albumin - anti-inflammatory foods
+    if (assessment.albumin && assessment.albumin >= 2) {
+      foods.push("Anti-inflammatory foods (turmeric, flaxseed, ginger)");
+    }
+
+    // High Sugar/Glucose - low GI foods
+    if ((assessment.sugar && assessment.sugar > 1) || (assessment.bloodGlucoseRandom && assessment.bloodGlucoseRandom > 140)) {
+      foods.push("Low-GI foods (bitter gourd, methi leaves, cinnamon tea)");
+      foods.push("Whole grains (barley, dalia in small portions)");
+    }
+
+    // Abnormal RBC - iron-rich foods
+    if (assessment.redBloodCells === "abnormal") {
+      foods.push("Iron-rich foods with vitamin C (spinach with lemon, beetroot)");
+      foods.push("B12 sources (fortified cereals, nutritional yeast for vegetarians)");
+    }
+
+    // Low Hemoglobin - iron absorption enhancers
+    if (assessment.hemoglobin && assessment.hemoglobin < 12) {
+      foods.push("Iron-rich foods (palak, jaggery in moderation, sprouts)");
+      foods.push("Vitamin C enhancers (amla, guava - small portions)");
+    }
+
+    // High WBC - anti-inflammatory foods
+    if (assessment.wbcCount && assessment.wbcCount > 11000) {
+      foods.push("Anti-inflammatory foods (turmeric milk, garlic, ginger tea)");
+    }
+
+    // Edema - diuretic foods
+    if (assessment.pedalEdema === "yes") {
+      foods.push("Natural diuretics (cucumber, parsley, celery)");
+    }
+
+    // Poor appetite - easy-to-digest foods
+    if (assessment.appetite === "poor") {
+      foods.push("Easily digestible foods (khichdi, curd rice, soft-cooked vegetables)");
+    }
+
+    return foods.join(", ");
   };
 
   const generateFoodToAvoid = (assessment?: CKDAssessment) => {
-    const base = "High-sodium foods (processed foods, canned soups), high-potassium foods (bananas, oranges, tomatoes), high-phosphorus foods (nuts, seeds, dairy), excessive protein";
-    
-    if (!assessment) return base;
-    
-    const riskScore = assessment.riskScore || 0;
-    if (riskScore > 0.6) {
-      return base + ", caffeine, alcohol, artificial sweeteners, red meat in excess";
+    if (!assessment) {
+      return "High-sodium processed foods, excessive protein, high-potassium fruits in excess";
     }
-    return base;
+
+    const avoidFoods = [];
+    
+    // Base CKD restrictions
+    avoidFoods.push("High-sodium foods (processed foods, canned soups, pickles, papad)");
+    avoidFoods.push("Excessive protein sources (red meat, excessive dal, soy products)");
+
+    // High Serum Creatinine - avoid protein and processed foods
+    if (assessment.serumCreatinine && parseFloat(assessment.serumCreatinine.toString()) > 1.5) {
+      avoidFoods.push("All red meat, fish, excessive protein");
+      avoidFoods.push("Alcohol and processed foods");
+    }
+
+    // High Blood Urea - strict protein restriction
+    if (assessment.bloodUrea && assessment.bloodUrea > 40) {
+      avoidFoods.push("Meat, fish, excessive pulses, soy products");
+    }
+
+    // High Blood Pressure - sodium restriction
+    if (assessment.bloodPressure && assessment.bloodPressure > 130) {
+      avoidFoods.push("Salt, chips, namkeen, bakery items with high sodium");
+      avoidFoods.push("Fried and processed snacks");
+    }
+
+    // High Potassium - avoid high-potassium foods
+    if (assessment.potassium && parseFloat(assessment.potassium.toString()) > 5.5) {
+      avoidFoods.push("High-potassium foods (banana, coconut water, oranges, tomatoes)");
+      avoidFoods.push("Spinach in large quantities, potato");
+    }
+
+    // High Sodium - strict sodium restriction
+    if (assessment.sodium && assessment.sodium > 145) {
+      avoidFoods.push("All salted snacks, namkeen, processed cheese");
+      avoidFoods.push("Restaurant food with high sodium");
+    }
+
+    // High Sugar/Glucose - avoid sugary foods
+    if ((assessment.sugar && assessment.sugar > 1) || (assessment.bloodGlucoseRandom && assessment.bloodGlucoseRandom > 140)) {
+      avoidFoods.push("Sugar, sweets, soft drinks, white rice, maida");
+      avoidFoods.push("High-GI fruits (mango, banana in excess, dates)");
+    }
+
+    // High Albumin - reduce dairy and excess protein
+    if (assessment.albumin && assessment.albumin >= 2) {
+      avoidFoods.push("Excess dairy products, cheese, heavy protein meals");
+    }
+
+    // Abnormal Pus Cells - avoid inflammatory foods
+    if (assessment.pusCell === "abnormal") {
+      avoidFoods.push("Spicy food, street food, contaminated water sources");
+    }
+
+    // High WBC - avoid inflammatory foods
+    if (assessment.wbcCount && assessment.wbcCount > 11000) {
+      avoidFoods.push("Fried foods, sugar, inflammatory oils, processed foods");
+    }
+
+    // Diabetes - strict sugar control
+    if (assessment.diabetesMellitus === "yes") {
+      avoidFoods.push("All sugars, juices, rice, potatoes in large quantities");
+    }
+
+    // Hypertension - sodium restriction
+    if (assessment.hypertension === "yes") {
+      avoidFoods.push("Processed snacks, bakery items, high-sodium ready meals");
+    }
+
+    // Edema - fluid and sodium restriction
+    if (assessment.pedalEdema === "yes") {
+      avoidFoods.push("High-salt foods, excess fluids, sugar");
+    }
+
+    // Poor appetite - avoid heavy foods
+    if (assessment.appetite === "poor") {
+      avoidFoods.push("Oily, rich, strong-smelling foods that may worsen appetite");
+    }
+
+    return avoidFoods.join(", ");
   };
 
   const generateWaterIntake = (assessment?: CKDAssessment) => {
     if (!assessment) return "Maintain adequate hydration - 6-8 glasses of water daily. Monitor urine output and adjust intake based on kidney function. Drink water between meals rather than with meals. Spread intake throughout the day. Consult healthcare provider if you have fluid retention or swelling.";
     
+    const advice = [];
     const riskScore = assessment.riskScore || 0;
     const creatinine = parseFloat(assessment.serumCreatinine?.toString() || "0");
     
+    // Base water intake advice based on kidney function
     if (riskScore > 0.6 || creatinine > 1.5) {
-      return "Moderate water intake - 4-6 glasses daily (1000-1500ml). Monitor fluid balance carefully and watch for signs of fluid overload like swelling in ankles or shortness of breath. Limit fluid intake if you have advanced kidney disease (Stage 4-5). Include all fluids (tea, coffee, soups) in daily count. Consult nephrologist for personalized fluid restrictions. Avoid excessive water during meals to prevent diluting digestive enzymes.";
+      advice.push("Moderate water intake - 4-6 glasses daily (1000-1500ml)");
+      advice.push("Monitor fluid balance carefully and watch for signs of fluid overload like swelling in ankles or shortness of breath");
+      advice.push("Include all fluids (tea, coffee, soups) in daily count");
+      advice.push("Consult nephrologist for personalized fluid restrictions");
+    } else {
+      advice.push("Maintain adequate hydration - 6-8 glasses of water daily (1500-2000ml)");
+      advice.push("Drink more in hot weather or during physical activity");
+      advice.push("Monitor urine color - pale yellow indicates good hydration");
     }
-    return "Maintain adequate hydration - 6-8 glasses of water daily (1500-2000ml). Drink more in hot weather or during physical activity. Monitor urine color - pale yellow indicates good hydration. Space water intake throughout the day rather than drinking large amounts at once. Include water-rich foods like cucumbers and watermelon. Reduce intake 2-3 hours before bedtime to improve sleep quality.";
+
+    // Additional advice based on specific conditions
+    if (assessment.pedalEdema === "yes") {
+      advice.push("Limit fluid intake due to edema - follow medical advice for exact amounts");
+    }
+
+    if (assessment.hypertension === "yes") {
+      advice.push("Monitor fluid balance as part of blood pressure management");
+    }
+
+    if (assessment.bloodUrea && assessment.bloodUrea > 40) {
+      advice.push("Moderate fluid intake to prevent further kidney stress");
+    }
+
+    advice.push("Space water intake throughout the day rather than drinking large amounts at once");
+    advice.push("Avoid excessive water during meals to prevent diluting digestive enzymes");
+    advice.push("Reduce intake 2-3 hours before bedtime to improve sleep quality");
+
+    return advice.join(". ");
   };
 
   const generateSpecialInstructions = (assessment?: CKDAssessment) => {
     if (!assessment) return "Regular monitoring of kidney function, follow medical advice, maintain healthy weight";
     
+    const instructions = [];
     const riskScore = assessment.riskScore || 0;
+    
     if (riskScore > 0.6) {
-      return "Strict monitoring of kidney function, regular nephrology consultations, blood pressure control, diabetes management if applicable";
+      instructions.push("Strict monitoring of kidney function, regular nephrology consultations");
+      instructions.push("Blood pressure control and diabetes management if applicable");
+    } else {
+      instructions.push("Regular monitoring of kidney function, follow medical advice");
+      instructions.push("Maintain healthy weight, preventive care");
     }
-    return "Regular monitoring of kidney function, follow medical advice, maintain healthy weight, preventive care";
+
+    // SHAP-based specific instructions
+    if (assessment.serumCreatinine && parseFloat(assessment.serumCreatinine.toString()) > 1.5) {
+      instructions.push("Work with renal dietitian for protein management");
+    }
+
+    if (assessment.potassium && parseFloat(assessment.potassium.toString()) > 5.0) {
+      instructions.push("Monitor blood potassium levels regularly");
+    }
+
+    if (assessment.diabetesMellitus === "yes") {
+      instructions.push("Coordinate with diabetes care team");
+    }
+
+    instructions.push("Keep food diary and track response to dietary changes");
+
+    return instructions.join(", ");
   };
 
   const downloadDietPlan = () => {

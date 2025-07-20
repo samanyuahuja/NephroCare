@@ -60,7 +60,11 @@ const Browse = () => {
       }
       
       try {
-        const allAssessments = await fetch("/api/ckd-assessments").then(res => res.json());
+        const response = await fetch("/api/ckd-assessments");
+        if (!response.ok) {
+          throw new Error('Failed to fetch assessments');
+        }
+        const allAssessments = await response.json();
         console.log('All assessments:', allAssessments?.length || 0);
         console.log('User assessment IDs:', userAssessmentIds);
         
