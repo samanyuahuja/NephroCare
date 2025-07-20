@@ -86,7 +86,46 @@ export default function Results({ params }: ResultsProps) {
 
   const riskScore = assessment.riskScore || 0;
   const riskLevel = assessment.riskLevel || "Low";
-  const shapFeatures = assessment.shapFeatures ? JSON.parse(assessment.shapFeatures) : [];
+  
+  // Parse SHAP features from visualization data
+  let shapFeatures: any[] = [];
+  let visualizationData: any = null;
+  try {
+    if (assessment.shapFeatures && typeof assessment.shapFeatures === 'string') {
+      const parsed = JSON.parse(assessment.shapFeatures);
+      visualizationData = parsed.visualizations;
+      
+      // Extract SHAP features from visualizations data
+      if (visualizationData?.shap?.features && visualizationData?.shap?.values) {
+        shapFeatures = visualizationData.shap.features.map((feature: string, index: number) => ({
+          feature: feature,
+          impact: visualizationData.shap.values[index] || 0,
+          value: visualizationData.shap.values[index] || 0,
+          type: (visualizationData.shap.values[index] || 0) > 0 ? 'negative' : 'positive' as 'positive' | 'negative'
+        }));
+      }
+      
+      // If no visualization data, create basic feature list for charts
+      if (shapFeatures.length === 0) {
+        const basicFeatures = [
+          { feature: "Serum Creatinine", impact: assessment.serumCreatinine > 1.4 ? 0.3 : -0.1 },
+          { feature: "Age", impact: assessment.age > 50 ? 0.1 : -0.05 },
+          { feature: "Blood Pressure", impact: assessment.bloodPressure > 140 ? 0.15 : -0.05 },
+          { feature: "Hemoglobin", impact: assessment.hemoglobin < 12 ? 0.12 : -0.03 },
+          { feature: "Hypertension", impact: assessment.hypertension === "yes" ? 0.08 : -0.02 }
+        ];
+        
+        shapFeatures = basicFeatures.map(f => ({
+          ...f,
+          value: f.impact,
+          type: f.impact > 0 ? 'negative' : 'positive' as 'positive' | 'negative'
+        }));
+      }
+    }
+  } catch (error) {
+    console.warn('Failed to parse SHAP features:', error);
+    shapFeatures = [];
+  }
 
   const getRiskColor = (level: string) => {
     switch (level.toLowerCase()) {

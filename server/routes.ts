@@ -53,6 +53,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Generate SHAP/LIME/PDP visualizations
           let visualizationData = null;
           try {
+            const modelInput = {
+              age: validatedData.age || 45,
+              bp: validatedData.bloodPressure || 120,
+              al: validatedData.albumin === "unknown" ? 1 : validatedData.albumin,
+              su: validatedData.sugar === "unknown" ? 1 : validatedData.sugar,
+              rbc: validatedData.redBloodCells === "abnormal" ? "abnormal" : "normal",
+              pc: validatedData.pusCell === "abnormal" ? "abnormal" : "normal",
+              ba: "notpresent", // Default value
+              bgr: validatedData.bloodGlucoseRandom === "unknown" ? 145 : validatedData.bloodGlucoseRandom,
+              bu: validatedData.bloodUrea === "unknown" ? 35 : validatedData.bloodUrea,
+              sc: validatedData.serumCreatinine === "unknown" ? 1.8 : validatedData.serumCreatinine,
+              sod: validatedData.sodium === "unknown" ? 135 : validatedData.sodium,
+              pot: validatedData.potassium === "unknown" ? 4.5 : validatedData.potassium,
+              hemo: validatedData.hemoglobin === "unknown" ? 12 : validatedData.hemoglobin,
+              wbcc: validatedData.wbcCount === "unknown" ? 7600 : validatedData.wbcCount,
+              rbcc: validatedData.rbcCount === "unknown" ? 5.2 : validatedData.rbcCount,
+              htn: validatedData.hypertension === "yes" ? "yes" : "no",
+              dm: validatedData.diabetesMellitus === "yes" ? "yes" : "no",
+              appet: validatedData.appetite === "poor" ? "poor" : "good",
+              pe: validatedData.pedalEdema === "yes" ? "yes" : "no",
+              ane: validatedData.anemia === "yes" ? "yes" : "no"
+            };
+            
             const vizProcess = spawn('python3', ['generate_shap_data.py', JSON.stringify({
               ...modelInput,
               prediction: predictionResult.probability,
