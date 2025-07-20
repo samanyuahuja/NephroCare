@@ -22,6 +22,12 @@ export default function Home() {
           
           {/* Enhanced Subheader */}
           <div className="mb-12">
+            <p className="text-sm sm:text-base md:text-lg lg:text-xl font-semibold text-blue-600 mb-3 tracking-wide uppercase">
+              {t(
+                "India's First Kidney Risk Assessment Tool",
+                "भारत का पहला किडनी जोखिम मूल्यांकन उपकरण"
+              )}
+            </p>
             <p className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-800 mb-4 leading-tight">
               {t(
                 "Advanced CKD Prediction & Healthcare Guidance",
