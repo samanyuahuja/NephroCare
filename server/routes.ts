@@ -2,6 +2,12 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertCKDAssessmentSchema, insertDietPlanSchema, insertChatMessageSchema } from "@shared/schema";
+import OpenAI from "openai";
+
+// Initialize OpenAI with API key
+const openai = new OpenAI({ 
+  apiKey: process.env.OPENAI_API_KEY 
+});
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -10,7 +16,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ status: "OK" });
   });
 
-  // Enhanced medical chatbot endpoint
+  // AI-powered medical chatbot endpoint
   app.post("/api/chat-direct", async (req, res) => {
     try {
       const { message } = req.body;
@@ -19,10 +25,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Message is required" });
       }
 
-      const reply = getEnhancedNephroBotResponse(message);
+      // Use OpenAI GPT-4o for intelligent responses
+      const reply = await getAIPoweredNephroBotResponse(message);
       return res.json({ reply });
       
     } catch (error) {
+      console.error('Chatbot error:', error);
       res.status(500).json({ error: "Failed to process message" });
     }
   });
@@ -31,54 +39,109 @@ export async function registerRoutes(app: Express): Promise<Server> {
   return httpServer;
 }
 
-// Enhanced NephroBot with comprehensive medical knowledge
+// AI-powered NephroBot using OpenAI GPT-4o with intelligent fallback
+async function getAIPoweredNephroBotResponse(message: string): Promise<string> {
+  try {
+    // Use the newest OpenAI model GPT-4o which was released May 13, 2024. Do not change this unless explicitly requested by the user
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "system",
+          content: `You are NephroBot, an advanced AI medical specialist focused exclusively on nephrology and kidney health. Your expertise includes:
+
+CORE SPECIALIZATIONS:
+- Chronic Kidney Disease (CKD) diagnosis, staging, and management
+- Acute kidney injury (AKI) recognition and treatment
+- Laboratory interpretation (creatinine, eGFR, BUN, proteinuria, electrolytes)
+- Renal replacement therapy (hemodialysis, peritoneal dialysis, transplant)
+- Nephrology pharmacology and drug dosing adjustments
+- Renal nutrition and dietary management
+- Mineral bone disease and CKD complications
+- Hypertension management in kidney disease
+- Diabetic nephropathy and other glomerular diseases
+
+RESPONSE GUIDELINES:
+- Provide detailed, evidence-based medical information
+- Use current nephrology guidelines and best practices
+- Explain complex concepts clearly for patients and healthcare providers
+- Include specific values, ranges, and clinical recommendations
+- Always emphasize the importance of consulting healthcare providers
+- Be comprehensive but organized with clear sections
+- Use medical terminology appropriately with explanations
+
+SAFETY DISCLAIMERS:
+- Always remind users that this information is educational
+- Emphasize the need for professional medical consultation
+- Never provide specific diagnoses for individual cases
+- Recommend emergency care when appropriate
+
+Format responses with clear sections, bullet points, and medical accuracy. Be the most knowledgeable kidney specialist the user could consult with.`
+        },
+        {
+          role: "user",
+          content: message
+        }
+      ],
+      max_tokens: 1500,
+      temperature: 0.3, // Lower temperature for more accurate medical information
+    });
+
+    return response.choices[0].message.content || getEnhancedNephroBotResponse(message);
+    
+  } catch (error: any) {
+    console.error('OpenAI API error:', error);
+    
+    // Check if it's a quota/rate limit error and provide enhanced fallback
+    if (error.code === 'insufficient_quota' || error.status === 429) {
+      console.log('Using enhanced medical knowledge fallback due to API quota limits');
+      return getEnhancedNephroBotResponse(message);
+    }
+    
+    // For other errors, use enhanced fallback
+    return getEnhancedNephroBotResponse(message);
+  }
+}
+
+// Enhanced medical knowledge fallback system
 function getEnhancedNephroBotResponse(message: string): string {
   const msg = message.toLowerCase();
 
-  // Advanced greeting patterns
+  // Greetings with medical focus
   if (/(hello|hi|hey|good morning|good afternoon|good evening|greetings)/i.test(msg)) {
-    return "Hello! I'm NephroBot, your advanced kidney health specialist. I have extensive knowledge about CKD, nephrology, lab values, treatments, medications, and lifestyle management. I can provide detailed medical guidance, explain complex concepts, and help you understand your kidney health journey. What specific aspect would you like to explore today?";
-  }
-
-  // Help and capabilities
-  if (/(help|what can you do|capabilities|assist)/i.test(msg)) {
-    return "I'm an advanced medical AI specializing in nephrology. My expertise includes:\n\nLAB ANALYSIS: Detailed interpretation of creatinine, eGFR, BUN, proteinuria, electrolytes\nMEDICAL CONDITIONS: CKD stages, AKI, nephrotic syndrome, hypertensive nephropathy\nMEDICATIONS: ACE inhibitors, ARBs, diuretics, phosphate binders, immunosuppressants\nNUTRITION: Renal diets, protein restriction, mineral management, fluid balance\nTREATMENTS: Dialysis modalities, transplant processes, conservative management\nRISK ASSESSMENT: Disease progression, complications, prognosis\nLIFESTYLE: Exercise, smoking cessation, weight management, BP control\n\nAsk me anything - I provide evidence-based, detailed medical information!";
+    return "Hello! I'm NephroBot, your AI-powered kidney health specialist. I'm equipped with comprehensive medical knowledge about chronic kidney disease, lab interpretations, treatments, and lifestyle management. Whether you need help understanding lab results, CKD stages, medications, or dietary recommendations, I'm here to provide detailed, evidence-based information. What kidney health question can I help you with today?";
   }
 
   // CKD comprehensive information
-  if (/(what is ckd|chronic kidney disease|kidney disease)/i.test(msg)) {
-    return "Chronic Kidney Disease (CKD) is a progressive, irreversible condition characterized by gradual loss of kidney function over months to years.\n\nDEFINITION: eGFR <60 mL/min/1.73m² for >3 months OR kidney damage with normal eGFR\n\nSTAGES:\n• Stage 1: eGFR ≥90 + kidney damage (proteinuria, hematuria, structural abnormalities)\n• Stage 2: eGFR 60-89 + kidney damage\n• Stage 3a: eGFR 45-59 (moderate decrease)\n• Stage 3b: eGFR 30-44 (moderate to severe)\n• Stage 4: eGFR 15-29 (severe, pre-dialysis planning)\n• Stage 5: eGFR <15 (kidney failure, RRT needed)\n\nCAUSES: Diabetes (45%), hypertension (27%), glomerulonephritis, polycystic kidney disease, autoimmune conditions\n\nCOMPLICATIONS: CVD, anemia, bone disease, acidosis, hyperkalemia, fluid overload";
+  if (/(what is ckd|chronic kidney disease|kidney disease|ckd)/i.test(msg)) {
+    return "**Chronic Kidney Disease (CKD) - Comprehensive Overview**\n\n**DEFINITION:** CKD is the gradual, progressive loss of kidney function over months to years, defined as eGFR <60 mL/min/1.73m² for >3 months OR evidence of kidney damage.\n\n**STAGES & eGFR VALUES:**\n• **Stage 1:** eGFR ≥90 + kidney damage (proteinuria/hematuria)\n• **Stage 2:** eGFR 60-89 + kidney damage\n• **Stage 3a:** eGFR 45-59 (moderate decrease)\n• **Stage 3b:** eGFR 30-44 (moderate-severe decrease)\n• **Stage 4:** eGFR 15-29 (severe, pre-dialysis planning)\n• **Stage 5:** eGFR <15 (kidney failure, RRT needed)\n\n**PRIMARY CAUSES:**\n• Diabetes mellitus (45% of cases)\n• Hypertension (27% of cases)\n• Glomerulonephritis\n• Polycystic kidney disease\n• Autoimmune conditions\n\n**KEY COMPLICATIONS:**\n• Cardiovascular disease (leading cause of death)\n• Anemia and bone disease\n• Electrolyte imbalances\n• Fluid retention and edema\n\n*This information is educational. Consult your nephrologist for personalized medical advice.*";
   }
 
-  // Detailed lab value interpretations
+  // Lab values - Creatinine
   if (/(creatinine|serum creatinine)/i.test(msg)) {
-    return "Serum Creatinine - Critical Kidney Function Marker:\n\nNORMAL VALUES:\n• Men: 0.7-1.3 mg/dL (62-115 μmol/L)\n• Women: 0.6-1.1 mg/dL (53-97 μmol/L)\n• Elderly: May be lower due to decreased muscle mass\n\nCLINICAL SIGNIFICANCE:\n• Reflects glomerular filtration capacity\n• Inversely related to kidney function\n• Used to calculate eGFR (most accurate assessment)\n\nELEVATED LEVELS INDICATE:\n• Acute kidney injury (rapid rise)\n• Chronic kidney disease (gradual increase)\n• Severe dehydration\n• Muscle breakdown (rhabdomyolysis)\n• Certain medications (NSAIDs, aminoglycosides)\n\nINTERPRETATION:\n• 1.5-2.0 mg/dL: Stage 3 CKD likely\n• 2.0-4.0 mg/dL: Stage 4 CKD\n• >4.0 mg/dL: Stage 5 CKD, consider RRT\n\nLIMITATIONS: Can remain normal until 50% kidney function lost";
+    return "**Serum Creatinine - Critical Kidney Function Marker**\n\n**NORMAL REFERENCE RANGES:**\n• **Men:** 0.7-1.3 mg/dL (62-115 μmol/L)\n• **Women:** 0.6-1.1 mg/dL (53-97 μmol/L)\n• **Elderly:** May be lower due to decreased muscle mass\n\n**CLINICAL SIGNIFICANCE:**\n• Waste product of muscle metabolism\n• Filtered by glomeruli, minimally reabsorbed\n• Inversely proportional to kidney function\n• Used to calculate eGFR (most accurate assessment)\n\n**INTERPRETATION BY LEVELS:**\n• **1.4-1.9 mg/dL:** Suggests Stage 3 CKD\n• **2.0-4.0 mg/dL:** Likely Stage 4 CKD\n• **>4.0 mg/dL:** Stage 5 CKD, consider renal replacement therapy\n\n**FACTORS AFFECTING LEVELS:**\n• Muscle mass, age, diet, medications\n• Dehydration, certain drugs (NSAIDs, contrast)\n• Can remain normal until 50% kidney function is lost\n\n**CLINICAL PEARL:** Rising creatinine indicates worsening kidney function and requires nephrology evaluation.\n\n*Always consult your healthcare provider for proper interpretation of your specific lab results.*";
   }
 
+  // eGFR information
   if (/(egfr|gfr|glomerular filtration)/i.test(msg)) {
-    return "eGFR (Estimated Glomerular Filtration Rate) - Gold Standard for Kidney Function:\n\nCALCULATION: CKD-EPI equation (most accurate)\nFactors: Age, sex, race, serum creatinine\n\nNORMAL VALUES:\n• Young adults: >120 mL/min/1.73m²\n• Adults: >90 mL/min/1.73m²\n• Age-related decline: ~1 mL/min/year after age 30\n\nCKD STAGING BY eGFR:\n• ≥90: Stage 1 (if kidney damage present)\n• 60-89: Stage 2 (if kidney damage present)\n• 45-59: Stage 3a (moderate decrease)\n• 30-44: Stage 3b (moderate-severe)\n• 15-29: Stage 4 (severe)\n• <15: Stage 5 (kidney failure)\n\nMONITORING FREQUENCY:\n• Stage 1-2: Annually\n• Stage 3a: Every 6 months\n• Stage 3b-4: Every 3 months\n• Stage 5: Monthly\n\nRAPID DECLINE: >5 mL/min/year = high risk, needs specialist referral";
+    return "**eGFR (Estimated Glomerular Filtration Rate) - Gold Standard**\n\n**CALCULATION METHOD:**\n• CKD-EPI equation (most accurate)\n• Factors: Age, sex, race, serum creatinine\n• Expressed as mL/min/1.73m² body surface area\n\n**NORMAL VALUES & INTERPRETATION:**\n• **Young adults:** >120 mL/min/1.73m²\n• **Adults >40 years:** >90 mL/min/1.73m²\n• **Age-related decline:** ~1 mL/min/year after age 30\n\n**MONITORING FREQUENCY BY STAGE:**\n• **Stages 1-2:** Annual monitoring\n• **Stage 3a:** Every 6 months\n• **Stage 3b-4:** Every 3 months\n• **Stage 5:** Monthly monitoring\n\n**RAPID DECLINE ALERT:**\n• >5 mL/min/year decline = High risk\n• Requires urgent nephrology referral\n• May indicate progressive kidney disease\n\n**CLINICAL APPLICATIONS:**\n• Drug dosing adjustments\n• Referral timing for specialists\n• Dialysis/transplant planning\n• Cardiovascular risk assessment\n\n*eGFR is the most reliable measure of kidney function. Discuss trends with your nephrologist.*";
   }
 
-  // Advanced symptom analysis
-  if (/(symptoms|signs|feeling|tired|fatigue|swelling)/i.test(msg)) {
-    return "CKD Symptoms - Comprehensive Clinical Presentation:\n\nEARLY STAGES (1-3a) - Often Asymptomatic:\n• Subtle fatigue\n• Mild hypertension\n• Occasional foamy urine\n• Minimal laboratory abnormalities\n\nMODERATE CKD (3b-4):\n• FATIGUE: Due to anemia, acidosis, toxin buildup\n• EDEMA: Starting in ankles, progressing upward\n• BREATHLESSNESS: Fluid retention, anemia\n• NAUSEA: Uremic toxins affecting GI tract\n• COGNITIVE: Difficulty concentrating, memory issues\n• BONE PAIN: Mineral bone disease development\n\nADVANCED CKD (Stage 5):\n• UREMIC SYMPTOMS: Nausea, vomiting, metallic taste\n• FLUID OVERLOAD: Pulmonary edema, severe swelling\n• ELECTROLYTE: Hyperkalemia (dangerous heart rhythms)\n• NEUROLOGIC: Confusion, seizures, coma\n• CARDIOVASCULAR: Pericarditis, heart failure\n• SKIN: Itching, uremic frost (severe cases)\n\nRED FLAGS - Seek immediate care:\n• Difficulty breathing\n• Chest pain\n• Severe swelling\n• Confusion/altered mental status\n• Decreased urination";
+  // Symptoms
+  if (/(symptoms|signs|feel|tired|fatigue|swelling|nausea)/i.test(msg)) {
+    return "**CKD Symptoms by Stage - Clinical Presentation**\n\n**EARLY STAGES (1-3a) - Often Silent:**\n• Subtle fatigue or weakness\n• Mild blood pressure elevation\n• Occasional foamy urine (proteinuria)\n• Generally asymptomatic (why screening is crucial)\n\n**MODERATE CKD (3b-4) - Symptoms Emerge:**\n• **Fatigue:** Due to anemia, toxin buildup, acidosis\n• **Edema:** Starting in ankles, progressing upward\n• **Breathlessness:** From fluid retention and anemia\n• **Nausea/Loss of appetite:** Uremic toxin effects\n• **Cognitive issues:** Concentration difficulties\n• **Bone/joint pain:** Mineral bone disease onset\n\n**ADVANCED CKD (Stage 5) - Multiple Systems:**\n• **Uremic symptoms:** Severe nausea, metallic taste\n• **Fluid overload:** Pulmonary edema, severe swelling\n• **Electrolyte disorders:** Dangerous heart rhythms\n• **Neurologic:** Confusion, seizures (uremic encephalopathy)\n• **Cardiovascular:** Pericarditis, heart failure\n• **Dermatologic:** Severe itching, uremic frost (rare)\n\n**🚨 EMERGENCY WARNING SIGNS:**\n• Difficulty breathing or chest pain\n• Severe swelling (face, hands)\n• Confusion or altered mental status\n• Significant decrease in urination\n• Persistent vomiting\n\n*Early CKD detection through lab screening is vital since symptoms appear late. Seek immediate medical attention for warning signs.*";
   }
 
-  // Comprehensive medication management
-  if (/(medication|drugs|ace inhibitor|arb|medicine)/i.test(msg)) {
-    return "CKD Medications - Comprehensive Nephro-Pharmacology:\n\nKIDNEY PROTECTIVE:\n• ACE INHIBITORS: Lisinopril, enalapril - reduce proteinuria, slow progression\n• ARBs: Losartan, valsartan - alternative to ACE-I, fewer side effects\n• SGLT2 INHIBITORS: Empagliflozin - revolutionary kidney/heart protection\n\nCKD COMPLICATIONS MANAGEMENT:\n• ANEMIA: Iron supplements, ESA (epoetin), newer HIF inhibitors\n• BONE DISEASE: Active vitamin D (calcitriol), phosphate binders (calcium carbonate, sevelamer)\n• ACIDOSIS: Sodium bicarbonate (target bicarbonate >22)\n• HYPERKALEMIA: Patiromer, sodium zirconium cyclosilicate\n\nAVOID/USE CAUTIOUSLY:\n• NSAIDs: Ibuprofen, naproxen (reduce kidney blood flow)\n• CONTRAST: Pre-hydrate, minimize dose, monitor\n• AMINOGLYCOSIDES: Gentamicin (direct nephrotoxicity)\n• METFORMIN: Stop if eGFR <30\n\nDOSING ADJUSTMENTS (by eGFR):\n• eGFR 30-59: Reduce doses of renally cleared drugs\n• eGFR 15-29: Significant dose reductions needed\n• eGFR <15: Many drugs contraindicated\n\nMEDICATION RECONCILIATION: Essential at every visit";
+  // Medications
+  if (/(medication|drugs|medicine|pills|treatment)/i.test(msg)) {
+    return "**CKD Medications - Comprehensive Nephropharmacology**\n\n**KIDNEY PROTECTIVE AGENTS:**\n• **ACE Inhibitors:** Lisinopril, enalapril - reduce proteinuria, slow progression\n• **ARBs:** Losartan, valsartan - alternative to ACE-I, fewer side effects\n• **SGLT2 Inhibitors:** Empagliflozin, dapagliflozin - revolutionary kidney/heart protection\n\n**COMPLICATION MANAGEMENT:**\n• **Anemia:** Iron supplements, ESAs (epoetin alfa), newer HIF inhibitors\n• **Bone Disease:** Active vitamin D (calcitriol), phosphate binders\n• **Acidosis:** Sodium bicarbonate (target >22 mEq/L)\n• **Hyperkalemia:** Patiromer, sodium zirconium cyclosilicate\n• **Hypertension:** Multiple agents often needed\n\n**⚠️ NEPHROTOXIC - AVOID/USE CAUTIOUSLY:**\n• **NSAIDs:** Ibuprofen, naproxen (reduce kidney blood flow)\n• **Contrast agents:** Pre-hydration essential, minimize exposure\n• **Aminoglycosides:** Gentamicin (direct nephrotoxicity)\n• **Metformin:** Discontinue if eGFR <30\n• **Proton pump inhibitors:** Long-term use linked to CKD progression\n\n**DOSE ADJUSTMENTS BY eGFR:**\n• **30-59 mL/min:** Reduce doses of renally cleared drugs\n• **15-29 mL/min:** Significant dose modifications needed\n• **<15 mL/min:** Many medications contraindicated\n\n*Medication management in CKD is complex. Work closely with your nephrologist and pharmacist for safe, effective treatment.*";
   }
 
-  // Advanced dietary management
-  if (/(diet|food|nutrition|protein|sodium|potassium|phosphorus)/i.test(msg)) {
-    return "Renal Nutrition - Evidence-Based Dietary Management:\n\nPROTEIN MANAGEMENT:\n• Stage 1-2: Normal intake (0.8-1.0 g/kg/day)\n• Stage 3-4: Restricted (0.6-0.8 g/kg/day)\n• Dialysis: Increased (1.2-1.4 g/kg/day)\n• Quality matters: Choose high biological value proteins\n\nSODIUM RESTRICTION:\n• Target: <2,300 mg/day (1 teaspoon salt)\n• Severe CHF/edema: <2,000 mg/day\n• Hidden sources: Processed foods, restaurant meals\n• Reading labels: Sodium content per serving\n\nPOTASSIUM MANAGEMENT:\n• Normal: 2,000-4,000 mg/day\n• Restrict if K+ >5.0 mEq/L\n• HIGH SOURCES: Bananas, oranges, potatoes, tomatoes\n• COOKING TIPS: Leaching (soaking, boiling)\n• Monitor levels every 3 months\n\nPHOSPHORUS CONTROL:\n• Target: 800-1,000 mg/day in CKD 3-5\n• LIMIT: Dairy, nuts, seeds, cola, processed foods\n• BINDERS: Take with meals if prescribed\n• Organic vs inorganic phosphorus absorption\n\nFLUID MANAGEMENT:\n• Early CKD: Stay hydrated (unless CHF)\n• Advanced CKD: May need restriction\n• Monitor daily weights\n• Target: <2 lbs gain between dialysis sessions";
-  }
-
-  // Emergency situations
-  if (/(emergency|urgent|chest pain|breathing|swelling)/i.test(msg)) {
-    return "KIDNEY EMERGENCY RECOGNITION - When to Seek Immediate Care:\n\nCALL 911 IMMEDIATELY:\n• PULMONARY EDEMA: Severe shortness of breath, pink frothy sputum\n• HYPERKALEMIA: Chest pain, palpitations, weakness, paralysis\n• SEVERE HTN: BP >180/120 with symptoms (headache, vision changes)\n• UREMIC ENCEPHALOPATHY: Confusion, seizures, decreased consciousness\n• ACUTE KIDNEY INJURY: Sudden decrease in urination, severe fatigue\n\nGO TO ER SAME DAY:\n• Rapid weight gain (>5 lbs in 2-3 days)\n• Persistent vomiting, unable to keep fluids down\n• Severe swelling (face, hands, difficulty walking)\n• Blood in urine with pain\n• Signs of infection (fever >101°F with chills)\n\nCALL DOCTOR WITHIN 24 HOURS:\n• New or worsening fatigue\n• Increased swelling in legs/ankles\n• Changes in urination pattern\n• Persistent nausea or loss of appetite\n• New medication side effects\n\nALWAYS CARRY: Emergency contact info, medication list, recent lab values";
+  // Diet and nutrition
+  if (/(diet|food|nutrition|eat|protein|sodium|potassium)/i.test(msg)) {
+    return "**Renal Nutrition - Evidence-Based Dietary Management**\n\n**PROTEIN MANAGEMENT:**\n• **Stages 1-2:** Normal intake (0.8-1.0 g/kg/day)\n• **Stages 3-4:** Moderate restriction (0.6-0.8 g/kg/day)\n• **Dialysis:** Increased needs (1.2-1.4 g/kg/day)\n• **Focus:** High biological value proteins (eggs, fish, lean meat)\n\n**SODIUM RESTRICTION:**\n• **Target:** <2,300 mg/day (1 teaspoon salt)\n• **Severe cases:** <2,000 mg/day\n• **Hidden sources:** Processed foods, restaurant meals, canned goods\n• **Reading labels:** Check sodium content per serving\n\n**POTASSIUM MANAGEMENT:**\n• **Normal intake:** 2,000-4,000 mg/day\n• **Restrict if K+ >5.0 mEq/L**\n• **High K+ foods:** Bananas, oranges, potatoes, tomatoes, nuts\n• **Cooking tips:** Leaching (soaking/boiling removes potassium)\n\n**PHOSPHORUS CONTROL:**\n• **Target:** 800-1,000 mg/day in advanced CKD\n• **Limit:** Dairy products, nuts, seeds, cola drinks\n• **Phosphate binders:** Take with meals if prescribed\n• **Organic vs inorganic:** Natural phosphorus better absorbed\n\n**FLUID MANAGEMENT:**\n• **Early CKD:** Maintain adequate hydration\n• **Advanced CKD:** May require restriction\n• **Monitor:** Daily weight checks\n• **Dialysis:** <2 lbs gain between sessions\n\n*Work with a certified renal dietitian for personalized meal planning. Dietary needs vary significantly by CKD stage.*";
   }
 
   // Default comprehensive response
-  return "I'm NephroBot, your comprehensive kidney health specialist. I provide detailed, evidence-based medical information about all aspects of nephrology.\n\nMY EXPERTISE COVERS:\n• Advanced lab interpretation (creatinine, eGFR, proteinuria)\n• CKD staging, progression, and prognosis\n• Comprehensive medication management\n• Evidence-based nutritional guidance\n• Dialysis and transplant education\n• Complication prevention and treatment\n• Emergency recognition and management\n• Lifestyle optimization strategies\n\nI can analyze complex medical scenarios, explain intricate pathophysiology, provide detailed treatment protocols, and offer personalized guidance based on your specific situation.\n\nFOR BEST RESULTS: Ask specific questions about symptoms, lab values, medications, diet, or any kidney-related concerns. I provide detailed, accurate medical information to help you make informed decisions about your kidney health.\n\nWhat specific aspect of kidney health would you like to explore in detail?";
+  return "**I'm NephroBot - Your Advanced Kidney Health AI Specialist**\n\n🧠 **MY EXPERTISE:**\n• Advanced laboratory interpretation (creatinine, eGFR, proteinuria)\n• CKD staging, progression monitoring, and prognosis\n• Comprehensive medication management and drug interactions\n• Evidence-based renal nutrition and dietary planning\n• Dialysis education and transplant preparation\n• Complication prevention and symptom management\n• Emergency recognition and when to seek care\n\n🎯 **I PROVIDE:**\n• Detailed explanations of complex kidney conditions\n• Interpretation of lab values and trends\n• Medication guidance and safety information\n• Dietary recommendations by CKD stage\n• Treatment options and decision support\n• Lifestyle modifications for kidney health\n\n💡 **FOR OPTIMAL HELP:**\nAsk specific questions about:\n- Lab results or symptoms\n- CKD stages or progression\n- Medications or treatments\n- Diet and lifestyle changes\n- Dialysis or transplant questions\n\n*I provide evidence-based medical education to help you make informed decisions about your kidney health. Always consult your healthcare team for personalized medical advice and treatment decisions.*\n\nWhat kidney health topic would you like to explore in detail?";
 }
