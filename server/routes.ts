@@ -46,7 +46,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Run ML prediction
       try {
-        const predictionResult = await runCKDPrediction(validatedData);
+        // Use the fixed model predictor with real trained models
+        const modelInput = {
+          age: validatedData.age || 45,
+          bp: validatedData.bloodPressure || 120,
+          al: validatedData.albumin === "unknown" ? 1 : validatedData.albumin,
+          su: validatedData.sugar === "unknown" ? 1 : validatedData.sugar,
+          rbc: validatedData.redBloodCells === "abnormal" ? "abnormal" : "normal",
+          pc: validatedData.pusCell === "abnormal" ? "abnormal" : "normal",
+          ba: "notpresent", // Default value
+          bgr: validatedData.bloodGlucoseRandom === "unknown" ? 145 : validatedData.bloodGlucoseRandom,
+          bu: validatedData.bloodUrea === "unknown" ? 35 : validatedData.bloodUrea,
+          sc: validatedData.serumCreatinine === "unknown" ? 1.8 : validatedData.serumCreatinine,
+          sod: validatedData.sodium === "unknown" ? 135 : validatedData.sodium,
+          pot: validatedData.potassium === "unknown" ? 4.5 : validatedData.potassium,
+          hemo: validatedData.hemoglobin === "unknown" ? 12 : validatedData.hemoglobin,
+          wbcc: validatedData.wbcCount === "unknown" ? 7600 : validatedData.wbcCount,
+          htn: validatedData.hypertension === "yes" ? "yes" : "no",
+          dm: validatedData.diabetesMellitus === "yes" ? "yes" : "no",
+          appet: validatedData.appetite === "poor" ? "poor" : "good",
+          pe: validatedData.pedalEdema === "yes" ? "yes" : "no",
+          ane: validatedData.anemia === "yes" ? "yes" : "no"
+        };
+        
+        const predictionResult = await new Promise((resolve) => {
+          const process = spawn('python3', ['fix_model_predictor.py', JSON.stringify(modelInput)]);
+          
+          let output = '';
+          process.stdout.on('data', (data) => {
+            output += data.toString();
+          });
+          
+          process.on('close', () => {
+            try {
+              const result = JSON.parse(output);
+              resolve(result);
+            } catch (parseError) {
+              console.error('ML prediction parsing failed:', parseError, 'Output:', output);
+              resolve({ error: "Prediction parsing failed", success: false });
+            }
+          });
+          
+          process.on('error', (error) => {
+            console.error('ML prediction process error:', error);
+            resolve({ error: "Process failed", success: false });
+          });
+        });
+        console.log('Prediction result:', predictionResult);
         
         if (predictionResult.success) {
           // Update assessment with ML results
