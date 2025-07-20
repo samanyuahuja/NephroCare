@@ -225,6 +225,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get all diet plans
+  app.get("/api/diet-plans", async (req, res) => {
+    try {
+      const dietPlans = await storage.getAllDietPlans();
+      res.json(dietPlans);
+    } catch (error: any) {
+      console.error('Get All Diet Plans error:', error);
+      res.status(500).json({ error: "Failed to fetch diet plans" });
+    }
+  });
+
+  // Get diet plan by assessment ID
+  app.get("/api/diet-plan/:assessmentId", async (req, res) => {
+    try {
+      const assessmentId = parseInt(req.params.assessmentId);
+      const dietPlan = await storage.getDietPlanByAssessmentId(assessmentId);
+      if (!dietPlan) {
+        return res.status(404).json({ error: "Diet plan not found" });
+      }
+      res.json(dietPlan);
+    } catch (error: any) {
+      console.error('Get Diet Plan error:', error);
+      res.status(500).json({ error: "Failed to fetch diet plan" });
+    }
+  });
+
   // Get diet plans (filtered by user's assessment IDs)
   app.get("/api/diet-plans/filtered", async (req, res) => {
     try {

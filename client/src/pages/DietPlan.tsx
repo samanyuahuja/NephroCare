@@ -21,8 +21,11 @@ export default function DietPlan({ params }: DietPlanProps) {
   // Check if user has access to this assessment
   const hasAccess = () => {
     try {
-      const storedIds = JSON.parse(localStorage.getItem('userAssessmentIds') || '[]');
-      return storedIds.includes(assessmentId);
+      if (typeof window !== 'undefined' && window.localStorage) {
+        const storedIds = JSON.parse(localStorage.getItem('userAssessmentIds') || '[]');
+        return storedIds.includes(assessmentId);
+      }
+      return false;
     } catch {
       return false;
     }
@@ -46,13 +49,28 @@ export default function DietPlan({ params }: DietPlanProps) {
       };
       
       const response = await apiRequest("POST", "/api/diet-plan", dietPlanData);
-      return response.json();
+      const result = await response.json();
+      console.log('Diet plan API response:', result);
+      return result;
     },
+  });
+
+  const { data: existingDietPlan } = useQuery<DietPlan>({
+    queryKey: ["/api/diet-plan", assessmentId],
+    enabled: !isNaN(assessmentId) && hasAccess(),
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   const { data: dietPlan, isLoading } = useQuery<DietPlan>({
     queryKey: ["/api/diet-plan", assessmentId, dietType],
-    queryFn: () => dietPlanMutation.mutateAsync({ assessmentId, dietType }),
+    queryFn: () => {
+      // If diet plan already exists and matches the current diet type, use it
+      if (existingDietPlan && existingDietPlan.dietType === dietType) {
+        return Promise.resolve(existingDietPlan);
+      }
+      // Otherwise create a new one
+      return dietPlanMutation.mutateAsync({ assessmentId, dietType });
+    },
     enabled: !isNaN(assessmentId) && hasAccess(),
   });
 

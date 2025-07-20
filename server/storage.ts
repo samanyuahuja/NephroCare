@@ -332,11 +332,7 @@ export class MemStorage implements IStorage {
     );
   }
 
-  async getAllCKDAssessments(): Promise<CKDAssessment[]> {
-    return Array.from(this.ckdAssessments.values()).sort((a, b) => 
-      new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
-    );
-  }
+
 }
 
 export const storage = new DatabaseStorage();
