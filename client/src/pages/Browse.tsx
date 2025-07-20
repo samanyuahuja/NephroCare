@@ -49,29 +49,52 @@ const Browse = () => {
   const { data: assessments, isLoading: assessmentsLoading } = useQuery<CKDAssessment[]>({
     queryKey: ["/api/ckd-assessments", "filtered", userAssessmentIds],
     queryFn: async () => {
-      if (userAssessmentIds.length === 0) return [];
+      if (userAssessmentIds.length === 0) {
+        console.log('No user assessment IDs found in localStorage');
+        return [];
+      }
       
-      const allAssessments = await fetch("/api/ckd-assessments").then(res => res.json());
-      console.log('All assessments:', allAssessments);
-      console.log('User assessment IDs:', userAssessmentIds);
-      const filtered = allAssessments.filter((assessment: CKDAssessment) => 
-        userAssessmentIds.includes(assessment.id)
-      );
-      console.log('Filtered assessments:', filtered);
-      return filtered;
+      try {
+        const allAssessments = await fetch("/api/ckd-assessments").then(res => res.json());
+        console.log('All assessments:', allAssessments?.length || 0);
+        console.log('User assessment IDs:', userAssessmentIds);
+        
+        const filtered = allAssessments.filter((assessment: CKDAssessment) => 
+          userAssessmentIds.includes(assessment.id)
+        );
+        console.log('Filtered assessments:', filtered?.length || 0, 'assessments found');
+        return filtered;
+      } catch (error) {
+        console.error('Failed to fetch assessments:', error);
+        return [];
+      }
     },
+    enabled: userAssessmentIds.length > 0,
   });
 
   const { data: dietPlans, isLoading: dietPlansLoading } = useQuery<DietPlan[]>({
     queryKey: ["/api/diet-plans", "filtered", userAssessmentIds],
     queryFn: async () => {
-      if (userAssessmentIds.length === 0) return [];
+      if (userAssessmentIds.length === 0) {
+        console.log('No user assessment IDs for diet plans');
+        return [];
+      }
       
-      const allDietPlans = await fetch("/api/diet-plans").then(res => res.json());
-      return allDietPlans.filter((plan: DietPlan) => 
-        userAssessmentIds.includes(plan.assessmentId!)
-      );
+      try {
+        const allDietPlans = await fetch("/api/diet-plans").then(res => res.json());
+        console.log('All diet plans:', allDietPlans?.length || 0);
+        
+        const filtered = allDietPlans.filter((plan: DietPlan) => 
+          userAssessmentIds.includes(plan.assessmentId!)
+        );
+        console.log('Filtered diet plans:', filtered?.length || 0, 'plans found');
+        return filtered;
+      } catch (error) {
+        console.error('Failed to fetch diet plans:', error);
+        return [];
+      }
     },
+    enabled: userAssessmentIds.length > 0,
   });
 
   const formatDateTime = (dateString: string | null) => {

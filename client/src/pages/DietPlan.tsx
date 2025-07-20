@@ -35,7 +35,17 @@ export default function DietPlan({ params }: DietPlanProps) {
 
   const dietPlanMutation = useMutation({
     mutationFn: async ({ assessmentId, dietType }: { assessmentId: number, dietType: string }) => {
-      const response = await apiRequest("POST", "/api/diet-plan", { assessmentId, dietType });
+      // Create a complete diet plan payload with all required fields
+      const dietPlanData = {
+        assessmentId,
+        dietType,
+        foodsToEat: generateFoodToEat(dietType, assessment),
+        foodsToAvoid: generateFoodToAvoid(assessment),
+        waterIntakeAdvice: generateWaterIntake(assessment),
+        specialInstructions: generateSpecialInstructions(assessment)
+      };
+      
+      const response = await apiRequest("POST", "/api/diet-plan", dietPlanData);
       return response.json();
     },
   });
@@ -48,6 +58,54 @@ export default function DietPlan({ params }: DietPlanProps) {
 
   const toggleDietType = (type: 'vegetarian' | 'non-vegetarian') => {
     setDietType(type);
+  };
+
+  // Helper functions to generate diet plan content
+  const generateFoodToEat = (dietType: string, assessment?: CKDAssessment) => {
+    const baseVeg = "Fresh vegetables (spinach, cauliflower, cabbage), low-potassium fruits (apples, berries), whole grains (oats, quinoa), lean proteins (tofu, lentils in moderation)";
+    const baseNonVeg = "Fresh vegetables (spinach, cauliflower, cabbage), low-potassium fruits (apples, berries), whole grains (oats, quinoa), lean proteins (chicken, fish, egg whites)";
+    
+    if (!assessment) return dietType === 'vegetarian' ? baseVeg : baseNonVeg;
+    
+    const riskScore = assessment.riskScore || 0;
+    if (riskScore > 0.6) {
+      return dietType === 'vegetarian' ? 
+        baseVeg + ", kidney-friendly herbs (parsley, cilantro), low-sodium options" :
+        baseNonVeg + ", kidney-friendly herbs (parsley, cilantro), low-sodium options";
+    }
+    return dietType === 'vegetarian' ? baseVeg : baseNonVeg;
+  };
+
+  const generateFoodToAvoid = (assessment?: CKDAssessment) => {
+    const base = "High-sodium foods (processed foods, canned soups), high-potassium foods (bananas, oranges, tomatoes), high-phosphorus foods (nuts, seeds, dairy), excessive protein";
+    
+    if (!assessment) return base;
+    
+    const riskScore = assessment.riskScore || 0;
+    if (riskScore > 0.6) {
+      return base + ", caffeine, alcohol, artificial sweeteners, red meat in excess";
+    }
+    return base;
+  };
+
+  const generateWaterIntake = (assessment?: CKDAssessment) => {
+    if (!assessment) return "Maintain adequate hydration - 6-8 glasses of water daily, adjust based on kidney function";
+    
+    const riskScore = assessment.riskScore || 0;
+    if (riskScore > 0.6) {
+      return "Moderate water intake - 4-6 glasses daily, monitor fluid balance, consult healthcare provider for specific limits";
+    }
+    return "Maintain adequate hydration - 6-8 glasses of water daily, adjust based on kidney function";
+  };
+
+  const generateSpecialInstructions = (assessment?: CKDAssessment) => {
+    if (!assessment) return "Regular monitoring of kidney function, follow medical advice, maintain healthy weight";
+    
+    const riskScore = assessment.riskScore || 0;
+    if (riskScore > 0.6) {
+      return "Strict monitoring of kidney function, regular nephrology consultations, blood pressure control, diabetes management if applicable";
+    }
+    return "Regular monitoring of kidney function, follow medical advice, maintain healthy weight, preventive care";
   };
 
   const downloadDietPlan = () => {
