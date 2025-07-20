@@ -1,10 +1,9 @@
-import type { Express } from "express";
-import { createServer, type Server } from "http";
+import { createServer } from "http";
+import { type Express } from "express";
 import { storage } from "./storage";
 import { insertCKDAssessmentSchema, insertDietPlanSchema, insertChatMessageSchema } from "@shared/schema";
 
-export async function registerRoutes(app: Express): Promise<Server> {
-  
+export function createRoutes(app: Express) {
   // Health check
   app.get("/api/health", (req, res) => {
     res.json({ status: "OK" });
