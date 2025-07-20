@@ -61,6 +61,10 @@ NephroCare is a professional, responsive Chronic Kidney Disease (CKD) prediction
 - Fixed mobile responsiveness issues while maintaining exact desktop interface
 - Added professional medical-themed favicon for browser tab branding
 - Updated production build with cache-busting to resolve deployment update issues
+- Integrated OpenAI GPT-4o API for real AI-powered chatbot responses with comprehensive fallback system
+- Enhanced NephroBot with advanced medical knowledge covering CKD stages, lab values, medications, and nutrition
+- Implemented hybrid chatbot system using OpenAI when quota allows, fallback to extensive medical knowledge otherwise
+- Added professional medical disclaimers and safety recommendations to all chatbot responses
 
 ## User Preferences
 

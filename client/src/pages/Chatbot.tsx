@@ -55,10 +55,12 @@ export default function Chatbot() {
         });
         
         if (!response.ok) {
+          console.error('API Response not OK:', response.status, response.statusText);
           throw new Error('Failed to get response from NephroBot');
         }
         
         const data = await response.json();
+        console.log('Chatbot response received:', data);
         return data.reply || "I'm having trouble processing your message. Please try again.";
       } catch (error) {
         console.error('Error calling chatbot:', error);
@@ -197,7 +199,7 @@ export default function Chatbot() {
                     <Bot className="h-3 w-3 sm:h-4 sm:w-4 text-white" />
                   </div>
                   <div className="bg-white p-2 sm:p-3 rounded-lg shadow-sm max-w-xs sm:max-w-md">
-                    <p className="text-gray-800 text-sm sm:text-base">{msg.response}</p>
+                    <div className="text-gray-800 text-sm sm:text-base whitespace-pre-wrap">{msg.response}</div>
                   </div>
                 </div>
               </div>
