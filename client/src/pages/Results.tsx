@@ -319,6 +319,10 @@ export default function Results({ params }: ResultsProps) {
       .filter(feature => feature.impact > 0) // Positive impact means increasing risk (negative for health)
       .sort((a, b) => b.impact - a.impact) // Sort by highest risk contribution first
       .slice(0, 3);
+    
+    console.log('SHAP Features for recommendations:', shapFeatures);
+    console.log('Top 3 negative features:', negativeFeatures);
+    console.log('Generated SHAP recommendations:', shapRecommendations);
 
     // If no negative features found, fallback to hardcoded recommendations
     if (negativeFeatures.length === 0) {
@@ -430,10 +434,12 @@ export default function Results({ params }: ResultsProps) {
       }
     });
 
+    console.log('Final SHAP recommendations being returned:', shapRecommendations);
     return shapRecommendations;
   };
 
   const personalizedRecommendations = getPersonalizedRecommendations(assessment, shapFeatures);
+  console.log('Final recommendations displayed:', personalizedRecommendations);
 
   const getRiskBadgeVariant = (level: string) => {
     const lowerLevel = level.toLowerCase();

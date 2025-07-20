@@ -52,9 +52,13 @@ const Browse = () => {
       if (userAssessmentIds.length === 0) return [];
       
       const allAssessments = await fetch("/api/ckd-assessments").then(res => res.json());
-      return allAssessments.filter((assessment: CKDAssessment) => 
+      console.log('All assessments:', allAssessments);
+      console.log('User assessment IDs:', userAssessmentIds);
+      const filtered = allAssessments.filter((assessment: CKDAssessment) => 
         userAssessmentIds.includes(assessment.id)
       );
+      console.log('Filtered assessments:', filtered);
+      return filtered;
     },
   });
 
