@@ -72,6 +72,9 @@ NephroCare is a professional, responsive Chronic Kidney Disease (CKD) prediction
 - Limited SHAP explanation display to top 5 features for better user experience
 - Enhanced personalized advisor with proper SHAP-based top 3 symptom recommendations
 - Fixed Browse function filtering and debugging issues with localStorage integration
+- Fixed critical SHAP feature interpretation bug where "no pedal edema" was incorrectly showing as positive CKD risk factor
+- Corrected pedal edema SHAP logic: no pedal edema now properly shows as negative value (decreases CKD risk)
+- Enhanced SHAP visualization with explicit medical logic for all remaining features instead of random values
 
 ## User Preferences
 

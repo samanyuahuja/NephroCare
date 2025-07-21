@@ -84,10 +84,23 @@ def generate_fake_shap_data(input_features, risk_level):
     else:
         shap_values.append(-0.01)
     
-    # Add remaining features with smaller impacts
-    remaining_features = len(features) - len(shap_values)
-    for i in range(remaining_features):
-        shap_values.append(np.random.uniform(-0.05, 0.05))
+    # Add remaining features with explicit medical logic
+    sod = input_features.get('sod', 135)
+    shap_values.append(0.03 if sod < 130 or sod > 145 else -0.01)  # Sodium
+    
+    pot = input_features.get('pot', 4.5)
+    shap_values.append(0.03 if pot > 5.0 or pot < 3.5 else -0.01)  # Potassium
+    
+    wbcc = input_features.get('wbcc', 7600)
+    shap_values.append(0.02 if wbcc > 10000 else -0.01)  # WBC Count
+    
+    rbcc = input_features.get('rbcc', 5.2)
+    shap_values.append(0.02 if rbcc < 4.5 else -0.01)  # RBC Count
+    
+    shap_values.append(0.08 if input_features.get('ane') == 'yes' else -0.01)  # Anemia
+    
+    # FIXED: Pedal edema logic - no edema should DECREASE CKD risk
+    shap_values.append(0.06 if input_features.get('pe') == 'yes' else -0.03)  # Pedal Edema
     
     # Ensure we have exact number of features
     shap_values = shap_values[:len(features)]
