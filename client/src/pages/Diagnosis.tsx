@@ -549,7 +549,7 @@ export default function Diagnosis() {
                               max="400"
                               {...field}
                               onChange={(e) => field.onChange(parseInt(e.target.value))}
-                              className={field.value && parseInt(field.value) > 200 ? "border-red-400" : ""}
+                              className={field.value && typeof field.value === "number" && field.value > 200 ? "border-red-400" : ""}
                             />
                           </FormControl>
                           <div className="flex items-center space-x-2">
@@ -570,7 +570,7 @@ export default function Diagnosis() {
                             </label>
                           </div>
                         </div>
-                        {field.value && parseInt(field.value) > 200 && (
+                        {field.value && typeof field.value === "number" && field.value > 200 && (
                           <p className="text-sm text-red-600">Warning: Uncontrolled diabetes - very high CKD risk</p>
                         )}
                       </FormItem>
@@ -590,7 +590,7 @@ export default function Diagnosis() {
                               max="100"
                               {...field}
                               onChange={(e) => field.onChange(parseInt(e.target.value))}
-                              className={field.value && parseInt(field.value) > 40 ? "border-red-400" : ""}
+                              className={field.value && typeof field.value === "number" && field.value > 40 ? "border-red-400" : ""}
                             />
                           </FormControl>
                           <div className="flex items-center space-x-2">
@@ -611,7 +611,7 @@ export default function Diagnosis() {
                             </label>
                           </div>
                         </div>
-                        {field.value && parseInt(field.value) > 40 && (
+                        {field.value && typeof field.value === "number" && field.value > 40 && (
                           <p className="text-sm text-red-600">Warning: Kidney function loss indicated</p>
                         )}
                       </FormItem>
@@ -632,7 +632,7 @@ export default function Diagnosis() {
                               max="10.0"
                               {...field}
                               onChange={(e) => field.onChange(parseFloat(e.target.value))}
-                              className={field.value && parseFloat(field.value) > 1.5 ? "border-red-400" : ""}
+                              className={field.value && typeof field.value === "number" && field.value > 1.5 ? "border-red-400" : ""}
                             />
                           </FormControl>
                           <div className="flex items-center space-x-2">
@@ -653,7 +653,7 @@ export default function Diagnosis() {
                             </label>
                           </div>
                         </div>
-                        {field.value && parseFloat(field.value) > 1.5 && (
+                        {field.value && typeof field.value === "number" && field.value > 1.5 && (
                           <p className="text-sm text-red-600">Warning: Declining kidney function - urgent evaluation needed</p>
                         )}
                       </FormItem>
@@ -673,7 +673,7 @@ export default function Diagnosis() {
                               max="150"
                               {...field}
                               onChange={(e) => field.onChange(parseInt(e.target.value))}
-                              className={field.value && (parseInt(field.value) < 130 || parseInt(field.value) > 150) ? "border-red-400" : ""}
+                              className={field.value && typeof field.value === "number" && (field.value < 130 || field.value > 150) ? "border-red-400" : ""}
                             />
                           </FormControl>
                           <div className="flex items-center space-x-2">
@@ -694,7 +694,7 @@ export default function Diagnosis() {
                             </label>
                           </div>
                         </div>
-                        {field.value && (parseInt(field.value) < 130 || parseInt(field.value) > 150) && (
+                        {field.value && typeof field.value === "number" && (field.value < 130 || field.value > 150) && (
                           <p className="text-sm text-red-600">Warning: Electrolyte imbalance - medical attention needed</p>
                         )}
                       </FormItem>
@@ -715,7 +715,7 @@ export default function Diagnosis() {
                               max="6.0"
                               {...field}
                               onChange={(e) => field.onChange(parseFloat(e.target.value))}
-                              className={field.value && parseFloat(field.value) > 5.5 ? "border-red-400" : ""}
+                              className={field.value && typeof field.value === "number" && field.value > 5.5 ? "border-red-400" : ""}
                             />
                           </FormControl>
                           <div className="flex items-center space-x-2">
@@ -736,7 +736,7 @@ export default function Diagnosis() {
                             </label>
                           </div>
                         </div>
-                        {field.value && parseFloat(field.value) > 5.5 && (
+                        {field.value && typeof field.value === "number" && field.value > 5.5 && (
                           <p className="text-sm text-red-600">Warning: Hyperkalemia risk - dangerous for heart</p>
                         )}
                       </FormItem>
@@ -757,7 +757,7 @@ export default function Diagnosis() {
                               max="18.0"
                               {...field}
                               onChange={(e) => field.onChange(parseFloat(e.target.value))}
-                              className={field.value && parseFloat(field.value) < 10 ? "border-red-400" : ""}
+                              className={field.value && typeof field.value === "number" && field.value < 10 ? "border-red-400" : ""}
                             />
                           </FormControl>
                           <div className="flex items-center space-x-2">
@@ -778,7 +778,7 @@ export default function Diagnosis() {
                             </label>
                           </div>
                         </div>
-                        {field.value && parseFloat(field.value) < 10 && (
+                        {field.value && typeof field.value === "number" && field.value < 10 && (
                           <p className="text-sm text-red-600">Warning: Anemia detected - common in CKD patients</p>
                         )}
                       </FormItem>
