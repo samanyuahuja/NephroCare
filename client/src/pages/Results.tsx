@@ -443,8 +443,8 @@ export default function Results({ params }: ResultsProps) {
     return 'default' as const;
   };
 
-  const downloadReport = () => {
-    generateAssessmentPDF(assessment);
+  const downloadReport = async () => {
+    await generateAssessmentPDF(assessment);
   };
 
   return (
@@ -521,7 +521,9 @@ export default function Results({ params }: ResultsProps) {
                 <li>• Numbers show how much each factor affects your risk score</li>
               </ul>
             </div>
-            <SHAPPlot features={shapFeatures} />
+            <div id="shap-plot">
+              <SHAPPlot features={shapFeatures} />
+            </div>
           </CardContent>
         </Card>
 
@@ -543,7 +545,9 @@ export default function Results({ params }: ResultsProps) {
                 <li>• Normal ranges are shaded in green</li>
               </ul>
             </div>
-            <PDPPlot assessment={assessment} />
+            <div id="pdp-plot-container">
+              <PDPPlot assessment={assessment} />
+            </div>
           </CardContent>
         </Card>
 
@@ -565,7 +569,9 @@ export default function Results({ params }: ResultsProps) {
                 <li>• Percentages show the strength of each factor's influence</li>
               </ul>
             </div>
-            <LIMEExplanation features={shapFeatures} />
+            <div id="lime-explanation">
+              <LIMEExplanation features={shapFeatures} />
+            </div>
           </CardContent>
         </Card>
 

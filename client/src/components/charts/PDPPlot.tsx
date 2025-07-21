@@ -152,7 +152,7 @@ export function PDPPlot({ assessment }: PDPPlotProps) {
           y = Math.max(5, 80 - (x - 6) * 6);
           break;
           
-        case 'Blood Glucose':
+        case 'Blood Glucose / Plasma Glucose':
           // Gradual increase, steeper after 180 mg/dL
           y = x < 180 ? 5 + (x - 70) * 0.15 : 20 + (x - 180) * 0.4;
           y = Math.min(y, 90);
@@ -232,7 +232,7 @@ export function PDPPlot({ assessment }: PDPPlotProps) {
           </SelectContent>
         </Select>
       </div>
-      <div className="relative h-48 bg-gray-100 rounded-lg p-4">
+      <div id={`pdp-plot-${selectedFeature.key}`} className="relative h-48 bg-gray-100 rounded-lg p-4">
         {/* Chart area */}
         <div className="relative w-full h-full">
           {/* Y-axis labels */}

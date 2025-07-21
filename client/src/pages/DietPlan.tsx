@@ -336,9 +336,9 @@ export default function DietPlan({ params }: DietPlanProps) {
     return instructions.join(", ");
   };
 
-  const downloadDietPlan = () => {
+  const downloadDietPlan = async () => {
     if (!dietPlan) return;
-    generateDietPlanPDF(dietPlan, assessment);
+    await generateDietPlanPDF(dietPlan, assessment);
   };
 
   if (!hasAccess()) {
@@ -396,7 +396,7 @@ export default function DietPlan({ params }: DietPlanProps) {
           </div>
 
           {/* Diet Content */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8 mb-6 sm:mb-8">
+          <div id="diet-plan-content" className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8 mb-6 sm:mb-8">
             {/* Foods to Eat */}
             <Card className="border-green-200 bg-green-50">
               <CardHeader>
