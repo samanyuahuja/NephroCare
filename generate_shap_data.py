@@ -49,12 +49,14 @@ def generate_fake_shap_data(input_features, risk_level):
     else:
         shap_values.append(-0.03)
     
-    if bu > 40:
-        shap_values.append(0.18)
+    if bu > 50:
+        shap_values.append(0.18)  # Severe elevation
+    elif bu > 40:
+        shap_values.append(0.12)  # Moderate elevation  
     elif bu > 25:
-        shap_values.append(0.08)
+        shap_values.append(0.04)  # Mild elevation
     else:
-        shap_values.append(-0.02)
+        shap_values.append(-0.02)  # Normal range
     
     if bp > 140:
         shap_values.append(0.12)

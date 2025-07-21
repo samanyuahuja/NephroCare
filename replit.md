@@ -75,6 +75,8 @@ NephroCare is a professional, responsive Chronic Kidney Disease (CKD) prediction
 - Fixed critical SHAP feature interpretation bug where "no pedal edema" was incorrectly showing as positive CKD risk factor
 - Corrected pedal edema SHAP logic: no pedal edema now properly shows as negative value (decreases CKD risk)
 - Enhanced SHAP visualization with explicit medical logic for all remaining features instead of random values
+- Fixed Blood Urea SHAP thresholds: refined BU ranges to be more medically accurate (normal <25, mild 25-40, moderate 40-50, severe >50)
+- Verified all other SHAP feature logic is medically correct: sodium, potassium, hemoglobin, age, and categorical features all show appropriate directional relationships
 
 ## User Preferences
 
