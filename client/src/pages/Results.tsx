@@ -260,8 +260,8 @@ export default function Results({ params }: ResultsProps) {
       });
     }
 
-    // Medical History factors
-    if (assessment.hypertension) {
+    // Medical History factors - Only add if explicitly "yes"
+    if (assessment.hypertension === "yes") {
       recommendations.push({
         factor: t("Hypertension History", "उच्च रक्तचाप का इतिहास"),
         value: "Present",
@@ -281,7 +281,7 @@ export default function Results({ params }: ResultsProps) {
       });
     }
 
-    if (assessment.diabetesMellitus) {
+    if (assessment.diabetesMellitus === "yes") {
       recommendations.push({
         factor: t("Diabetes Mellitus", "मधुमेह"),
         value: "Present",

@@ -77,6 +77,10 @@ NephroCare is a professional, responsive Chronic Kidney Disease (CKD) prediction
 - Enhanced SHAP visualization with explicit medical logic for all remaining features instead of random values
 - Fixed Blood Urea SHAP thresholds: refined BU ranges to be more medically accurate (normal <25, mild 25-40, moderate 40-50, severe >50)
 - Verified all other SHAP feature logic is medically correct: sodium, potassium, hemoglobin, age, and categorical features all show appropriate directional relationships
+- Fixed critical bug in personalized recommendations: diabetes and hypertension were showing as positive risk factors even when set to "no"
+- Updated conditional logic to properly check for "yes" values: `assessment.hypertension === "yes"` instead of `assessment.hypertension`
+- Added comprehensive PDP dropdown with 11 medical features allowing users to explore partial dependence plots for any parameter
+- Enhanced PDP graphs with medically accurate curves for all features including albumin, sodium, potassium, WBC/RBC counts
 
 ## User Preferences
 
