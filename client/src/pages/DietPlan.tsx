@@ -242,7 +242,7 @@ export default function DietPlan({ params }: DietPlanProps) {
   };
 
   // Calculate specific nutritional targets based on SHAP analysis
-  const calculateNutritionalTargets = (assessment: CKDAssessment, shapFeatures: any[]) => {
+  const calculateNutritionalTargets = (assessment: CKDAssessment, shapFeatures: any) => {
     const targets = {
       protein: { min: 0.6, max: 0.8, unit: 'g/kg body weight', reasoning: '' },
       sodium: { max: 2000, unit: 'mg/day', reasoning: '' },
@@ -264,7 +264,18 @@ export default function DietPlan({ params }: DietPlanProps) {
       targets.sodium.reasoning = 'Strictly limited due to hypertension risk';
     }
     
-    if (assessment.potassium > 5.0) {
+    // Basic assessment-based adjustments when SHAP not available
+    if (assessment.serumCreatinine && parseFloat(assessment.serumCreatinine.toString()) > 1.5) {
+      targets.protein.max = 0.6;
+      targets.protein.reasoning = 'Reduced due to elevated creatinine levels';
+    }
+    
+    if (assessment.bloodPressure && assessment.bloodPressure > 140) {
+      targets.sodium.max = 1500;
+      targets.sodium.reasoning = 'Restricted due to high blood pressure';
+    }
+    
+    if (assessment.potassium && parseFloat(assessment.potassium.toString()) > 5.0) {
       targets.potassium.max = 2000;
       targets.potassium.reasoning = 'Restricted due to elevated serum potassium levels';
     }
@@ -576,18 +587,18 @@ export default function DietPlan({ params }: DietPlanProps) {
         </CardHeader>
         <CardContent>
           {/* SHAP-Based Analysis Section */}
-          {assessment && (
-            <div className="mb-8 p-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
-              <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
-                <svg className="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 00-2-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
-                {t("AI-Powered SHAP Analysis for Your Diet Plan", "आपकी आहार योजना के लिए AI-संचालित SHAP विश्लेषण")}
-              </h3>
-              
-              {(() => {
-                const shapAnalysis = generateShapBasedDietAnalysis(assessment);
-                return (
+          {assessment && (() => {
+            try {
+              const shapAnalysis = generateShapBasedDietAnalysis(assessment);
+              return (
+                <div className="mb-8 p-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
+                  <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                    <svg className="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 00-2-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                    {t("AI-Powered SHAP Analysis for Your Diet Plan", "आपकी आहार योजना के लिए AI-संचालित SHAP विश्लेषण")}
+                  </h3>
+                  
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {/* Primary Risk Factors */}
                     {shapAnalysis.primaryRiskFactors.length > 0 && (
@@ -662,10 +673,19 @@ export default function DietPlan({ params }: DietPlanProps) {
                       </div>
                     </div>
                   </div>
-                );
-              })()}
-            </div>
-          )}
+                </div>
+              );
+            } catch (error) {
+              console.error('Error in SHAP analysis:', error);
+              return (
+                <div className="mb-8 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                  <p className="text-yellow-800">
+                    {t("Basic diet recommendations will be provided based on your assessment data.", "आपके मूल्यांकन डेटा के आधार पर बुनियादी आहार सिफारिशें प्रदान की जाएंगी।")}
+                  </p>
+                </div>
+              );
+            }
+          })()}
 
           {/* Diet Type Toggle */}
           <div className="flex justify-center mb-6 sm:mb-8">
