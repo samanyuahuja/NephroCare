@@ -444,7 +444,11 @@ export default function Results({ params }: ResultsProps) {
   };
 
   const downloadReport = async () => {
-    await generateAssessmentPDF(assessment);
+    try {
+      await generateAssessmentPDF(assessment);
+    } catch (error) {
+      console.error('PDF generation failed:', error);
+    }
   };
 
   return (

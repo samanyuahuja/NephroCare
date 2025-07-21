@@ -421,28 +421,12 @@ export class PDFGenerator {
     // Add personalized recommendations based on SHAP
     this.addSHAPRecommendations(assessment);
 
-    // Add new page for PDP plots
-    this.doc.addPage();
-    this.currentY = this.margin;
-    
-    this.addSection('Partial Dependence Plot Analysis');
-    this.doc.setFontSize(10);
-    this.doc.setTextColor(31, 41, 55);
-    this.doc.text('The following charts show how each health parameter influences CKD risk. Your current values are marked with red dots.', 
-      this.margin, this.currentY, { maxWidth: this.pageWidth - 2 * this.margin });
-    this.currentY += 15;
-
-    // Add all PDP plots
-    for (const feature of PDP_FEATURES) {
-      await this.addElementAsImage(`pdp-plot-${feature.key}`, `${feature.name} Impact Analysis`);
-    }
-
-    // Add LIME explanation if available
+    // Add PDP and LIME analysis
+    await this.addElementAsImage('pdp-plot-container', 'Partial Dependence Plot Analysis');
     await this.addElementAsImage('lime-explanation', 'LIME Local Explanation');
 
-    // Add comprehensive instructions
-    this.doc.addPage();
-    this.currentY = this.margin;
+    // Add comprehensive instructions on same page or new page if needed
+    this.checkPageBreak(100);
     this.addInstructionsSection();
     
     // General Recommendations

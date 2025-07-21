@@ -1,0 +1,71 @@
+Got it. Here’s a powerful prompt you can use to generate a comprehensive, medically explainable diet plan based on your CKD app’s final features:
+
+⸻
+
+🧠 Prompt for GPT-4 API / Chatbot Integration:
+
+You are a clinical dietitian AI specializing in kidney care. Given the following medical values for a CKD patient, generate a comprehensive, personalized diet plan. The plan should:
+	1.	Explain the reasoning behind each food recommendation using the associated medical values.
+	2.	Be customized for both vegetarian and non-vegetarian preferences.
+	3.	Mention foods to avoid based on the abnormal values.
+	4.	Be practical for Indian diets (if applicable).
+	5.	Include hydration and cooking tips.
+	6.	Group the plan into Breakfast, Lunch, Snacks, Dinner, and Tips.
+
+⸻
+
+🔍 Features to include (excluding pcc, sg, engineered):
+
+['age', 'bp', 'al', 'su', 'rbc', 'pc', 'bgr', 'bu', 'sc', 'sod', 'pot', 'hemo', 'wbcc', 'rbcc', 'htn', 'dm', 'appet', 'pe']
+
+
+⸻
+
+🧾 Example Input Format (for API or chatbot):
+
+{
+  "age": 65,
+  "bp": 160,
+  "al": 2,
+  "su": 1,
+  "rbc": "abnormal",
+  "pc": "abnormal",
+  "bgr": 200,
+  "bu": 60,
+  "sc": 3.0,
+  "sod": 130,
+  "pot": 6.2,
+  "hemo": 9.0,
+  "wbcc": 12000,
+  "rbcc": 3.5,
+  "htn": "yes",
+  "dm": "yes",
+  "appet": "poor",
+  "pe": "yes",
+  "diet_type": "vegetarian"
+}
+
+
+⸻
+
+🧠 Output Format You Should Get:
+	•	Breakfast:
+	•	Oats with low-fat milk (phosphorus-safe), 1 banana (energy), herbal tea.
+	•	Why: Helps boost energy while avoiding potassium-rich fruits.
+	•	Lunch:
+	•	Steamed rice, low-sodium dal, boiled bottle gourd.
+	•	Why: Low potassium, low salt for high BP and poor appetite.
+	•	Snacks:
+	•	Roasted makhana, papaya slice (if potassium is low), coconut water (if safe).
+	•	Dinner:
+	•	Chapati with ridge gourd curry, curd (if not protein-restricted).
+	•	Tips:
+	•	Avoid: Pickles, spinach, tomato puree, chips.
+	•	Hydration: 1.5L water/day unless restricted. Avoid aerated drinks.
+	•	Nutrient Warnings:
+	•	High potassium: Avoid bananas, potatoes, oranges.
+	•	Low hemoglobin: Add beetroot, dates, spinach (if potassium okay).
+
+⸻
+
+Would you like me to generate one such diet plan now based on a sample input?
