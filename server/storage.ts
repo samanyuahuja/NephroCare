@@ -21,7 +21,7 @@ export interface IStorage {
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   
-  createCKDAssessment(assessment: InsertCKDAssessment): Promise<CKDAssessment>;
+  createCKDAssessment(assessment: any): Promise<CKDAssessment>;
   getCKDAssessment(id: number): Promise<CKDAssessment | undefined>;
   getCKDAssessmentsByIds(ids: number[]): Promise<CKDAssessment[]>;
   updateCKDAssessmentResults(id: number, riskScore: number, riskLevel: string, shapFeatures: string): Promise<CKDAssessment | undefined>;
@@ -52,7 +52,7 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async createCKDAssessment(assessment: InsertCKDAssessment): Promise<CKDAssessment> {
+  async createCKDAssessment(assessment: any): Promise<CKDAssessment> {
     const [result] = await db.insert(ckdAssessments).values(assessment).returning();
     return result;
   }

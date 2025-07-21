@@ -41,8 +41,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const validatedData = insertCKDAssessmentSchema.parse(req.body);
       
+      // Transform "unknown" values to defaults for database storage
+      const transformedData = {
+        patientName: validatedData.patientName,
+        age: validatedData.age || 45,
+        bloodPressure: validatedData.bloodPressure || 120,
+        albumin: validatedData.albumin === "unknown" ? 1 : Number(validatedData.albumin),
+        sugar: validatedData.sugar === "unknown" ? 1 : Number(validatedData.sugar),
+        bloodGlucoseRandom: validatedData.bloodGlucoseRandom === "unknown" ? 145 : Number(validatedData.bloodGlucoseRandom),
+        bloodUrea: validatedData.bloodUrea === "unknown" ? 35 : Number(validatedData.bloodUrea),
+        serumCreatinine: validatedData.serumCreatinine === "unknown" ? 1.8 : Number(validatedData.serumCreatinine),
+        sodium: validatedData.sodium === "unknown" ? 135 : Number(validatedData.sodium),
+        potassium: validatedData.potassium === "unknown" ? 4.5 : Number(validatedData.potassium),
+        hemoglobin: validatedData.hemoglobin === "unknown" ? 12 : Number(validatedData.hemoglobin),
+        wbcCount: validatedData.wbcCount === "unknown" ? 7600 : Number(validatedData.wbcCount),
+        rbcCount: validatedData.rbcCount === "unknown" ? 5.2 : Number(validatedData.rbcCount),
+        redBloodCells: validatedData.redBloodCells === "unknown" ? "normal" : validatedData.redBloodCells,
+        pusCell: validatedData.pusCell === "unknown" ? "normal" : validatedData.pusCell,
+        hypertension: validatedData.hypertension === "unknown" ? "no" : validatedData.hypertension,
+        diabetesMellitus: validatedData.diabetesMellitus === "unknown" ? "no" : validatedData.diabetesMellitus,
+        appetite: validatedData.appetite === "unknown" ? "good" : validatedData.appetite,
+        pedalEdema: validatedData.pedalEdema === "unknown" ? "no" : validatedData.pedalEdema,
+        anemia: validatedData.anemia === "unknown" ? "no" : validatedData.anemia,
+      };
+      
       // Create initial assessment
-      const assessment = await storage.createCKDAssessment(validatedData);
+      const assessment = await storage.createCKDAssessment(transformedData);
       
       // Run ML prediction
       try {
