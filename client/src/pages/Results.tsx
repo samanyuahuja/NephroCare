@@ -581,39 +581,41 @@ export default function Results({ params }: ResultsProps) {
             <div className="bg-gray-50 rounded-lg p-4 mb-4">
               <div className="text-sm text-gray-600 mb-2">NephroBot:</div>
               <div className="text-gray-800">
-                {shapFeatures.length > 0 ? (
-                  () => {
-                    // Find the highest impact factor (positive values increase risk)
-                    const highestRiskFactor = shapFeatures
-                      .filter(f => f.impact > 0)
-                      .sort((a, b) => b.impact - a.impact)[0];
-                    
-                    if (highestRiskFactor) {
-                      const featureName = highestRiskFactor.feature.toLowerCase();
-                      
-                      if (featureName.includes('creatinine')) {
-                        return `Your ${highestRiskFactor.feature.toLowerCase()} is the primary risk factor (${(highestRiskFactor.impact * 100).toFixed(1)}% impact). Normal levels are typically 0.6-1.2 mg/dL. Consider consulting a nephrologist for kidney function evaluation.`;
-                      } else if (featureName.includes('hemoglobin')) {
-                        return `Your ${highestRiskFactor.feature.toLowerCase()} is the primary risk factor (${(highestRiskFactor.impact * 100).toFixed(1)}% impact). Low hemoglobin may indicate anemia related to kidney disease. Consider iron supplements and kidney function monitoring.`;
-                      } else if (featureName.includes('urea')) {
-                        return `Your ${highestRiskFactor.feature.toLowerCase()} is the primary risk factor (${(highestRiskFactor.impact * 100).toFixed(1)}% impact). Elevated blood urea suggests reduced kidney filtering. Consider dietary protein moderation and increased hydration.`;
-                      } else if (featureName.includes('age')) {
-                        return `Your ${highestRiskFactor.feature.toLowerCase()} is the primary risk factor (${(highestRiskFactor.impact * 100).toFixed(1)}% impact). Age-related kidney function decline is natural. Focus on preventive care and regular monitoring.`;
-                      } else if (featureName.includes('pressure')) {
-                        return `Your ${highestRiskFactor.feature.toLowerCase()} is the primary risk factor (${(highestRiskFactor.impact * 100).toFixed(1)}% impact). High blood pressure damages kidneys over time. Consider BP medications and lifestyle modifications.`;
-                      } else if (featureName.includes('hypertension')) {
-                        return `Your ${highestRiskFactor.feature.toLowerCase()} is the primary risk factor (${(highestRiskFactor.impact * 100).toFixed(1)}% impact). Hypertension history increases kidney disease risk. Maintain strict BP control and regular monitoring.`;
-                      } else if (featureName.includes('diabetes')) {
-                        return `Your ${highestRiskFactor.feature.toLowerCase()} is the primary risk factor (${(highestRiskFactor.impact * 100).toFixed(1)}% impact). Diabetes can cause kidney damage over time. Focus on tight glucose control and kidney-protective medications.`;
-                      } else {
-                        return `Your ${highestRiskFactor.feature.toLowerCase()} is the primary risk factor (${(highestRiskFactor.impact * 100).toFixed(1)}% impact). This factor contributes significantly to your CKD risk. Would you like specific guidance on managing this condition?`;
-                      }
-                    } else {
-                      return "Good news! Most of your health factors are protective and decrease CKD risk. Continue maintaining healthy lifestyle habits and regular monitoring.";
-                    }
+                {(() => {
+                  if (shapFeatures.length === 0) {
+                    return "I can help explain your results and provide guidance on managing your kidney health. Feel free to ask any questions!";
                   }
-                )() : "I can help explain your results and provide guidance on managing your kidney health. Feel free to ask any questions!"
-                }
+                  
+                  // Find the highest impact factor (positive values increase risk)
+                  const highestRiskFactor = shapFeatures
+                    .filter(f => f.impact > 0)
+                    .sort((a, b) => b.impact - a.impact)[0];
+                  
+                  if (!highestRiskFactor) {
+                    return "Good news! Most of your health factors are protective and decrease CKD risk. Continue maintaining healthy lifestyle habits and regular monitoring.";
+                  }
+                  
+                  const featureName = highestRiskFactor.feature.toLowerCase();
+                  const impactPercentage = (highestRiskFactor.impact * 100).toFixed(1);
+                  
+                  if (featureName.includes('creatinine')) {
+                    return `Your ${highestRiskFactor.feature.toLowerCase()} is the primary risk factor (${impactPercentage}% impact). Normal levels are typically 0.6-1.2 mg/dL. Consider consulting a nephrologist for kidney function evaluation.`;
+                  } else if (featureName.includes('hemoglobin')) {
+                    return `Your ${highestRiskFactor.feature.toLowerCase()} is the primary risk factor (${impactPercentage}% impact). Low hemoglobin may indicate anemia related to kidney disease. Consider iron supplements and kidney function monitoring.`;
+                  } else if (featureName.includes('urea')) {
+                    return `Your ${highestRiskFactor.feature.toLowerCase()} is the primary risk factor (${impactPercentage}% impact). Elevated blood urea suggests reduced kidney filtering. Consider dietary protein moderation and increased hydration.`;
+                  } else if (featureName.includes('age')) {
+                    return `Your ${highestRiskFactor.feature.toLowerCase()} is the primary risk factor (${impactPercentage}% impact). Age-related kidney function decline is natural. Focus on preventive care and regular monitoring.`;
+                  } else if (featureName.includes('pressure')) {
+                    return `Your ${highestRiskFactor.feature.toLowerCase()} is the primary risk factor (${impactPercentage}% impact). High blood pressure damages kidneys over time. Consider BP medications and lifestyle modifications.`;
+                  } else if (featureName.includes('hypertension')) {
+                    return `Your ${highestRiskFactor.feature.toLowerCase()} is the primary risk factor (${impactPercentage}% impact). Hypertension history increases kidney disease risk. Maintain strict BP control and regular monitoring.`;
+                  } else if (featureName.includes('diabetes')) {
+                    return `Your ${highestRiskFactor.feature.toLowerCase()} is the primary risk factor (${impactPercentage}% impact). Diabetes can cause kidney damage over time. Focus on tight glucose control and kidney-protective medications.`;
+                  } else {
+                    return `Your ${highestRiskFactor.feature.toLowerCase()} is the primary risk factor (${impactPercentage}% impact). This factor contributes significantly to your CKD risk. Would you like specific guidance on managing this condition?`;
+                  }
+                })()}
               </div>
             </div>
             <Link href="/chatbot">
