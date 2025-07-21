@@ -72,6 +72,173 @@ export default function DietPlan({ params }: DietPlanProps) {
     }
   };
 
+  // Advanced SHAP-based diet analysis
+  const generateShapBasedDietAnalysis = (assessment: CKDAssessment) => {
+    const shapFeatures = parseShapFeatures(assessment.shapFeatures);
+    
+    const analysis = {
+      primaryRiskFactors: [] as any[],
+      protectiveFactors: [] as any[],
+      dietaryInterventions: [] as any[],
+      specificRecommendations: [] as any[],
+      nutritionalTargets: {} as any
+    };
+
+    // Analyze each SHAP feature for dietary implications
+    shapFeatures.forEach((feature: any) => {
+      const { name, value, impact } = feature;
+      
+      if (impact > 0.1) { // High risk factors
+        analysis.primaryRiskFactors.push({
+          factor: name,
+          value: value,
+          impact: impact,
+          intervention: getDietaryIntervention(name, value, 'reduce')
+        });
+      } else if (impact < -0.05) { // Protective factors
+        analysis.protectiveFactors.push({
+          factor: name,
+          value: value,
+          impact: Math.abs(impact),
+          intervention: getDietaryIntervention(name, value, 'maintain')
+        });
+      }
+    });
+
+    // Generate specific nutritional targets based on SHAP analysis
+    analysis.nutritionalTargets = calculateNutritionalTargets(assessment, shapFeatures);
+    
+    return analysis;
+  };
+
+  // Get specific dietary intervention for each SHAP feature
+  const getDietaryIntervention = (factorName: string, value: any, action: 'reduce' | 'maintain') => {
+    const interventions = {
+      'Serum Creatinine': {
+        reduce: {
+          foods: ['Low-protein grains (rice, pasta in moderation)', 'Plant proteins (small portions)', 'Low-phosphorus vegetables'],
+          avoid: ['High-protein meats', 'Processed foods', 'Excessive dairy'],
+          explanation: 'High creatinine indicates kidney stress. Reducing protein load helps preserve kidney function.'
+        },
+        maintain: {
+          foods: ['Lean proteins in moderation', 'Fresh vegetables', 'Adequate hydration'],
+          explanation: 'Normal creatinine levels support continuing balanced protein intake.'
+        }
+      },
+      'Blood Urea': {
+        reduce: {
+          foods: ['Low-protein vegetables', 'Complex carbohydrates', 'Controlled protein portions'],
+          avoid: ['Excessive meat', 'High-nitrogen foods', 'Dehydration'],
+          explanation: 'Elevated urea suggests protein metabolism stress. Reducing protein intake decreases kidney workload.'
+        },
+        maintain: {
+          foods: ['Balanced protein sources', 'Adequate fluids'],
+          explanation: 'Normal urea levels allow for standard protein recommendations.'
+        }
+      },
+      'Blood Pressure': {
+        reduce: {
+          foods: ['Low-sodium vegetables', 'Potassium-rich foods (if allowed)', 'DASH diet foods'],
+          avoid: ['High-sodium processed foods', 'Excessive salt', 'Canned foods with sodium'],
+          explanation: 'High blood pressure damages kidneys. Sodium restriction and potassium balance help control BP.'
+        },
+        maintain: {
+          foods: ['Moderate sodium intake', 'Heart-healthy foods'],
+          explanation: 'Normal blood pressure supports standard heart-healthy dietary guidelines.'
+        }
+      },
+      'Blood Glucose Random': {
+        reduce: {
+          foods: ['Low-glycemic vegetables', 'Complex carbohydrates', 'High-fiber foods'],
+          avoid: ['Simple sugars', 'Refined carbohydrates', 'Sugary drinks'],
+          explanation: 'High glucose accelerates kidney damage. Controlling blood sugar slows CKD progression.'
+        },
+        maintain: {
+          foods: ['Balanced carbohydrates', 'Regular meal timing'],
+          explanation: 'Normal glucose levels support standard carbohydrate recommendations.'
+        }
+      },
+      'Albumin': {
+        reduce: {
+          foods: ['Low-protein alternatives', 'Plant-based proteins', 'Kidney-friendly vegetables'],
+          avoid: ['High-protein foods', 'Excessive dairy', 'Red meat'],
+          explanation: 'High albumin in urine indicates kidney damage. Protein restriction may slow progression.'
+        },
+        maintain: {
+          foods: ['Adequate protein for nutrition'],
+          explanation: 'Normal albumin levels allow for standard protein intake.'
+        }
+      },
+      'Sodium': {
+        reduce: {
+          foods: ['Fresh vegetables', 'Herbs and spices', 'Low-sodium alternatives'],
+          avoid: ['Processed foods', 'Restaurant foods', 'Canned foods'],
+          explanation: 'High sodium worsens blood pressure and fluid retention. Restriction is crucial for kidney health.'
+        },
+        maintain: {
+          foods: ['Moderate sodium intake', 'Fresh foods'],
+          explanation: 'Normal sodium levels support moderate sodium dietary guidelines.'
+        }
+      },
+      'Potassium': {
+        reduce: {
+          foods: ['Low-potassium vegetables (cabbage, green beans)', 'White rice', 'Apples'],
+          avoid: ['High-potassium foods (bananas, oranges)', 'Nuts', 'Dried fruits'],
+          explanation: 'High potassium can cause dangerous heart rhythms in kidney disease. Restriction is essential.'
+        },
+        maintain: {
+          foods: ['Moderate potassium foods', 'Balanced fruit/vegetable intake'],
+          explanation: 'Normal potassium levels allow for standard fruit and vegetable recommendations.'
+        }
+      },
+      'Hemoglobin': {
+        reduce: {
+          foods: ['Iron-rich foods', 'Vitamin C sources', 'Lean proteins'],
+          avoid: ['Iron inhibitors (tea with meals)', 'Excessive calcium'],
+          explanation: 'Low hemoglobin indicates anemia. Iron-rich foods help improve oxygen delivery.'
+        },
+        maintain: {
+          foods: ['Balanced iron sources'],
+          explanation: 'Normal hemoglobin supports standard iron intake recommendations.'
+        }
+      }
+    };
+
+    const factor = interventions[factorName as keyof typeof interventions];
+    return factor ? factor[action] : { foods: [], avoid: [], explanation: 'Maintain balanced nutrition.' };
+  };
+
+  // Calculate specific nutritional targets based on SHAP analysis
+  const calculateNutritionalTargets = (assessment: CKDAssessment, shapFeatures: any[]) => {
+    const targets = {
+      protein: { min: 0.6, max: 0.8, unit: 'g/kg body weight', reasoning: '' },
+      sodium: { max: 2000, unit: 'mg/day', reasoning: '' },
+      potassium: { max: 3000, unit: 'mg/day', reasoning: '' },
+      phosphorus: { max: 1000, unit: 'mg/day', reasoning: '' },
+      fluids: { target: 1500, unit: 'ml/day', reasoning: '' }
+    };
+
+    // Adjust targets based on SHAP analysis
+    const highRiskFeatures = shapFeatures.filter(f => f.impact > 0.1);
+    
+    if (highRiskFeatures.some(f => f.name === 'Serum Creatinine')) {
+      targets.protein.max = 0.6;
+      targets.protein.reasoning = 'Reduced due to elevated creatinine indicating kidney stress';
+    }
+    
+    if (highRiskFeatures.some(f => f.name === 'Blood Pressure')) {
+      targets.sodium.max = 1500;
+      targets.sodium.reasoning = 'Strictly limited due to hypertension risk';
+    }
+    
+    if (assessment.potassium > 5.0) {
+      targets.potassium.max = 2000;
+      targets.potassium.reasoning = 'Restricted due to elevated serum potassium levels';
+    }
+
+    return targets;
+  };
+
   const toggleDietType = async (type: 'vegetarian' | 'non-vegetarian') => {
     setDietType(type);
     // Force refetch with new diet type
@@ -375,6 +542,98 @@ export default function DietPlan({ params }: DietPlanProps) {
           </p>
         </CardHeader>
         <CardContent>
+          {/* SHAP-Based Analysis Section */}
+          {assessment && (
+            <div className="mb-8 p-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
+              <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                <svg className="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 00-2-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                {t("AI-Powered SHAP Analysis for Your Diet Plan", "आपकी आहार योजना के लिए AI-संचालित SHAP विश्लेषण")}
+              </h3>
+              
+              {(() => {
+                const shapAnalysis = generateShapBasedDietAnalysis(assessment);
+                return (
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* Primary Risk Factors */}
+                    {shapAnalysis.primaryRiskFactors.length > 0 && (
+                      <div className="bg-red-50 p-4 rounded-lg border border-red-200">
+                        <h4 className="font-semibold text-red-800 mb-3 flex items-center">
+                          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                          </svg>
+                          High Risk Factors Requiring Dietary Intervention
+                        </h4>
+                        {shapAnalysis.primaryRiskFactors.map((factor: any, index: number) => (
+                          <div key={index} className="mb-4 p-3 bg-white rounded border border-red-100">
+                            <div className="font-medium text-red-900 mb-1">
+                              {factor.factor}: {factor.value} (Impact: {(factor.impact * 100).toFixed(1)}%)
+                            </div>
+                            <div className="text-sm text-red-700 mb-2">{factor.intervention.explanation}</div>
+                            <div className="text-sm">
+                              <span className="font-medium text-green-700">Recommended: </span>
+                              {factor.intervention.foods?.join(', ')}
+                            </div>
+                            {factor.intervention.avoid && (
+                              <div className="text-sm mt-1">
+                                <span className="font-medium text-red-700">Avoid: </span>
+                                {factor.intervention.avoid.join(', ')}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Protective Factors */}
+                    {shapAnalysis.protectiveFactors.length > 0 && (
+                      <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                        <h4 className="font-semibold text-green-800 mb-3 flex items-center">
+                          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          Protective Factors to Maintain
+                        </h4>
+                        {shapAnalysis.protectiveFactors.map((factor: any, index: number) => (
+                          <div key={index} className="mb-3 p-3 bg-white rounded border border-green-100">
+                            <div className="font-medium text-green-900 mb-1">
+                              {factor.factor}: {factor.value} (Protective Impact: {(factor.impact * 100).toFixed(1)}%)
+                            </div>
+                            <div className="text-sm text-green-700">{factor.intervention.explanation}</div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Nutritional Targets */}
+                    <div className="lg:col-span-2 bg-blue-50 p-4 rounded-lg border border-blue-200">
+                      <h4 className="font-semibold text-blue-800 mb-3 flex items-center">
+                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 00-2-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                        Personalized Nutritional Targets Based on SHAP Analysis
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {Object.entries(shapAnalysis.nutritionalTargets).map(([nutrient, target]: [string, any]) => (
+                          <div key={nutrient} className="bg-white p-3 rounded border border-blue-100">
+                            <div className="font-medium text-blue-900 capitalize">{nutrient}</div>
+                            <div className="text-sm text-blue-700">
+                              {target.min && `${target.min}-`}{target.max || target.target} {target.unit}
+                            </div>
+                            {target.reasoning && (
+                              <div className="text-xs text-blue-600 mt-1">{target.reasoning}</div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+          )}
+
           {/* Diet Type Toggle */}
           <div className="flex justify-center mb-6 sm:mb-8">
             <div className="bg-gray-100 p-1 rounded-lg w-full sm:w-auto">
