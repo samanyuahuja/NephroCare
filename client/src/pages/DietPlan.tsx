@@ -85,28 +85,61 @@ export default function DietPlan({ params }: DietPlanProps) {
     };
 
     // Analyze each SHAP feature for dietary implications
-    shapFeatures.forEach((feature: any) => {
-      const { name, value, impact } = feature;
-      
-      if (impact > 0.1) { // High risk factors
-        analysis.primaryRiskFactors.push({
-          factor: name,
-          value: value,
-          impact: impact,
-          intervention: getDietaryIntervention(name, value, 'reduce')
-        });
-      } else if (impact < -0.05) { // Protective factors
-        analysis.protectiveFactors.push({
-          factor: name,
-          value: value,
-          impact: Math.abs(impact),
-          intervention: getDietaryIntervention(name, value, 'maintain')
-        });
-      }
-    });
+    if (Array.isArray(shapFeatures)) {
+      shapFeatures.forEach((feature: any) => {
+        const { name, value, impact } = feature;
+        
+        if (impact > 0.1) { // High risk factors
+          analysis.primaryRiskFactors.push({
+            factor: name,
+            value: value,
+            impact: impact,
+            intervention: getDietaryIntervention(name, value, 'reduce')
+          });
+        } else if (impact < -0.05) { // Protective factors
+          analysis.protectiveFactors.push({
+            factor: name,
+            value: value,
+            impact: Math.abs(impact),
+            intervention: getDietaryIntervention(name, value, 'maintain')
+          });
+        }
+      });
+    }
 
     // Generate specific nutritional targets based on SHAP analysis
     analysis.nutritionalTargets = calculateNutritionalTargets(assessment, shapFeatures);
+    
+    // If no SHAP features available, create basic analysis from assessment data
+    if (!Array.isArray(shapFeatures) || shapFeatures.length === 0) {
+      // Add basic risk factors based on assessment values
+      if (assessment.serumCreatinine && parseFloat(assessment.serumCreatinine.toString()) > 1.2) {
+        analysis.primaryRiskFactors.push({
+          factor: 'Serum Creatinine',
+          value: `${assessment.serumCreatinine} mg/dL`,
+          impact: 0.3,
+          intervention: getDietaryIntervention('Serum Creatinine', assessment.serumCreatinine, 'reduce')
+        });
+      }
+      
+      if (assessment.bloodUrea && assessment.bloodUrea > 40) {
+        analysis.primaryRiskFactors.push({
+          factor: 'Blood Urea',
+          value: `${assessment.bloodUrea} mg/dL`,
+          impact: 0.2,
+          intervention: getDietaryIntervention('Blood Urea', assessment.bloodUrea, 'reduce')
+        });
+      }
+      
+      if (assessment.bloodPressure && assessment.bloodPressure > 140) {
+        analysis.primaryRiskFactors.push({
+          factor: 'Blood Pressure',
+          value: `${assessment.bloodPressure} mmHg`,
+          impact: 0.15,
+          intervention: getDietaryIntervention('Blood Pressure', assessment.bloodPressure, 'reduce')
+        });
+      }
+    }
     
     return analysis;
   };
@@ -219,7 +252,7 @@ export default function DietPlan({ params }: DietPlanProps) {
     };
 
     // Adjust targets based on SHAP analysis
-    const highRiskFeatures = shapFeatures.filter(f => f.impact > 0.1);
+    const highRiskFeatures = Array.isArray(shapFeatures) ? shapFeatures.filter(f => f.impact > 0.1) : [];
     
     if (highRiskFeatures.some(f => f.name === 'Serum Creatinine')) {
       targets.protein.max = 0.6;
