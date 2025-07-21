@@ -543,11 +543,7 @@ export default function Results({ params }: ResultsProps) {
                 <li>• Normal ranges are shaded in green</li>
               </ul>
             </div>
-            <PDPPlot 
-              feature="Serum Creatinine" 
-              value={assessment.serumCreatinine}
-              unit="mg/dL"
-            />
+            <PDPPlot assessment={assessment} />
           </CardContent>
         </Card>
 
