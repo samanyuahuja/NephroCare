@@ -165,7 +165,7 @@ export default function Diagnosis() {
                     </div>
 
                     <div className="bg-white p-3 rounded-lg border">
-                      <div className="font-semibold text-red-600 mb-1">Blood Glucose ≥ 160</div>
+                      <div className="font-semibold text-red-600 mb-1">Blood Glucose / Plasma Glucose ≥ 160</div>
                       <div className="text-gray-600">{t("Fatigue, excessive hunger/thirst", "थकान, अत्यधिक भूख/प्यास")}</div>
                     </div>
 
@@ -282,7 +282,7 @@ export default function Diagnosis() {
                     </div>
 
                     <div className="bg-white p-4 rounded-lg border">
-                      <div className="font-semibold text-green-700 mb-2">Blood Glucose Random</div>
+                      <div className="font-semibold text-green-700 mb-2">Blood Glucose Random / Plasma Glucose Random</div>
                       <div className="text-gray-600">{t("In 'Blood Sugar' section - random blood sugar level", "'ब्लड शुगर' सेक्शन में - रैंडम ब्लड शुगर लेवल")}</div>
                     </div>
 
@@ -540,7 +540,7 @@ export default function Diagnosis() {
                     name="bloodGlucoseRandom"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Blood Glucose Random (mg/dL)</FormLabel>
+                        <FormLabel>Blood Glucose Random / Plasma Glucose Random (mg/dL)</FormLabel>
                         <div className="space-y-2">
                           <FormControl>
                             <Input

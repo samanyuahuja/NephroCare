@@ -58,7 +58,7 @@ const FEATURE_OPTIONS: FeatureConfig[] = [
     getValue: (a) => Number(a.hemoglobin) || 12
   },
   {
-    name: "Blood Glucose",
+    name: "Blood Glucose / Plasma Glucose",
     key: "bloodGlucoseRandom",
     unit: "mg/dL",
     minValue: 70,

@@ -218,10 +218,10 @@ export default function Results({ params }: ResultsProps) {
       });
     }
 
-    // High Blood Glucose (>150)
+    // High Blood Glucose / Plasma Glucose (>150)
     if (assessment.bloodGlucoseRandom > 150) {
       recommendations.push({
-        factor: t("High Blood Glucose", "उच्च रक्त शर्करा"),
+        factor: t("High Blood Glucose / Plasma Glucose", "उच्च रक्त शर्करा / प्लाज्मा ग्लूकोज"),
         value: `${assessment.bloodGlucoseRandom} mg/dL`,
         severity: "high",
         causes: t(

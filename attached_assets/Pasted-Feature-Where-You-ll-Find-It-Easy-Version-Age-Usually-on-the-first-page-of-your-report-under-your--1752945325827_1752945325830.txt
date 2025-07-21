@@ -16,7 +16,7 @@ Pus Cells (pc)
 Also in “Urine Microscopy” — shows if there’s any infection.
 Pus Cell Clumps (pcc)
 In the same section as above — it may say “Clumps present” if there’s an infection.
-Blood Glucose Random (bgr)
+Blood Glucose Random / Plasma Glucose Random (bgr)
 In the “Blood Sugar” section — this is your sugar level when tested randomly.
 Blood Urea (bu)
 Found in the “Kidney Function Test” (KFT) — look for “Urea” or “Blood Urea.”
