@@ -22,21 +22,21 @@ export default function Chatbot() {
   // Load messages from localStorage on component mount
   useEffect(() => {
     try {
-      const storedMessages = localStorage.getItem('nephroBotMessages');
+      const storedMessages = localStorage.getItem("nephroBotMessages");
       if (storedMessages) {
         setMessages(JSON.parse(storedMessages));
       }
     } catch (error) {
-      console.error('Error loading chat messages:', error);
+      console.error("Error loading chat messages:", error);
     }
   }, []);
 
   // Save messages to localStorage whenever messages change
   useEffect(() => {
     try {
-      localStorage.setItem('nephroBotMessages', JSON.stringify(messages));
+      localStorage.setItem("nephroBotMessages", JSON.stringify(messages));
     } catch (error) {
-      console.error('Error saving chat messages:', error);
+      console.error("Error saving chat messages:", error);
     }
   }, [messages]);
 
@@ -44,26 +44,33 @@ export default function Chatbot() {
     mutationFn: async (userMessage: string) => {
       // Call Flask chatbot API through our server
       try {
-        const response = await fetch('/api/chat-direct', {
-          method: 'POST',
+        const response = await fetch("/api/chat-direct", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
-          body: JSON.stringify({ 
-            message: userMessage
-          })
+          body: JSON.stringify({
+            message: userMessage,
+          }),
         });
-        
+
         if (!response.ok) {
-          console.error('API Response not OK:', response.status, response.statusText);
-          throw new Error('Failed to get response from NephroBot');
+          console.error(
+            "API Response not OK:",
+            response.status,
+            response.statusText,
+          );
+          throw new Error("Failed to get response from NephroBot");
         }
-        
+
         const data = await response.json();
-        console.log('Chatbot response received:', data);
-        return data.reply || "I'm having trouble processing your message. Please try again.";
+        console.log("Chatbot response received:", data);
+        return (
+          data.reply ||
+          "I'm having trouble processing your message. Please try again."
+        );
       } catch (error) {
-        console.error('Error calling chatbot:', error);
+        console.error("Error calling chatbot:", error);
         return "I'm having trouble processing your message. Please try again later.";
       }
     },
@@ -72,15 +79,15 @@ export default function Chatbot() {
         id: Date.now(),
         message: userMessage,
         response: botResponse,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
-      
-      setMessages(prev => [...prev, newMessage]);
+
+      setMessages((prev) => [...prev, newMessage]);
       setMessage("");
       setIsLoading(false);
     },
     onError: (error) => {
-      console.error('Error sending message:', error);
+      console.error("Error sending message:", error);
       setIsLoading(false);
     },
   });
@@ -93,7 +100,7 @@ export default function Chatbot() {
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
     }
@@ -108,15 +115,21 @@ export default function Chatbot() {
 
   const clearChat = () => {
     setMessages([]);
-    localStorage.removeItem('nephroBotMessages');
+    localStorage.removeItem("nephroBotMessages");
   };
 
   const sampleQuestions = [
     t("What does high creatinine mean?", "उच्च क्रिएटिनिन का क्या मतलब है?"),
     t("How to improve hemoglobin?", "हीमोग्लोबिन कैसे बढ़ाएं?"),
     t("What are CKD symptoms?", "CKD के लक्षण क्या हैं?"),
-    t("How can I prevent CKD progression?", "मैं CKD की प्रगति कैसे रोक सकता हूं?"),
-    t("What foods should I avoid with kidney disease?", "गुर्दे की बीमारी में कौन से खाद्य पदार्थों से बचना चाहिए?")
+    t(
+      "How can I prevent CKD progression?",
+      "मैं CKD की प्रगति कैसे रोक सकता हूं?",
+    ),
+    t(
+      "What foods should I avoid with kidney disease?",
+      "गुर्दे की बीमारी में कौन से खाद्य पदार्थों से बचना चाहिए?",
+    ),
   ];
 
   return (
@@ -128,15 +141,20 @@ export default function Chatbot() {
             <div className="flex-1 min-w-0">
               <CardTitle className="flex items-center text-lg sm:text-xl">
                 <Bot className="mr-2 sm:mr-3 h-5 w-5 sm:h-6 sm:w-6" />
-                <span className="truncate">{t("NephroBot Assistant", "नेफ्रोबॉट सहायक")}</span>
+                <span className="truncate">
+                  {t("NephroBot Assistant", "नेफ्रोबॉट सहायक")}
+                </span>
               </CardTitle>
               <p className="text-blue-100 text-xs sm:text-sm hidden sm:block">
-                {t("Ask me anything about CKD, your results, or kidney health", "CKD, आपके परिणाम, या गुर्दे के स्वास्थ्य के बारे में मुझसे कुछ भी पूछें")}
+                {t(
+                  "Ask me anything about CKD, your results, or kidney health",
+                  "CKD, आपके परिणाम, या गुर्दे के स्वास्थ्य के बारे में मुझसे कुछ भी पूछें",
+                )}
               </p>
             </div>
-            <Button 
-              variant="outline" 
-              size="sm" 
+            <Button
+              variant="outline"
+              size="sm"
               onClick={clearChat}
               className="ml-2 flex items-center gap-1 sm:gap-2 bg-white/20 border-white/30 text-white hover:bg-white/30 text-xs sm:text-sm"
             >
@@ -156,8 +174,10 @@ export default function Chatbot() {
               </div>
               <div className="bg-white p-2 sm:p-3 rounded-lg shadow-sm max-w-xs sm:max-w-md">
                 <p className="text-gray-800 text-sm sm:text-base">
-                  {t("Hello! I'm NephroBot, your CKD assistant. I can help explain your results, answer questions about kidney health, or provide guidance on managing your condition. What would you like to know?", 
-                     "नमस्ते! मैं नेफ्रोबॉट हूं, आपका CKD सहायक। मैं आपके परिणामों को समझाने, गुर्दे के स्वास्थ्य के बारे में प्रश्नों के उत्तर देने, या आपकी स्थिति के प्रबंधन पर मार्गदर्शन प्रदान करने में मदद कर सकता हूं। आप क्या जानना चाहते हैं?")}
+                  {t(
+                    "Hello! I'm NephroBot, your CKD assistant. I can help explain your results, answer questions about kidney health, or provide guidance on managing your condition. What would you like to know?",
+                    "नमस्ते! मैं नेफ्रोबॉट हूं, आपका CKD सहायक। मैं आपके परिणामों को समझाने, गुर्दे के स्वास्थ्य के बारे में प्रश्नों के उत्तर देने, या आपकी स्थिति के प्रबंधन पर मार्गदर्शन प्रदान करने में मदद कर सकता हूं। आप क्या जानना चाहते हैं?",
+                  )}
                 </p>
               </div>
             </div>
@@ -199,7 +219,9 @@ export default function Chatbot() {
                     <Bot className="h-3 w-3 sm:h-4 sm:w-4 text-white" />
                   </div>
                   <div className="bg-white p-2 sm:p-3 rounded-lg shadow-sm max-w-xs sm:max-w-md">
-                    <div className="text-gray-800 text-sm sm:text-base whitespace-pre-wrap">{msg.response}</div>
+                    <div className="text-gray-800 text-sm sm:text-base whitespace-pre-wrap">
+                      {msg.response}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -214,8 +236,14 @@ export default function Chatbot() {
                 <div className="bg-white p-2 sm:p-3 rounded-lg shadow-sm">
                   <div className="flex space-x-1">
                     <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                    <div
+                      className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                      style={{ animationDelay: "0.1s" }}
+                    ></div>
+                    <div
+                      className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                      style={{ animationDelay: "0.2s" }}
+                    ></div>
                   </div>
                 </div>
               </div>
@@ -230,7 +258,10 @@ export default function Chatbot() {
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder={t("Type your question...", "अपना प्रश्न टाइप करें...")}
+              placeholder={t(
+                "Type your question...",
+                "अपना प्रश्न टाइप करें...",
+              )}
               disabled={sendMessageMutation.isPending}
               className="flex-1 text-sm sm:text-base"
             />
