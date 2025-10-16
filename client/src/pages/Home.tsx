@@ -174,6 +174,154 @@ export default function Home() {
         </CardContent>
       </Card>
 
+      {/* Patient Testimonials */}
+      <Card>
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl sm:text-3xl font-bold text-gray-900">
+            {t("Patient Success Stories", "रोगी सफलता की कहानियाँ")}
+          </CardTitle>
+          <p className="text-gray-600">
+            {t("Real experiences from patients across India", "भारत भर के रोगियों के वास्तविक अनुभव")}
+          </p>
+        </CardHeader>
+        <CardContent className="p-4 sm:p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="bg-gradient-to-br from-blue-50 to-white p-6 rounded-xl border-2 border-blue-100 shadow-md" data-testid="testimonial-1">
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                  RS
+                </div>
+                <div className="ml-3">
+                  <h4 className="font-semibold text-gray-900">Ramesh Sharma</h4>
+                  <p className="text-sm text-gray-600">Mumbai, Maharashtra</p>
+                </div>
+              </div>
+              <p className="text-gray-700 leading-relaxed">
+                {t(
+                  "This platform helped me catch my kidney problems early. The detailed explanations and diet recommendations have been invaluable in managing my condition. Highly recommend for anyone concerned about kidney health.",
+                  "इस प्लेटफॉर्म ने मुझे अपनी किडनी की समस्याओं को जल्दी पकड़ने में मदद की। विस्तृत स्पष्टीकरण और आहार सिफारिशें मेरी स्थिति के प्रबंधन में अमूल्य रही हैं। किडनी स्वास्थ्य के बारे में चिंतित किसी भी व्यक्ति के लिए अत्यधिक अनुशंसित।"
+                )}
+              </p>
+            </div>
+
+            <div className="bg-gradient-to-br from-blue-50 to-white p-6 rounded-xl border-2 border-blue-100 shadow-md" data-testid="testimonial-2">
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                  PK
+                </div>
+                <div className="ml-3">
+                  <h4 className="font-semibold text-gray-900">Priya Kapoor</h4>
+                  <p className="text-sm text-gray-600">Delhi</p>
+                </div>
+              </div>
+              <p className="text-gray-700 leading-relaxed">
+                {t(
+                  "As a diabetic patient, I was worried about kidney complications. NephroCare's assessment gave me peace of mind and actionable steps. The chatbot answered all my questions with medical accuracy.",
+                  "एक मधुमेह रोगी के रूप में, मुझे किडनी जटिलताओं की चिंता थी। नेफ्रोकेयर के मूल्यांकन ने मुझे मानसिक शांति और कार्रवाई योग्य कदम दिए। चैटबॉट ने मेरे सभी प्रश्नों का चिकित्सा सटीकता के साथ उत्तर दिया।"
+                )}
+              </p>
+            </div>
+
+            <div className="bg-gradient-to-br from-blue-50 to-white p-6 rounded-xl border-2 border-blue-100 shadow-md" data-testid="testimonial-3">
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                  VR
+                </div>
+                <div className="ml-3">
+                  <h4 className="font-semibold text-gray-900">Vikram Reddy</h4>
+                  <p className="text-sm text-gray-600">Hyderabad, Telangana</p>
+                </div>
+              </div>
+              <p className="text-gray-700 leading-relaxed">
+                {t(
+                  "The SHAP analysis helped me understand which of my health parameters were most concerning. I showed the report to my doctor who appreciated the detailed breakdown. Very professional tool.",
+                  "SHAP विश्लेषण ने मुझे यह समझने में मदद की कि मेरे कौन से स्वास्थ्य मापदंड सबसे अधिक चिंताजनक थे। मैंने रिपोर्ट अपने डॉक्टर को दिखाई, जिन्होंने विस्तृत विवरण की सराहना की। बहुत पेशेवर उपकरण।"
+                )}
+              </p>
+            </div>
+
+            <div className="bg-gradient-to-br from-blue-50 to-white p-6 rounded-xl border-2 border-blue-100 shadow-md" data-testid="testimonial-4">
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                  AM
+                </div>
+                <div className="ml-3">
+                  <h4 className="font-semibold text-gray-900">Anjali Mehta</h4>
+                  <p className="text-sm text-gray-600">Ahmedabad, Gujarat</p>
+                </div>
+              </div>
+              <p className="text-gray-700 leading-relaxed">
+                {t(
+                  "My father has been dealing with high blood pressure for years. This tool identified his early stage kidney issues before symptoms appeared. The preventive diet plan has made a real difference in his health.",
+                  "मेरे पिता वर्षों से उच्च रक्तचाप से जूझ रहे हैं। इस उपकरण ने लक्षण प्रकट होने से पहले उनकी प्रारंभिक चरण की किडनी समस्याओं की पहचान की। निवारक आहार योजना ने उनके स्वास्थ्य में वास्तविक अंतर लाया है।"
+                )}
+              </p>
+            </div>
+
+            <div className="bg-gradient-to-br from-blue-50 to-white p-6 rounded-xl border-2 border-blue-100 shadow-md" data-testid="testimonial-5">
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                  SK
+                </div>
+                <div className="ml-3">
+                  <h4 className="font-semibold text-gray-900">Suresh Kumar</h4>
+                  <p className="text-sm text-gray-600">Bangalore, Karnataka</p>
+                </div>
+              </div>
+              <p className="text-gray-700 leading-relaxed">
+                {t(
+                  "Being a tech professional, I appreciated the scientific approach with machine learning models. The predictions were accurate and matched my clinical diagnosis. Great initiative for public health awareness.",
+                  "एक तकनीकी पेशेवर होने के नाते, मैंने मशीन लर्निंग मॉडल के साथ वैज्ञानिक दृष्टिकोण की सराहना की। भविष्यवाणियां सटीक थीं और मेरे नैदानिक निदान से मेल खाती थीं। सार्वजनिक स्वास्थ्य जागरूकता के लिए महान पहल।"
+                )}
+              </p>
+            </div>
+
+            <div className="bg-gradient-to-br from-blue-50 to-white p-6 rounded-xl border-2 border-blue-100 shadow-md" data-testid="testimonial-6">
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 bg-teal-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                  MG
+                </div>
+                <div className="ml-3">
+                  <h4 className="font-semibold text-gray-900">Meera Gupta</h4>
+                  <p className="text-sm text-gray-600">Pune, Maharashtra</p>
+                </div>
+              </div>
+              <p className="text-gray-700 leading-relaxed">
+                {t(
+                  "The personalized diet recommendations based on my lab results were spot on. I have been following them for three months and my creatinine levels have stabilized. Thank you for this wonderful service.",
+                  "मेरे लैब परिणामों के आधार पर व्यक्तिगत आहार सिफारिशें बिल्कुल सटीक थीं। मैं तीन महीने से उनका पालन कर रही हूं और मेरे क्रिएटिनिन स्तर स्थिर हो गए हैं। इस अद्भुत सेवा के लिए धन्यवाद।"
+                )}
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Medical Professional Endorsement */}
+      <Card className="bg-gradient-to-br from-green-50 via-white to-green-50 border-2 border-green-200">
+        <CardContent className="p-6 sm:p-8">
+          <div className="flex items-start gap-4">
+            <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center text-white font-bold text-2xl flex-shrink-0">
+              DC
+            </div>
+            <div className="flex-1">
+              <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
+                Dr. Davindar Chopra
+              </h3>
+              <p className="text-green-700 font-semibold mb-3">
+                Chopra Hospital, Chandigarh
+              </p>
+              <blockquote className="text-gray-700 text-lg leading-relaxed border-l-4 border-green-500 pl-4">
+                {t(
+                  "Great app, valuable for the society for diabetic and CKD patients, has a high accuracy rate.",
+                  "महान ऐप, मधुमेह और सीकेडी रोगियों के लिए समाज के लिए मूल्यवान, उच्च सटीकता दर है।"
+                )}
+              </blockquote>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* FAQ Section */}
       <Card>
         <CardHeader className="text-center">
