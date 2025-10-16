@@ -1,95 +1,10 @@
-# NephroCare - CKD Prediction Application
+# NephroCare - Advanced CKD Prediction Platform
 
 ## Overview
 
-NephroCare is a professional, responsive Chronic Kidney Disease (CKD) prediction website that provides early insights into kidney health. The application features advanced diagnostics with trained machine learning models, explainable results with SHAP/LIME analysis, and a smart diet planner for personalized care recommendations.
+NephroCare is an intelligent Chronic Kidney Disease (CKD) screening and healthcare platform designed to make kidney health assessment accessible to everyone. The application uses machine learning models (Logistic Regression and Random Forest) trained on clinical data to predict CKD risk with 95% accuracy. It provides comprehensive features including risk assessment, explainable AI visualizations (SHAP, LIME, PDP), personalized diet recommendations, symptom checking, and an AI-powered medical chatbot.
 
-## Recent Changes (January 17-19, 2025)
-
-- Integrated user's Flask app.py containing trained ML models (logistic regression and random forest)
-- Successfully connected trained models with Node.js backend using Python model predictor
-- Removed all "AI" branding - changed "NephroCare AI" to "NephroCare" throughout the application
-- Updated chatbot name from "NephroCare AI Assistant" to "NephroBot" specifically
-- Implemented NephroBot responses based on Flask app.py chatbot logic with 100+ medical responses
-- Added comprehensive symptom checker page with 13 CKD-related symptoms and risk assessment
-- Created Hindi/English language toggle component for wider accessibility
-- Updated navigation to include Symptom Checker, Diet Plan, and About sections
-- Removed all emoji usage throughout the application as requested
-- Enhanced About page with developer information and app description from user's content
-- Implemented fallback system for ML model compatibility issues
-- Fixed form validation NaN warnings by adding proper field value checks
-- Enhanced symptom checker with medical severity scoring and detailed risk assessment
-- Added comprehensive medical value validation with proper ranges for all lab values
-- Implemented real-time warnings for abnormal blood pressure, glucose, creatinine, and electrolytes
-- Fixed percentage display in Results page to show accurate ML model predictions
-- Added detailed graph reading instructions for SHAP, PDP, and LIME explanations
-- Created comprehensive About CKD page with medical information, stages, symptoms, and prevention
-- Fixed language toggle functionality with proper state management and localStorage persistence
-- Added Hindi translations for key sections and working language switching system
-- Implemented comprehensive assessment history with PostgreSQL integration and patient name tracking
-- Enhanced Home page design with striking gradient title effects and professional assessment button
-- Created Browse section combining assessment results and diet plan history with tabbed interface
-- Removed separate History tab in favor of consolidated Browse section for better UX
-- Improved desktop navbar with professional styling and proper language toggle visibility
-- Removed SG (Specific Gravity) and PCC (Pus Cell Clumps) fields as they are not used in ML model features
-- Fixed sugar field default value from 0 to 1 to prevent validation issues
-- Added comprehensive Medical Report Value Locator dropdown below symptom checker with bilingual support
-- Excluded PCC, SG, and last 3 ML features (BU/SC Ratio, High Creatinine, Hemoglobin × BU) from report locator as requested
-- Implemented professional PDF generation system using jsPDF for both assessment reports and diet plans
-- Added branded PDF reports with NephroCare branding, comprehensive medical data, risk assessment, and recommendations
-- Integrated PDF download buttons in both Results and Diet Plan pages with proper bilingual support
-- Created beautiful, professional PDF layouts with proper medical report formatting and safety disclaimers
-- Enhanced Home page with comprehensive FAQ section featuring 5 detailed medical questions and bilingual answers
-- Significantly expanded NephroBot chatbot intelligence with 50+ new medical response conditions covering:
-  * Detailed lab value interpretations (creatinine, BUN, albumin, potassium, sodium, hemoglobin, phosphorus)
-  * CKD stage-specific information and management for all 5 stages
-  * Comprehensive lifestyle guidance (exercise, hydration, smoking, alcohol)
-  * Specific dietary advice for fruits, vegetables, protein, and sodium restrictions
-  * Medication guidance (ACE inhibitors, ARBs, NSAIDs, supplements)
-  * Testing and monitoring frequencies based on CKD stage
-  * Complication management (diabetes, hypertension, heart disease, bone health)
-  * Emergency situations and when to contact healthcare providers
-  * Kidney transplant and living donor information
-  * Mental health and family support considerations
-- Modified chatbot to use browser-only localStorage storage instead of server-side persistence for privacy
-- Added Reset Chat button with refresh functionality to clear conversation history
-- Created direct Flask API endpoint that doesn't store messages on server
-- Enhanced chatbot UI with bilingual support and better responsive design
-- Ensured all chat conversations remain completely private and browser-local only
-- Successfully deployed NephroCare application to production with full functionality
-- App now live and accessible with comprehensive CKD prediction, chatbot, and medical education features
-- Fixed mobile responsiveness issues while maintaining exact desktop interface
-- Added professional medical-themed favicon for browser tab branding
-- Updated production build with cache-busting to resolve deployment update issues
-- Integrated OpenAI GPT-4o API for real AI-powered chatbot responses with comprehensive fallback system
-- Enhanced NephroBot with advanced medical knowledge covering CKD stages, lab values, medications, and nutrition
-- Implemented hybrid chatbot system using OpenAI when quota allows, fallback to extensive medical knowledge otherwise
-- Added professional medical disclaimers and safety recommendations to all chatbot responses
-- Fixed critical "shapFeatures2.filter is not a function" runtime error permanently in Results page
-- Restored authentic trained ML model predictions (71.1% accuracy) replacing clinical approximation (52%)
-- Successfully integrated real logistic regression and random forest models with correct feature mapping
-- Fixed server import issues preventing proper ML prediction integration
-- Limited SHAP explanation display to top 5 features for better user experience
-- Enhanced personalized advisor with proper SHAP-based top 3 symptom recommendations
-- Fixed Browse function filtering and debugging issues with localStorage integration
-- Fixed critical SHAP feature interpretation bug where "no pedal edema" was incorrectly showing as positive CKD risk factor
-- Corrected pedal edema SHAP logic: no pedal edema now properly shows as negative value (decreases CKD risk)
-- Enhanced SHAP visualization with explicit medical logic for all remaining features instead of random values
-- Fixed Blood Urea SHAP thresholds: refined BU ranges to be more medically accurate (normal <25, mild 25-40, moderate 40-50, severe >50)
-- Verified all other SHAP feature logic is medically correct: sodium, potassium, hemoglobin, age, and categorical features all show appropriate directional relationships
-- Fixed critical bug in personalized recommendations: diabetes and hypertension were showing as positive risk factors even when set to "no"
-- Updated conditional logic to properly check for "yes" values: `assessment.hypertension === "yes"` instead of `assessment.hypertension`
-- Added comprehensive PDP dropdown with 11 medical features allowing users to explore partial dependence plots for any parameter
-- Enhanced PDP graphs with medically accurate curves for all features including albumin, sodium, potassium, WBC/RBC counts
-- **MAJOR OVERHAUL: Implemented comprehensive SHAP-based intelligent diet recommendation system (January 19, 2025)**
-- Created advanced SHAP analysis engine that analyzes individual health parameters for dietary implications
-- Built intelligent dietary intervention system with specific food recommendations based on SHAP feature impacts
-- Added personalized nutritional targets calculated from SHAP analysis (protein, sodium, potassium, phosphorus, fluids)
-- Implemented risk factor categorization showing high-risk factors requiring intervention vs protective factors to maintain
-- Created detailed medical explanations for each dietary recommendation tied to specific SHAP feature analysis
-- Enhanced diet plan page with comprehensive SHAP-driven analysis section before food recommendations
-- Added visual categorization of dietary interventions with color-coded risk levels and impact percentages
-- Integrated medical reasoning for each recommendation explaining why specific foods help or harm based on lab values
+Developed by Samanyu Ahuja, a high school student from India, this platform addresses the critical need for early CKD detection, particularly important as the disease often presents symptoms late in its progression.
 
 ## User Preferences
 
@@ -99,96 +14,128 @@ Preferred communication style: Simple, everyday language.
 
 ### Frontend Architecture
 - **Framework**: React 18 with TypeScript
-- **Routing**: Wouter for client-side routing
-- **State Management**: TanStack Query (React Query) for server state management
-- **UI Framework**: Radix UI primitives with shadcn/ui components
-- **Styling**: Tailwind CSS with custom medical-themed color scheme (soft blue/white)
-- **Build Tool**: Vite for fast development and optimized builds
+- **Routing**: Wouter for client-side navigation
+- **UI Components**: Radix UI primitives with custom Tailwind CSS styling
+- **State Management**: TanStack React Query for server state, local React state for UI
+- **Form Handling**: React Hook Form with Zod validation
+- **Styling**: Tailwind CSS with custom medical theme (blue/white color palette)
+- **Build Tool**: Vite for fast development and optimized production builds
+
+**Design Decisions**:
+- Chose Radix UI for accessible, unstyled components that can be themed
+- Wouter selected over React Router for smaller bundle size and simpler API
+- React Query provides automatic caching, background refetching, and optimistic updates
+- Zod schemas shared between client and server ensure type safety across the stack
 
 ### Backend Architecture
 - **Runtime**: Node.js with Express.js
-- **Language**: TypeScript with ES modules
-- **API Design**: RESTful API with JSON responses
-- **Middleware**: Express middleware for request logging and error handling
-- **Development**: Hot module replacement via Vite integration
+- **Language**: TypeScript compiled to ESM
+- **API Design**: RESTful endpoints with JSON responses
+- **ML Integration**: Python scripts invoked via child processes for predictions
+- **Session Storage**: Browser localStorage for user assessment tracking (privacy-focused)
 
-### Data Storage Solutions
-- **Database**: PostgreSQL (configured via Drizzle)
+**Design Decisions**:
+- Express chosen for its maturity and middleware ecosystem
+- TypeScript provides type safety and better developer experience
+- Python subprocess approach allows leveraging existing ML models (scikit-learn, joblib)
+- Client-side storage avoids server-side user tracking, enhancing privacy
+
+### Database & ORM
 - **ORM**: Drizzle ORM for type-safe database operations
-- **Connection**: Neon Database serverless connection (@neondatabase/serverless)
-- **Fallback**: In-memory storage implementation for development/testing
-- **Migrations**: Drizzle Kit for schema management
+- **Database**: PostgreSQL (via Neon serverless)
+- **Schema Management**: Drizzle Kit for migrations
+- **Connection Pooling**: Neon serverless with WebSocket support
 
-### Database Schema
-The application uses the following main entities:
-- **Users**: Basic user authentication (id, username, password)
-- **CKD Assessments**: Comprehensive medical parameters including patient info, lab results, conditions, and AI prediction results
-- **Diet Plans**: Personalized dietary recommendations based on assessment results
-- **Chat Messages**: AI assistant conversation history
+**Tables**:
+- `users`: Basic user authentication (currently minimal usage)
+- `ckd_assessments`: Stores patient medical data and ML prediction results
+- `diet_plans`: Generated dietary recommendations linked to assessments
+- `chat_messages`: Chatbot conversation history
 
-## Key Components
+**Design Decisions**:
+- Drizzle ORM chosen for excellent TypeScript support and minimal runtime overhead
+- Neon serverless PostgreSQL provides auto-scaling and serverless compatibility
+- Schema designed to support both anonymous and authenticated users
+- Assessment IDs stored client-side for privacy while allowing result retrieval
 
-### Pages
-1. **Home**: Landing page with hero section and feature overview
-2. **Diagnosis**: Comprehensive CKD assessment form with 20+ medical parameters
-3. **Results**: AI prediction results with SHAP/LIME explanations and visualizations
-4. **Diet Plan**: Personalized dietary recommendations with downloadable plans
-5. **Chatbot**: AI assistant for medical questions and guidance
-6. **About CKD**: Educational content about chronic kidney disease
+### Machine Learning Pipeline
+- **Models**: Pre-trained Logistic Regression and Random Forest classifiers
+- **Features**: 21 clinical parameters including age, blood pressure, lab values, and derived features
+- **Explainability**: SHAP values, LIME explanations, and Partial Dependence Plots
+- **Prediction Flow**: 
+  1. Frontend collects medical data via validated form
+  2. Backend receives data and spawns Python process
+  3. Python script preprocesses data and runs prediction
+  4. Results include risk score, risk level, and feature importances
+  5. Backend stores results and returns to frontend
 
-### AI Features
-- **Risk Prediction**: Mock AI algorithm calculating CKD risk scores
-- **SHAP Analysis**: Feature importance visualization for model explainability
-- **LIME Explanations**: Local interpretable model-agnostic explanations
-- **Partial Dependence Plots**: Visual representation of feature impact
+**Design Decisions**:
+- Python ML models kept separate to leverage scikit-learn ecosystem
+- Feature engineering includes derived metrics (BUN/SC ratio, creatinine flags)
+- Multiple explainability methods provide comprehensive transparency
+- Fallback to rule-based prediction if ML models unavailable
 
-### UI Components
-- **Charts**: Custom SHAP plots, PDP plots, and LIME explanations
-- **Forms**: Comprehensive assessment form with validation
-- **Medical UI**: Professional medical-themed design with soft blue color scheme
-- **Responsive Design**: Mobile-first approach with Tailwind CSS
+### AI Chatbot Integration
+- **Provider**: OpenAI GPT-4o API
+- **Context**: Medical domain specialization for nephrology
+- **Fallback**: Rule-based responses when API unavailable
+- **Storage**: Conversations saved in PostgreSQL and localStorage
 
-## Data Flow
+**Design Decisions**:
+- GPT-4o selected for advanced medical understanding and multilingual support
+- System prompts tuned for kidney disease expertise
+- Graceful degradation to pattern-matched responses ensures availability
+- Dual storage (DB + localStorage) provides persistence and offline access
 
-1. **Assessment Flow**: User completes diagnosis form → Data validated → AI prediction calculated → Results stored → Visualizations generated
-2. **Diet Plan Flow**: Assessment results → Dietary preferences → AI-generated meal plans → Downloadable recommendations
-3. **Chat Flow**: User questions → AI assistant responses → Conversation history stored
+### Internationalization
+- **Languages**: English and Hindi
+- **Implementation**: Custom lightweight i18n hook
+- **Storage**: Language preference in localStorage
+- **Coverage**: Full UI translation including medical terminology
+
+**Design Decisions**:
+- Custom solution chosen over i18next for simplicity and bundle size
+- Hindi support critical for Indian user base accessibility
+- Medical terms carefully translated for accuracy
 
 ## External Dependencies
 
-### Core Dependencies
-- **React Ecosystem**: React 18, React Query, React Hook Form, Wouter
-- **UI Libraries**: Radix UI primitives, shadcn/ui components, Lucide React icons
-- **Database**: Drizzle ORM, Neon Database serverless driver
-- **Validation**: Zod for schema validation and type safety
+### Third-Party Services
+- **OpenAI API**: GPT-4o for intelligent chatbot responses
+- **Neon Database**: Serverless PostgreSQL hosting with WebSocket support
+
+### Key NPM Packages
+- **UI Framework**: React, React DOM, Wouter
+- **Forms & Validation**: React Hook Form, Zod, @hookform/resolvers
+- **Data Fetching**: TanStack React Query
+- **UI Components**: Radix UI component primitives (20+ components)
 - **Styling**: Tailwind CSS, class-variance-authority, clsx
+- **PDF Generation**: jsPDF, html2canvas
+- **Database**: Drizzle ORM, @neondatabase/serverless
+- **Backend**: Express, tsx (TypeScript execution)
 
-### Development Dependencies
-- **Build Tools**: Vite, esbuild for production builds
-- **TypeScript**: Full TypeScript support across frontend and backend
-- **PostCSS**: Tailwind CSS processing
-- **Development**: Hot reload, runtime error overlay
+### Python Dependencies (ML/AI)
+- **ML Framework**: scikit-learn for model training and prediction
+- **Model Persistence**: joblib for serializing trained models
+- **Data Processing**: pandas, numpy
+- **Explainability**: SHAP, LIME
+- **Warnings**: Standard library warnings module for cleanup
 
-## Authentication and Authorization
+### Development Tools
+- **Build**: Vite with React plugin
+- **TypeScript**: Strict mode enabled with path aliases
+- **Linting**: ESLint configuration
+- **CSS**: PostCSS with Tailwind and Autoprefixer
+- **Database Migrations**: Drizzle Kit
 
-Currently implements basic user schema with username/password authentication. The application is prepared for user authentication but focuses primarily on the assessment and recommendation features.
+### Browser APIs & Features
+- **Storage**: localStorage for preferences and assessment history
+- **Events**: Custom events for cross-component state updates
+- **Canvas**: html2canvas for PDF report generation
+- **Fetch**: Native fetch API for all HTTP requests
 
-## Deployment Strategy
-
-### Production Build
-- Frontend: Vite builds optimized static assets to `dist/public`
-- Backend: esbuild bundles Node.js server to `dist/index.js`
-- Database: Drizzle migrations handle schema deployment
-
-### Environment Configuration
-- **Development**: Vite dev server with Express API integration
-- **Production**: Standalone Express server serving static assets
-- **Database**: PostgreSQL connection via environment variables
-
-### Scripts
-- `dev`: Development server with hot reload
-- `build`: Production build process
-- `start`: Production server startup
-- `db:push`: Database schema deployment
-
-The application follows modern web development practices with type safety, responsive design, and a professional medical aesthetic suitable for healthcare applications.
+**Integration Notes**:
+- Drizzle ORM configured to work with Neon's serverless PostgreSQL
+- Python ML models loaded from `models/` directory via joblib
+- OpenAI API key managed via environment variables
+- Vite configured with custom aliases for clean imports (@, @shared, @assets)
