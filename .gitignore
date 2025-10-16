@@ -4,3 +4,8 @@ dist
 server/public
 vite.config.ts.*
 *.tar.gz
+
+# Replit-specific files (keep in Replit, exclude from GitHub)
+.replit
+replit.nix
+.config/
