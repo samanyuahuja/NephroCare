@@ -156,6 +156,11 @@ export default function Layout({ children }: LayoutProps) {
                     nephrocareai@gmail.com
                   </a>
                 </li>
+                <li>
+                  <a href="https://instagram.com/nephrocareai" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
+                    @nephrocareai
+                  </a>
+                </li>
                 <li>{t("Medical Guidance", "चिकित्सा मार्गदर्शन")}</li>
                 <li>{t("Health Resources", "स्वास्थ्य संसाधन")}</li>
               </ul>
