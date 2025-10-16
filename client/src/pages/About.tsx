@@ -28,7 +28,7 @@ export default function About() {
         <CardContent className="space-y-4">
           <p className="text-muted-foreground">
             {t(
-              "NephroCare is an intelligent Chronic Kidney Disease (CKD) screening and awareness platform built with compassion, purpose, and a deep sense of social responsibility. This platform helps users assess their kidney health using clinical lab values, symptoms, and medical history — delivering personalized insights, diet recommendations, and risk assessments in just a few clicks.",
+              "NephroCare is an intelligent Chronic Kidney Disease (CKD) screening and awareness platform built with compassion, purpose, and a deep sense of social responsibility. This platform helps users assess their kidney health using clinical lab values, symptoms, and medical history, delivering personalized insights, diet recommendations, and risk assessments in just a few clicks.",
               "नेफ्रोकेयर एक बुद्धिमान क्रोनिक किडनी रोग (सीकेडी) स्क्रीनिंग और जागरूकता प्लेटफॉर्म है जो करुणा, उद्देश्य और सामाजिक जिम्मेदारी की गहरी भावना के साथ बनाया गया है। यह प्लेटफॉर्म उपयोगकर्ताओं को क्लिनिकल लैब वैल्यू, लक्षण और मेडिकल हिस्ट्री का उपयोग करके अपने गुर्दे के स्वास्थ्य का आकलन करने में मदद करता है।"
             )}
           </p>
@@ -42,7 +42,7 @@ export default function About() {
 
           <p className="text-muted-foreground">
             {t(
-              "Early detection of CKD can significantly improve treatment outcomes and delay disease progression. Yet, many individuals remain unaware of the warning signs until it's too late. NephroCare aims to change that by offering a user-friendly interface where anyone can input values like blood pressure, serum creatinine, albumin levels, and more — and get an instant risk score, feature explanations, and dynamic diet plans tailored to their unique needs.",
+              "Early detection of CKD can significantly improve treatment outcomes and delay disease progression. Yet, many individuals remain unaware of the warning signs until it's too late. NephroCare aims to change that by offering a user-friendly interface where anyone can input values like blood pressure, serum creatinine, albumin levels, and more to get an instant risk score, feature explanations, and dynamic diet plans tailored to their unique needs.",
               "सीकेडी का जल्दी पता लगाना उपचार के परिणामों में काफी सुधार कर सकता है और बीमारी की प्रगति में देरी कर सकता है। फिर भी, कई व्यक्ति चेतावनी के संकेतों से अवगत नहीं रहते जब तक कि बहुत देर न हो जाए। नेफ्रोकेयर का उद्देश्य एक उपयोगकर्ता-अनुकूल इंटरफेस प्रदान करके इसे बदलना है।"
             )}
           </p>
@@ -103,7 +103,7 @@ export default function About() {
           <div className="text-center">
             <p className="text-muted-foreground">
               {t(
-                "This app is not meant to replace a doctor but to educate, empower, and guide users in understanding their kidney health better — especially in the early stages where intervention can make a huge difference.",
+                "This app is not meant to replace a doctor but to educate, empower, and guide users in understanding their kidney health better, especially in the early stages where intervention can make a huge difference.",
                 "यह ऐप डॉक्टर की जगह लेने के लिए नहीं है बल्कि उपयोगकर्ताओं को अपने गुर्दे के स्वास्थ्य को बेहतर ढंग से समझने में शिक्षित, सशक्त और मार्गदर्शन करने के लिए है।"
               )}
             </p>
@@ -128,7 +128,7 @@ export default function About() {
 
             <p className="text-muted-foreground mt-4">
               {t(
-                "Thank you for using this app. We hope it encourages you to take your health into your own hands — and never ignore the signs your body gives you.",
+                "Thank you for using this app. We hope it encourages you to take your health into your own hands and never ignore the signs your body gives you.",
                 "इस ऐप का उपयोग करने के लिए धन्यवाद। हम आशा करते हैं कि यह आपको अपने स्वास्थ्य को अपने हाथों में लेने के लिए प्रोत्साहित करता है।"
               )}
             </p>
