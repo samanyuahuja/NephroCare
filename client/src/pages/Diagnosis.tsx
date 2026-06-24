@@ -22,24 +22,41 @@ export default function Diagnosis() {
   const [isSymptomCheckerOpen, setIsSymptomCheckerOpen] = useState(false);
   const [isReportGuideOpen, setIsReportGuideOpen] = useState(false);
 
+  // UCI CKD Dataset median values for form defaults
+  // These provide balanced, unbiased starting points
+  const datasetMedians = {
+    age: 51,
+    bloodPressure: 80,
+    albumin: 1,
+    sugar: 1,
+    bloodGlucoseRandom: 121,
+    bloodUrea: 36,
+    serumCreatinine: 1.2,
+    sodium: 138,
+    potassium: 4.4,
+    hemoglobin: 12.5,
+    wbcCount: 7800,
+    rbcCount: 4.8,
+  };
+
   const form = useForm<InsertCKDAssessment>({
     resolver: zodResolver(insertCKDAssessmentSchema),
     defaultValues: {
       patientName: "",
-      age: 45,
-      bloodPressure: 120,
-      albumin: 1,
-      sugar: 1,
+      age: datasetMedians.age,
+      bloodPressure: datasetMedians.bloodPressure,
+      albumin: datasetMedians.albumin,
+      sugar: datasetMedians.sugar,
       redBloodCells: "normal",
       pusCell: "normal",
-      bloodGlucoseRandom: 145,
-      bloodUrea: 35,
-      serumCreatinine: 1.8,
-      sodium: 135,
-      potassium: 4.5,
-      hemoglobin: 12,
-      wbcCount: 7600,
-      rbcCount: 5.2,
+      bloodGlucoseRandom: datasetMedians.bloodGlucoseRandom,
+      bloodUrea: datasetMedians.bloodUrea,
+      serumCreatinine: datasetMedians.serumCreatinine,
+      sodium: datasetMedians.sodium,
+      potassium: datasetMedians.potassium,
+      hemoglobin: datasetMedians.hemoglobin,
+      wbcCount: datasetMedians.wbcCount,
+      rbcCount: datasetMedians.rbcCount,
       hypertension: "no",
       diabetesMellitus: "no",
       appetite: "good",
@@ -560,7 +577,7 @@ export default function Diagnosis() {
                                 if (e.target.checked) {
                                   field.onChange("unknown");
                                 } else {
-                                  field.onChange(145); // Reset to default value
+                                  field.onChange(datasetMedians.bloodGlucoseRandom); // Reset to dataset median
                                 }
                               }}
                               checked={field.value === "unknown"}
@@ -601,7 +618,7 @@ export default function Diagnosis() {
                                 if (e.target.checked) {
                                   field.onChange("unknown");
                                 } else {
-                                  field.onChange(35); // Reset to default value
+                                  field.onChange(datasetMedians.bloodUrea); // Reset to dataset median
                                 }
                               }}
                               checked={field.value === "unknown"}
@@ -643,7 +660,7 @@ export default function Diagnosis() {
                                 if (e.target.checked) {
                                   field.onChange("unknown");
                                 } else {
-                                  field.onChange(1.8); // Reset to default value
+                                  field.onChange(datasetMedians.serumCreatinine); // Reset to dataset median
                                 }
                               }}
                               checked={field.value === "unknown"}
@@ -684,7 +701,7 @@ export default function Diagnosis() {
                                 if (e.target.checked) {
                                   field.onChange("unknown");
                                 } else {
-                                  field.onChange(135); // Reset to default value
+                                  field.onChange(datasetMedians.sodium); // Reset to dataset median
                                 }
                               }}
                               checked={field.value === "unknown"}
@@ -726,7 +743,7 @@ export default function Diagnosis() {
                                 if (e.target.checked) {
                                   field.onChange("unknown");
                                 } else {
-                                  field.onChange(4.5); // Reset to default value
+                                  field.onChange(datasetMedians.potassium); // Reset to dataset median
                                 }
                               }}
                               checked={field.value === "unknown"}
@@ -768,7 +785,7 @@ export default function Diagnosis() {
                                 if (e.target.checked) {
                                   field.onChange("unknown");
                                 } else {
-                                  field.onChange(12); // Reset to default value
+                                  field.onChange(datasetMedians.hemoglobin); // Reset to dataset median
                                 }
                               }}
                               checked={field.value === "unknown"}
@@ -806,7 +823,7 @@ export default function Diagnosis() {
                                 if (e.target.checked) {
                                   field.onChange("unknown");
                                 } else {
-                                  field.onChange(7600); // Reset to default value
+                                  field.onChange(datasetMedians.wbcCount); // Reset to dataset median
                                 }
                               }}
                               checked={field.value === "unknown"}
@@ -842,7 +859,7 @@ export default function Diagnosis() {
                                 if (e.target.checked) {
                                   field.onChange("unknown");
                                 } else {
-                                  field.onChange(5.2); // Reset to default value
+                                  field.onChange(datasetMedians.rbcCount); // Reset to dataset median
                                 }
                               }}
                               checked={field.value === "unknown"}
