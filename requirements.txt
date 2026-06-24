@@ -1,7 +1,19 @@
-flask
-gunicorn
-scikit-learn
-joblib
-numpy
-pandas
-shap
+# NephroCare - Python ML backend dependencies
+# Python 3.11 required
+# Compatible with Render, Heroku, Railway, and similar platforms
+
+# Web framework & server
+Flask==3.1.1
+gunicorn==21.2.0
+
+# Machine learning
+scikit-learn==1.7.0
+joblib==1.5.1
+
+# Data processing
+numpy==2.3.1
+pandas==2.3.1
+scipy==1.16.0
+
+# Explainability
+shap==0.46.0
