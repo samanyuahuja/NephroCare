@@ -4,7 +4,7 @@ Flask API for CKD Prediction using trained models
 Integrates with the Node.js backend for NephroCare
 """
 
-from flask import Flask, request, jsonify, render_template_string
+from flask import Flask, request, jsonify, render_template
 import joblib
 import pandas as pd
 import numpy as np
@@ -422,16 +422,7 @@ def health():
     })
 @app.route('/')
 def home():
-    return jsonify({
-        "message": "NephroCare API is running",
-        "status": "healthy",
-        "endpoints": {
-            "health": "/health",
-            "predict": "/api/predict",
-            "chatbot": "/api/chatbot"
-        }
-    })
-    
+    return render_template('index.html')
 if __name__ == '__main__':
     print("🏥 Starting NephroCare Flask API...")
     print(f"📂 Working directory: {os.getcwd()}")
