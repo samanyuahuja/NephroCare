@@ -420,7 +420,18 @@ def health():
         "models_loaded": rf_model is not None and scaler is not None,
         "version": "1.0.0"
     })
-
+@app.route('/')
+def home():
+    return jsonify({
+        "message": "NephroCare API is running",
+        "status": "healthy",
+        "endpoints": {
+            "health": "/health",
+            "predict": "/api/predict",
+            "chatbot": "/api/chatbot"
+        }
+    })
+    
 if __name__ == '__main__':
     print("🏥 Starting NephroCare Flask API...")
     print(f"📂 Working directory: {os.getcwd()}")
