@@ -1,8 +1,8 @@
 import express, { type NextFunction, type Request, type Response } from "express";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
-import { registerRoutes } from "./routes";
-import { log } from "./vite";
+import { registerRoutes } from "./routes.js";
+import { log } from "./logger.js";
 
 export async function createApplication() {
   const app = express();

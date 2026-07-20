@@ -11,9 +11,9 @@ import {
   type InsertDietPlan,
   type ChatMessage,
   type InsertChatMessage
-} from "../shared/schema";
+} from "../shared/schema.js";
 
-import { db } from "./db";
+import { db } from "./db.js";
 import { eq, desc } from "drizzle-orm";
 
 export interface IStorage {

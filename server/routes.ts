@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage";
-import { insertCKDAssessmentSchema, insertDietPlanSchema, insertChatMessageSchema } from "../shared/schema";
+import { storage } from "./storage.js";
+import { insertCKDAssessmentSchema, insertDietPlanSchema, insertChatMessageSchema } from "../shared/schema.js";
 import OpenAI from "openai";
 import { z } from "zod";
 

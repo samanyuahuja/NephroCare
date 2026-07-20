@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import { createApplication } from "../server/app";
+import { createApplication } from "../server/app.js";
 
 const application = createApplication();
 
