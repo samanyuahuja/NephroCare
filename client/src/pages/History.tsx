@@ -16,7 +16,7 @@ const History = () => {
     queryKey: ["/api/ckd-assessments"],
   });
 
-  const formatDateTime = (dateString: string | null) => {
+  const formatDateTime = (dateString: string | Date | null) => {
     if (!dateString) return "N/A";
     const date = new Date(dateString);
     return date.toLocaleDateString(language === 'hi' ? 'hi-IN' : 'en-US', {

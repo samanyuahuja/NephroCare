@@ -1,15 +1,25 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertCKDAssessmentSchema, insertDietPlanSchema, insertChatMessageSchema } from "@shared/schema";
+import { insertCKDAssessmentSchema, insertDietPlanSchema, insertChatMessageSchema } from "../shared/schema";
 import OpenAI from "openai";
-import { spawn } from 'child_process';
 import { z } from "zod";
 
 // --- SECURITY: OpenAI key loaded from environment variable only (OWASP A07:2021) ---
-const openai = new OpenAI({ 
-  apiKey: process.env.OPENAI_API_KEY 
-});
+const openai = process.env.OPENAI_API_KEY
+  ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+  : null;
+
+interface PredictionResult {
+  success: boolean;
+  prediction: number;
+  probability: number;
+  risk_level: string;
+  risk_color: string;
+  model_used: string;
+  reasoning: string;
+  primary_factors: string[];
+}
 
 // --- SECURITY: Input sanitization helper - strips HTML/script tags (OWASP A03:2021) ---
 function sanitizeString(input: string): string {
@@ -144,116 +154,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
           ane: validatedData.anemia === "yes" ? "yes" : "no"
         };
         
-        interface PredictionResult {
-          success: boolean;
-          prediction?: string;
-          probability?: number;
-          risk_level?: string;
-          risk_color?: string;
-          model_used?: string;
-          error?: string;
-        }
-        
-        const predictionResult = await new Promise<PredictionResult>((resolve) => {
-          const process = spawn('python3', ['fix_model_predictor.py', JSON.stringify(modelInput)]);
-          
-          let output = '';
-          process.stdout.on('data', (data) => {
-            output += data.toString();
-          });
-          
-          process.on('close', () => {
-            try {
-              const result = JSON.parse(output);
-              resolve(result);
-            } catch (parseError) {
-              console.error('ML prediction parsing failed:', parseError, 'Output:', output);
-              resolve({ error: "Prediction parsing failed", success: false });
-            }
-          });
-          
-          process.on('error', (error) => {
-            console.error('ML prediction process error:', error);
-            resolve({ error: "Process failed", success: false });
-          });
-        });
+        const predictionResult = runCKDPrediction(modelInput);
         console.log('Prediction result:', predictionResult);
         
         if (predictionResult.success) {
-          // Update assessment with ML results
-          // Generate SHAP/LIME/PDP visualizations
-          let visualizationData = null;
-          try {
-            // Reuse modelInput with dataset medians for visualization
-            const vizModelInput = {
-              age: validatedData.age || datasetMedians.age,
-              bp: validatedData.bloodPressure || datasetMedians.bloodPressure,
-              al: validatedData.albumin === "unknown" ? datasetMedians.albumin : validatedData.albumin,
-              su: validatedData.sugar === "unknown" ? datasetMedians.sugar : validatedData.sugar,
-              rbc: validatedData.redBloodCells === "abnormal" ? "abnormal" : "normal",
-              pc: validatedData.pusCell === "abnormal" ? "abnormal" : "normal",
-              ba: "notpresent",
-              bgr: validatedData.bloodGlucoseRandom === "unknown" ? datasetMedians.bloodGlucoseRandom : validatedData.bloodGlucoseRandom,
-              bu: validatedData.bloodUrea === "unknown" ? datasetMedians.bloodUrea : validatedData.bloodUrea,
-              sc: validatedData.serumCreatinine === "unknown" ? datasetMedians.serumCreatinine : validatedData.serumCreatinine,
-              sod: validatedData.sodium === "unknown" ? datasetMedians.sodium : validatedData.sodium,
-              pot: validatedData.potassium === "unknown" ? datasetMedians.potassium : validatedData.potassium,
-              hemo: validatedData.hemoglobin === "unknown" ? datasetMedians.hemoglobin : validatedData.hemoglobin,
-              wbcc: validatedData.wbcCount === "unknown" ? datasetMedians.wbcCount : validatedData.wbcCount,
-              rbcc: validatedData.rbcCount === "unknown" ? datasetMedians.rbcCount : validatedData.rbcCount,
-              htn: validatedData.hypertension === "yes" ? "yes" : "no",
-              dm: validatedData.diabetesMellitus === "yes" ? "yes" : "no",
-              appet: validatedData.appetite === "poor" ? "poor" : "good",
-              pe: validatedData.pedalEdema === "yes" ? "yes" : "no",
-              ane: validatedData.anemia === "yes" ? "yes" : "no"
-            };
-            
-            const vizProcess = spawn('python3', ['generate_shap_data.py', JSON.stringify({
-              ...vizModelInput,
-              prediction: predictionResult.probability,
-              risk_level: predictionResult.risk_level
-            })]);
-            
-            let vizOutput = '';
-            vizProcess.stdout.on('data', (data) => {
-              vizOutput += data.toString();
-            });
-            
-            await new Promise((resolve) => {
-              vizProcess.on('close', () => {
-                if (vizOutput) {
-                  try {
-                    visualizationData = JSON.parse(vizOutput);
-                  } catch (parseError) {
-                    console.warn('Visualization parsing failed:', parseError);
-                  }
-                }
-                resolve(null);
-              });
-            });
-          } catch (vizError) {
-            console.warn('Visualization generation failed:', vizError);
-          }
-          
           const updatedAssessment = await storage.updateCKDAssessmentResults(
             assessment.id,
-            predictionResult.probability || 0,
-            predictionResult.risk_level || 'unknown',
+            predictionResult.probability,
+            predictionResult.risk_level,
             JSON.stringify({
               prediction: predictionResult.prediction,
               probability: predictionResult.probability,
               risk_level: predictionResult.risk_level,
               risk_color: predictionResult.risk_color,
-              model_used: predictionResult.model_used || 'clinical',
+              model_used: predictionResult.model_used,
+              reasoning: predictionResult.reasoning,
+              primary_factors: predictionResult.primary_factors,
               timestamp: new Date().toISOString(),
-              visualizations: visualizationData
+              visualizations: null
             })
           );
           
           res.json(updatedAssessment || assessment);
         } else {
           // Return assessment without ML prediction (fallback)
-          console.warn('ML prediction failed, returning basic assessment:', predictionResult.error);
+          console.warn('Clinical scoring failed, returning basic assessment');
           res.json(assessment);
         }
       } catch (mlError) {
@@ -427,124 +352,87 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 
 
-// ML Prediction Integration
-async function runCKDPrediction(assessmentData: any): Promise<any> {
-  return new Promise((resolve) => {
-    try {
-      
-      // Map assessment data to model format
-      const modelInput = {
-        age: assessmentData.age || 45,
-        bp: assessmentData.bloodPressure || 120,
-        al: assessmentData.albumin === "unknown" ? 1 : assessmentData.albumin,
-        su: assessmentData.sugar === "unknown" ? 1 : assessmentData.sugar,
-        rbc: assessmentData.redBloodCells === "abnormal" ? "abnormal" : "normal",
-        pc: assessmentData.pusCell === "abnormal" ? "abnormal" : "normal",
-        ba: "notpresent", // Default value
-        bgr: assessmentData.bloodGlucoseRandom === "unknown" ? 145 : assessmentData.bloodGlucoseRandom,
-        bu: assessmentData.bloodUrea === "unknown" ? 35 : assessmentData.bloodUrea,
-        sc: assessmentData.serumCreatinine === "unknown" ? 1.8 : assessmentData.serumCreatinine,
-        sod: assessmentData.sodium === "unknown" ? 135 : assessmentData.sodium,
-        pot: assessmentData.potassium === "unknown" ? 4.5 : assessmentData.potassium,
-        hemo: assessmentData.hemoglobin === "unknown" ? 12 : assessmentData.hemoglobin,
-        wbcc: assessmentData.wbcCount === "unknown" ? 7600 : assessmentData.wbcCount,
-        rbcc: assessmentData.rbcCount === "unknown" ? 5.2 : assessmentData.rbcCount,
-        htn: assessmentData.hypertension === "yes" ? "yes" : "no",
-        dm: assessmentData.diabetesMellitus === "yes" ? "yes" : "no",
-        appet: assessmentData.appetite === "poor" ? "poor" : "good",
-        pe: assessmentData.pedalEdema === "yes" ? "yes" : "no",
-        ane: assessmentData.anemia === "yes" ? "yes" : "no"
-      };
-      
-      // Use python_predictor.py (clinical model - more reliable)
-      const pythonProcess = spawn('python3', ['python_predictor.py', JSON.stringify(modelInput)]);
-      
-      let output = '';
-      let error = '';
-      
-      pythonProcess.stdout.on('data', (data) => {
-        output += data.toString();
-      });
-      
-      pythonProcess.stderr.on('data', (data) => {
-        error += data.toString();
-      });
-      
-      pythonProcess.on('close', (code) => {
-        if (code === 0 && output) {
-          try {
-            const result = JSON.parse(output.trim());
-            if (result.success !== false) {
-              resolve({ ...result, success: true });
-              return;
-            }
-          } catch (parseError) {
-            console.error('Error parsing ML output:', parseError);
-          }
-        }
-        
-        // Fallback to model predictor (if clinical fails)
-        console.log('Trying ML model predictor...');
-        const fallbackProcess = spawn('python3', ['model_predictor.py', JSON.stringify(modelInput)]);
-        
-        let fallbackOutput = '';
-        
-        fallbackProcess.stdout.on('data', (data) => {
-          fallbackOutput += data.toString();
-        });
-        
-        fallbackProcess.on('close', (fallbackCode) => {
-          if (fallbackCode === 0 && fallbackOutput) {
-            try {
-              const fallbackResult = JSON.parse(fallbackOutput.trim());
-              resolve({ ...fallbackResult, success: true, model_used: 'clinical_fallback' });
-            } catch (parseError) {
-              resolve({
-                success: false,
-                error: `Fallback prediction parsing failed: ${parseError}`,
-                prediction: 0,
-                probability: 0.0,
-                risk_level: 'Unknown'
-              });
-            }
-          } else {
-            resolve({
-              success: false,
-              error: `Both ML and clinical prediction failed. ML error: ${error}, Fallback code: ${fallbackCode}`,
-              prediction: 0,
-              probability: 0.0,
-              risk_level: 'Error'
-            });
-          }
-        });
-      });
-      
-      // Timeout after 30 seconds
-      setTimeout(() => {
-        pythonProcess.kill();
-        resolve({
-          success: false,
-          error: 'ML prediction timeout',
-          prediction: 0,
-          probability: 0.0,
-          risk_level: 'Timeout'
-        });
-      }, 30000);
-      
-    } catch (error) {
-      resolve({
-        success: false,
-        error: `ML prediction setup failed: ${error}`,
-        prediction: 0,
-        probability: 0.0,
-        risk_level: 'Error'
-      });
-    }
-  });
+// Mirrors the existing Python clinical scorer without spawning a subprocess,
+// which keeps assessment requests compatible with Vercel Functions.
+function runCKDPrediction(data: Record<string, unknown>): PredictionResult {
+  const numberValue = (key: string, fallback = 0) => {
+    const value = Number(data[key]);
+    return Number.isFinite(value) ? value : fallback;
+  };
+
+  const age = numberValue("age");
+  const bp = numberValue("bp");
+  const sc = numberValue("sc");
+  const hemo = numberValue("hemo");
+  const bu = numberValue("bu");
+  const al = numberValue("al");
+  const sod = numberValue("sod", 140);
+  const pot = numberValue("pot", 4);
+  let riskScore = 0;
+
+  if (age > 60) riskScore += 0.15;
+  else if (age > 45) riskScore += 0.08;
+
+  if (sc > 1.5) riskScore += 0.42;
+  else if (sc > 1.2) riskScore += 0.25;
+  else if (sc > 1.0) riskScore += 0.1;
+
+  if (hemo < 10) riskScore += 0.28;
+  else if (hemo < 12) riskScore += 0.15;
+
+  if (bu > 40) riskScore += 0.2;
+  else if (bu > 25) riskScore += 0.1;
+
+  if (bp > 140) riskScore += 0.12;
+  else if (bp > 130) riskScore += 0.06;
+
+  if (data.dm === "yes") riskScore += 0.15;
+  if (data.htn === "yes") riskScore += 0.1;
+  if (al > 2) riskScore += 0.18;
+  else if (al > 1) riskScore += 0.08;
+  if (data.pe === "yes") riskScore += 0.08;
+  if (data.ane === "yes") riskScore += 0.06;
+  if (data.appet === "poor") riskScore += 0.05;
+  if (data.rbc === "abnormal") riskScore += 0.07;
+  if (data.pc === "abnormal") riskScore += 0.05;
+  if (sod < 135 || sod > 145) riskScore += 0.04;
+  if (pot > 5) riskScore += 0.06;
+  if (sc > 0 && bu / sc > 20) riskScore += 0.08;
+
+  riskScore = Math.min(riskScore, 0.95);
+  const probability = Math.round(riskScore * 1000) / 1000;
+  const [riskLevel, riskColor] = probability < 0.3
+    ? ["Low Risk", "success"]
+    : probability < 0.6
+      ? ["Moderate Risk", "warning"]
+      : probability < 0.85
+        ? ["High Risk", "danger"]
+        : ["Very High Risk", "danger"];
+
+  const primaryFactors: string[] = [];
+  if (sc > 1.2) primaryFactors.push(`Elevated creatinine (${sc} mg/dL)`);
+  if (hemo < 12) primaryFactors.push(`Low hemoglobin (${hemo} g/dL)`);
+  if (bu > 25) primaryFactors.push(`High blood urea (${bu} mg/dL)`);
+  if (bp > 140) primaryFactors.push(`High blood pressure (${bp} mmHg)`);
+
+  return {
+    success: true,
+    prediction: probability > 0.5 ? 1 : 0,
+    probability,
+    risk_level: riskLevel,
+    risk_color: riskColor,
+    model_used: "clinical_rules_v1",
+    reasoning: `Educational risk estimate based on: ${primaryFactors.length ? primaryFactors.join("; ") : "parameters within the scorer's lower-risk ranges"}`,
+    primary_factors: primaryFactors,
+  };
 }
 
 // AI-powered NephroBot using OpenAI GPT-4o with intelligent fallback
 async function getAIPoweredNephroBotResponse(message: string): Promise<string> {
+  if (!openai) {
+    return getEnhancedNephroBotResponse(message);
+  }
+
   try {
     // Use the newest OpenAI model GPT-4o which was released May 13, 2024. Do not change this unless explicitly requested by the user
     const response = await openai.chat.completions.create({

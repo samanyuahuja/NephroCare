@@ -11,7 +11,7 @@ import {
   type InsertDietPlan,
   type ChatMessage,
   type InsertChatMessage
-} from "@shared/schema";
+} from "../shared/schema";
 
 import { db } from "./db";
 import { eq, desc } from "drizzle-orm";
@@ -37,33 +37,35 @@ export interface IStorage {
 }
 
 export class DatabaseStorage implements IStorage {
+  constructor(private readonly database: NonNullable<typeof db>) {}
+
   async getUser(id: number): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.id, id));
+    const [user] = await this.database.select().from(users).where(eq(users.id, id));
     return user || undefined;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.username, username));
+    const [user] = await this.database.select().from(users).where(eq(users.username, username));
     return user || undefined;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const [user] = await db.insert(users).values(insertUser).returning();
+    const [user] = await this.database.insert(users).values(insertUser).returning();
     return user;
   }
 
   async createCKDAssessment(assessment: any): Promise<CKDAssessment> {
-    const [result] = await db.insert(ckdAssessments).values(assessment).returning();
+    const [result] = await this.database.insert(ckdAssessments).values(assessment).returning();
     return result;
   }
 
   async getCKDAssessment(id: number): Promise<CKDAssessment | undefined> {
-    const [assessment] = await db.select().from(ckdAssessments).where(eq(ckdAssessments.id, id));
+    const [assessment] = await this.database.select().from(ckdAssessments).where(eq(ckdAssessments.id, id));
     return assessment || undefined;
   }
 
   async updateCKDAssessmentResults(id: number, riskScore: number, riskLevel: string, shapFeatures: string): Promise<CKDAssessment | undefined> {
-    const [updated] = await db
+    const [updated] = await this.database
       .update(ckdAssessments)
       .set({ riskScore, riskLevel, shapFeatures })
       .where(eq(ckdAssessments.id, id))
@@ -74,27 +76,27 @@ export class DatabaseStorage implements IStorage {
   async getCKDAssessmentsByIds(ids: number[]): Promise<CKDAssessment[]> {
     if (ids.length === 0) return [];
     const { inArray } = await import("drizzle-orm");
-    return await db.select().from(ckdAssessments).where(inArray(ckdAssessments.id, ids)).orderBy(desc(ckdAssessments.createdAt));
+    return await this.database.select().from(ckdAssessments).where(inArray(ckdAssessments.id, ids)).orderBy(desc(ckdAssessments.createdAt));
   }
 
   async getAllCKDAssessments(): Promise<CKDAssessment[]> {
-    return await db.select().from(ckdAssessments).orderBy(desc(ckdAssessments.createdAt));
+    return await this.database.select().from(ckdAssessments).orderBy(desc(ckdAssessments.createdAt));
   }
 
   async createDietPlan(dietPlan: InsertDietPlan): Promise<DietPlan> {
-    const [plan] = await db.insert(dietPlans).values(dietPlan).returning();
+    const [plan] = await this.database.insert(dietPlans).values(dietPlan).returning();
     return plan;
   }
 
   async getDietPlanByAssessmentId(assessmentId: number): Promise<DietPlan | undefined> {
-    const [plan] = await db.select().from(dietPlans).where(eq(dietPlans.assessmentId, assessmentId));
+    const [plan] = await this.database.select().from(dietPlans).where(eq(dietPlans.assessmentId, assessmentId));
     return plan || undefined;
   }
 
   async getDietPlansByAssessmentIds(assessmentIds: number[]): Promise<DietPlan[]> {
     if (assessmentIds.length === 0) return [];
     const { inArray } = await import("drizzle-orm");
-    const result = await db
+    const result = await this.database
       .select({
         id: dietPlans.id,
         assessmentId: dietPlans.assessmentId,
@@ -115,7 +117,7 @@ export class DatabaseStorage implements IStorage {
 
   async getAllDietPlans(): Promise<DietPlan[]> {
     // Join with assessments to get patient names
-    const result = await db
+    const result = await this.database
       .select({
         id: dietPlans.id,
         assessmentId: dietPlans.assessmentId,
@@ -139,7 +141,7 @@ export class DatabaseStorage implements IStorage {
       ...message,
       response: nephroResponse
     };
-    const [chat] = await db.insert(chatMessages).values(chatData).returning();
+    const [chat] = await this.database.insert(chatMessages).values(chatData).returning();
     return chat;
   }
 
@@ -163,7 +165,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getChatMessages(): Promise<ChatMessage[]> {
-    return await db.select().from(chatMessages).orderBy(desc(chatMessages.createdAt));
+    return await this.database.select().from(chatMessages).orderBy(desc(chatMessages.createdAt));
   }
 }
 
@@ -205,7 +207,7 @@ export class MemStorage implements IStorage {
     return user;
   }
 
-  async createCKDAssessment(insertAssessment: InsertCKDAssessment): Promise<CKDAssessment> {
+  async createCKDAssessment(insertAssessment: any): Promise<CKDAssessment> {
     const id = this.currentAssessmentId++;
     const assessment: CKDAssessment = { 
       ...insertAssessment, 
@@ -335,4 +337,4 @@ export class MemStorage implements IStorage {
 
 }
 
-export const storage = new DatabaseStorage();
+export const storage: IStorage = db ? new DatabaseStorage(db) : new MemStorage();
