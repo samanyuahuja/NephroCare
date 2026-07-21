@@ -83,7 +83,7 @@ This platform was developed by Samanyu Ahuja, a high school student from India w
 
 ### Prerequisites
 - Node.js 20 or higher
-- PostgreSQL 16 (or use Replit's built-in database)
+- A Supabase PostgreSQL project for durable production storage
 - Python 3.11 for ML model execution
 - OpenAI API key for chatbot functionality
 
@@ -100,14 +100,15 @@ cd nephrocare
 npm install
 ```
 
-3. Set up environment variables:
+3. Set up environment variables using the Supabase transaction-pooler URL:
 ```bash
 # Create .env file with:
-DATABASE_URL=your_postgresql_connection_string
+DATABASE_URL=postgresql://postgres.PROJECT_REF:PASSWORD@POOLER_HOST:6543/postgres?sslmode=require
+DATABASE_POOL_MAX=5
 OPENAI_API_KEY=your_openai_api_key
 ```
 
-4. Run database migrations:
+4. Apply `migrations/0001_nephrocare_schema.sql` in Supabase, or run:
 ```bash
 npm run db:push
 ```
@@ -125,6 +126,16 @@ The application will be available at `http://localhost:5000`
 npm run build
 npm run start
 ```
+
+### Vercel and Supabase
+
+Set `DATABASE_URL` in Vercel for Production, Preview, and Development. Use the
+Supabase transaction pooler on port `6543`; serverless functions should not use
+the direct database hostname. After changing environment variables, redeploy so
+the new values are included in the deployment.
+
+`GET /api/health` reports whether the app is using PostgreSQL or the temporary
+in-memory fallback. A configured but unreachable database returns HTTP 503.
 
 ---
 

@@ -4,6 +4,7 @@ import { storage } from "./storage.js";
 import { insertCKDAssessmentSchema, insertDietPlanSchema, insertChatMessageSchema } from "../shared/schema.js";
 import OpenAI from "openai";
 import { z } from "zod";
+import { checkDatabaseConnection } from "./db.js";
 
 // --- SECURITY: OpenAI key loaded from environment variable only (OWASP A07:2021) ---
 const openai = process.env.OPENAI_API_KEY
@@ -46,8 +47,14 @@ const filteredIdsSchema = z.array(z.number().int().positive().max(2147483647)).m
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
-  app.get("/api/health", (_req, res) => {
-    res.json({ status: "OK" });
+  app.get("/api/health", async (_req, res) => {
+    const database = await checkDatabaseConnection();
+    const healthy = !database.configured || database.connected;
+
+    res.status(healthy ? 200 : 503).json({
+      status: healthy ? "OK" : "DEGRADED",
+      database,
+    });
   });
 
   // --- SECURITY: Chat endpoint with strict input validation ---
