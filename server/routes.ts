@@ -202,15 +202,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get all CKD assessments (for Browse section)
-  app.get("/api/ckd-assessments", async (req, res) => {
-    try {
-      const assessments = await storage.getAllCKDAssessments();
-      res.json(assessments);
-    } catch (error: any) {
-      console.error('Get all CKD Assessments error:', error);
-      res.status(500).json({ error: "Failed to fetch CKD assessments" });
-    }
+  // Assessment collections are never exposed as an unfiltered public list.
+  app.get("/api/ckd-assessments", (_req, res) => {
+    res.status(403).json({ error: "Use browser-linked assessment references" });
   });
 
   // --- SECURITY: Filtered assessments with validated ID array ---
@@ -277,15 +271,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get all diet plans
-  app.get("/api/diet-plans", async (req, res) => {
-    try {
-      const dietPlans = await storage.getAllDietPlans();
-      res.json(dietPlans);
-    } catch (error: any) {
-      console.error('Get All Diet Plans error:', error);
-      res.status(500).json({ error: "Failed to fetch diet plans" });
-    }
+  // Diet-plan collections are never exposed as an unfiltered public list.
+  app.get("/api/diet-plans", (_req, res) => {
+    res.status(403).json({ error: "Use browser-linked assessment references" });
   });
 
   // --- SECURITY: Diet plan with validated integer param ---

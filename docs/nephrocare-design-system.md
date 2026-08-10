@@ -32,11 +32,14 @@ moderate risk, and green for low risk. They are not decorative accents.
 
 ## Components
 
-- Cards use the existing 8px radius, a quiet border, and at most a small shadow.
-- Buttons use the existing blue primary and white outline variants.
-- Icons come from Lucide and clarify an action or medical concept.
-- Forms remain dense, familiar, and easy to scan.
-- Sections may use a 16px radius where they group a complete workflow.
+- Content groups use dividers, tables, and spacing before containers.
+- Cards are reserved for discrete records and interactive tools. They use a 2px
+  radius, a single border, and no decorative shadow.
+- Buttons are square, blue, and labelled with a specific command.
+- Icons are reserved for established controls or the existing NephroCare mark.
+  They are not placed in coloured feature tiles.
+- Forms remain dense, familiar, left-aligned, and easy to scan.
+- Editorial pages use a narrow reading column and visible section rules.
 
 ## Motion
 
@@ -57,6 +60,9 @@ hover scaling, or motion that prevents reading and interaction.
 - No purple gradients or multi-colour hero treatments.
 - No invented testimonials, statistics, awards, or validation claims.
 - No repeated feature-card grids when a workflow or directory is clearer.
+- No pill labels for ordinary headings or metadata.
+- No icon plus heading plus paragraph pattern repeated across a page.
+- No rounded containers around content that can stand on the page by itself.
 - No vague phrases such as "revolutionary", "advanced AI", or "powered by AI".
 - No stock healthcare photography used only for atmosphere.
 - No nested cards or oversized marketing sections inside the working product.
@@ -69,3 +75,13 @@ define the brand, validate sections against it, use meaningful product visuals,
 and add motion only after the structure is coherent.
 
 Reference: https://tquinonero.github.io/tutorials/greenlight-ai-workflow/
+
+## Production Foundations
+
+- Radix Primitives supplies accessible behaviour for dialogs, tabs, selects,
+  toggles, and other controls without prescribing the visual identity.
+- Motion supplies route transitions, scroll progress, and staged reveals. Every
+  animation has a reduced-motion fallback.
+- Route-level code splitting keeps charting and PDF code away from the initial
+  homepage download.
+- Legal and trust content is reachable from every page through the footer.

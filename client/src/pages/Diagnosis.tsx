@@ -119,9 +119,9 @@ export default function Diagnosis() {
     <div className="max-w-4xl mx-auto">
       <Card>
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl sm:text-3xl font-bold">
+          <h1 className="text-2xl sm:text-3xl font-bold">
             {t("CKD Risk Assessment", "सीकेडी जोखिम मूल्यांकन")}
-          </CardTitle>
+          </h1>
           <p className="text-gray-600">
             {t(
               "Please fill out the medical parameters below for accurate CKD risk prediction.",

@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileSearch, Calendar, User, TrendingUp, Utensils, Activity } from "lucide-react";
+import { Calendar, TrendingUp, Utensils, Activity } from "lucide-react";
 import { Link } from "wouter";
 import { useLanguage } from "@/hooks/useLanguage";
 import type { CKDAssessment, DietPlan } from "@shared/schema";
@@ -60,7 +60,7 @@ const Browse = () => {
       }
       
       try {
-        const response = await fetch("/api/ckd-assessments");
+        const response = await fetch(`/api/ckd-assessments/filtered?ids=${encodeURIComponent(JSON.stringify(userAssessmentIds))}`);
         if (!response.ok) {
           console.error('API response not OK:', response.status, response.statusText);
           throw new Error(`Failed to fetch assessments: ${response.status}`);
@@ -75,14 +75,7 @@ const Browse = () => {
           console.error('JSON parse error:', parseError);
           throw new Error('Invalid JSON response from server');
         }
-        console.log('All assessments:', allAssessments?.length || 0);
-        console.log('User assessment IDs:', userAssessmentIds);
-        
-        const filtered = allAssessments.filter((assessment: CKDAssessment) => 
-          assessment && assessment.id && userAssessmentIds.includes(assessment.id)
-        );
-        console.log('Filtered assessments:', filtered?.length || 0, 'assessments found');
-        return filtered;
+        return allAssessments;
       } catch (error) {
         console.error('Failed to fetch assessments:', error);
         return [];
@@ -100,14 +93,9 @@ const Browse = () => {
       }
       
       try {
-        const allDietPlans = await fetch("/api/diet-plans").then(res => res.json());
-        console.log('All diet plans:', allDietPlans?.length || 0);
-        
-        const filtered = allDietPlans.filter((plan: DietPlan) => 
-          userAssessmentIds.includes(plan.assessmentId!)
-        );
-        console.log('Filtered diet plans:', filtered?.length || 0, 'plans found');
-        return filtered;
+        const response = await fetch(`/api/diet-plans/filtered?ids=${encodeURIComponent(JSON.stringify(userAssessmentIds))}`);
+        if (!response.ok) throw new Error(`Failed to fetch diet plans: ${response.status}`);
+        return await response.json();
       } catch (error) {
         console.error('Failed to fetch diet plans:', error);
         return [];
@@ -140,9 +128,9 @@ const Browse = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
-        <div className="flex items-center gap-3 mb-4">
-          <FileSearch className="h-8 w-8 text-primary" />
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+        <div className="mb-4 border-b-2 border-slate-900 pb-5">
+          <p className="section-kicker mb-3">{t("Private to this browser", "इस ब्राउज़र तक सीमित")}</p>
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-white">
             {t("Browse Results & Diet Plans", "परिणाम और आहार योजनाएं ब्राउज़ करें")}
           </h1>
         </div>
@@ -194,11 +182,10 @@ const Browse = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {assessmentsWithResults.map((assessment) => (
-                <Card key={assessment.id} className="hover:shadow-lg transition-shadow cursor-pointer">
+                <Card key={assessment.id} className="cursor-pointer transition-colors hover:border-blue-400">
                   <CardHeader>
                     <div className="flex items-start justify-between mb-2">
                       <CardTitle className="text-lg flex items-center gap-2">
-                        <User className="h-5 w-5 text-primary" />
                         {assessment.patientName}
                       </CardTitle>
                       <Badge variant={getRiskBadgeVariant(assessment.riskLevel)}>
@@ -270,7 +257,7 @@ const Browse = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {dietPlans.map((plan) => (
-                <Card key={plan.id} className="hover:shadow-lg transition-shadow">
+                <Card key={plan.id} className="transition-colors hover:border-blue-400">
                   <CardHeader>
                     <div className="flex items-start justify-between mb-2">
                       <CardTitle className="text-lg flex items-center gap-2">

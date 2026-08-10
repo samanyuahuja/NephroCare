@@ -139,12 +139,12 @@ export default function Chatbot() {
         <CardHeader className="bg-primary text-white rounded-t-xl p-3 sm:p-6">
           <div className="flex items-center justify-between">
             <div className="flex-1 min-w-0">
-              <CardTitle className="flex items-center text-lg sm:text-xl">
+              <h1 className="flex items-center text-lg font-semibold sm:text-xl">
                 <Bot className="mr-2 sm:mr-3 h-5 w-5 sm:h-6 sm:w-6" />
                 <span className="truncate">
                   {t("NephroBot Assistant", "नेफ्रोबॉट सहायक")}
                 </span>
-              </CardTitle>
+              </h1>
               <p className="text-blue-100 text-xs sm:text-sm hidden sm:block">
                 {t(
                   "Ask me anything about CKD, your results, or kidney health",

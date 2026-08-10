@@ -1,11 +1,11 @@
 {
-  "name": "NephroCare - CKD Prediction & Care",
+  "name": "NephroCare - Kidney Health Awareness",
   "short_name": "NephroCare",
-  "description": "Professional Chronic Kidney Disease prediction and personalized care platform",
+  "description": "Educational kidney-health information and preliminary CKD screening support.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#3b82f6",
+  "theme_color": "#18375f",
   "orientation": "portrait-primary",
   "icons": [
     {

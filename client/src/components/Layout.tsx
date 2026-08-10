@@ -1,7 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Activity, Menu } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Activity, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import LanguageToggle from "@/components/LanguageToggle";
@@ -12,177 +10,156 @@ interface LayoutProps {
   children: React.ReactNode;
 }
 
+const primaryNav = [
+  { href: "/", label: ["Home", "होम"] },
+  { href: "/diagnosis", label: ["Assessment", "मूल्यांकन"] },
+  { href: "/browse", label: ["My reports", "मेरी रिपोर्ट"] },
+  { href: "/symptom-checker", label: ["Symptoms", "लक्षण"] },
+  { href: "/chatbot", label: ["Ask NephroBot", "नेफ्रोबॉट से पूछें"] },
+  { href: "/about-ckd", label: ["CKD guide", "सीकेडी गाइड"] },
+];
+
+const legalNav = [
+  { href: "/privacy", label: "Privacy" },
+  { href: "/terms", label: "Terms" },
+  { href: "/medical-disclaimer", label: "Medical disclaimer" },
+  { href: "/accessibility", label: "Accessibility" },
+];
+
 export default function Layout({ children }: LayoutProps) {
   const [location] = useLocation();
-  const [isOpen, setIsOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const { language } = useLanguage();
   const reduceMotion = useReducedMotion();
 
-  const navItems = [
-    { href: "/", label: t("Home", "होम") },
-    { href: "/diagnosis", label: t("Assessment", "मूल्यांकन") },
-    { href: "/browse", label: t("Browse", "ब्राउज़") },
-    { href: "/symptom-checker", label: t("Symptoms", "लक्षण") },
-    { href: "/chatbot", label: t("NephroBot", "नेफ्रोबॉट") },
-    { href: "/about", label: t("About", "के बारे में") },
-    { href: "/about-ckd", label: t("About CKD", "सीकेडी के बारे में") },
-  ];
+  const isActive = (href: string) =>
+    href === "/" ? location === "/" : location.startsWith(href);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-white text-slate-950">
       <SiteMotion routeKey={location} />
-      {/* Navigation */}
-      <nav className="bg-white dark:bg-gray-900 shadow-sm border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            {/* Logo */}
-            <Link href="/" className="flex items-center space-x-3">
-              <Activity className="h-8 w-8 text-primary" />
-              <span className="text-xl font-bold text-gray-900 dark:text-white">NephroCare</span>
-            </Link>
+      <a className="skip-link" href="#main-content">
+        Skip to main content
+      </a>
 
-            {/* Desktop Navigation */}
-            <div className="hidden lg:flex items-center space-x-1">
-              {navItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
-                    location === item.href
-                      ? "text-primary bg-primary/10"
-                      : "text-gray-600 dark:text-gray-300 hover:text-primary hover:bg-gray-50 dark:hover:bg-gray-800"
-                  }`}
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </div>
+      <div className="service-notice">
+        <div className="service-shell service-notice__inner">
+          <span>{t("Kidney health information and preliminary screening", "किडनी स्वास्थ्य जानकारी और प्रारंभिक स्क्रीनिंग")}</span>
+          <Link href="/medical-disclaimer">{t("Not a diagnosis", "यह निदान नहीं है")}</Link>
+        </div>
+      </div>
 
-            {/* Right Side Actions */}
-            <div className="flex items-center space-x-4">
-              <div className="hidden lg:block">
-                <LanguageToggle />
-              </div>
+      <header className="site-header">
+        <div className="service-shell site-header__inner">
+          <Link href="/" className="wordmark" aria-label="NephroCare home">
+            <Activity aria-hidden="true" />
+            <span>NephroCare</span>
+          </Link>
 
-              {/* Mobile Menu Button */}
-              <div className="lg:hidden">
-                <Sheet open={isOpen} onOpenChange={setIsOpen}>
-                  <SheetTrigger asChild>
-                    <Button variant="ghost" size="icon" className="text-gray-600 dark:text-gray-300 hover:text-primary">
-                      <Menu className="h-6 w-6" />
-                    </Button>
-                  </SheetTrigger>
-                  <SheetContent side="right" className="w-80">
-                    <div className="flex items-center space-x-3 mb-8">
-                      <Activity className="h-8 w-8 text-primary" />
-                      <span className="text-xl font-bold text-gray-900 dark:text-white">NephroCare</span>
-                    </div>
-                    <nav className="space-y-2">
-                      {navItems.map((item) => (
-                        <Link
-                          key={item.href}
-                          href={item.href}
-                          className={`block px-4 py-3 rounded-lg text-base font-medium transition-colors duration-200 ${
-                            location === item.href
-                              ? "text-primary bg-primary/10"
-                              : "text-gray-600 dark:text-gray-300 hover:text-primary hover:bg-gray-50 dark:hover:bg-gray-800"
-                          }`}
-                          onClick={() => setIsOpen(false)}
-                        >
-                          {item.label}
-                        </Link>
-                      ))}
-                      <div className="pt-6 border-t border-gray-200 dark:border-gray-700 mt-6">
-                        <div className="flex justify-center">
-                          <LanguageToggle />
-                        </div>
-                      </div>
-                    </nav>
-                  </SheetContent>
-                </Sheet>
-              </div>
-            </div>
+          <nav className="primary-nav" aria-label="Primary navigation">
+            {primaryNav.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={isActive(item.href) ? "is-active" : ""}
+              >
+                {t(item.label[0], item.label[1])}
+              </Link>
+            ))}
+          </nav>
+
+          <div className="site-header__actions">
+            <div className="site-language"><LanguageToggle /></div>
+            <button
+              className="menu-button"
+              type="button"
+              onClick={() => setMenuOpen((open) => !open)}
+              aria-expanded={menuOpen}
+              aria-controls="mobile-navigation"
+              aria-label={menuOpen ? "Close navigation" : "Open navigation"}
+            >
+              {menuOpen ? <X /> : <Menu />}
+            </button>
           </div>
         </div>
-      </nav>
 
-      {/* Main Content */}
+        <AnimatePresence>
+          {menuOpen && (
+            <motion.nav
+              id="mobile-navigation"
+              className="mobile-nav"
+              aria-label="Mobile navigation"
+              initial={reduceMotion ? false : { height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={reduceMotion ? undefined : { height: 0, opacity: 0 }}
+              transition={{ duration: 0.22 }}
+            >
+              <div className="service-shell mobile-nav__inner">
+                {primaryNav.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={isActive(item.href) ? "is-active" : ""}
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    {t(item.label[0], item.label[1])}
+                  </Link>
+                ))}
+                <div className="mobile-nav__language"><LanguageToggle /></div>
+              </div>
+            </motion.nav>
+          )}
+        </AnimatePresence>
+      </header>
+
       <AnimatePresence mode="wait" initial={false}>
         <motion.main
+          id="main-content"
           key={location}
-          className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
-          initial={reduceMotion ? false : { opacity: 0, y: 12 }}
+          className="service-shell site-main"
+          initial={reduceMotion ? false : { opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={reduceMotion ? undefined : { opacity: 0, y: -6 }}
-          transition={{ duration: 0.36, ease: [0.22, 1, 0.36, 1] }}
+          exit={reduceMotion ? undefined : { opacity: 0, y: -4 }}
+          transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
         >
           {children}
         </motion.main>
       </AnimatePresence>
 
-      {/* Footer */}
-      <footer className="bg-gray-900 text-gray-300 py-12 mt-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-              <div className="flex items-center space-x-3 mb-4">
-                <Activity className="h-8 w-8 text-primary" />
-                <span className="text-xl font-bold text-white">NephroCare</span>
+      <footer className="site-footer">
+        <div className="service-shell">
+          <div className="site-footer__top">
+            <div className="site-footer__identity">
+              <Link href="/" className="wordmark wordmark--footer">
+                <Activity aria-hidden="true" />
+                <span>NephroCare</span>
+              </Link>
+              <p>{t("A student-built kidney health awareness service.", "छात्र द्वारा निर्मित किडनी स्वास्थ्य जागरूकता सेवा।")}</p>
+            </div>
+
+            <div className="site-footer__directory">
+              <div>
+                <h2>{t("Use NephroCare", "नेफ्रोकेयर का उपयोग करें")}</h2>
+                <Link href="/diagnosis">{t("Start an assessment", "मूल्यांकन शुरू करें")}</Link>
+                <Link href="/symptom-checker">{t("Check symptoms", "लक्षण जांचें")}</Link>
+                <Link href="/browse">{t("View my reports", "मेरी रिपोर्ट देखें")}</Link>
               </div>
-              <p className="text-gray-400">
-                {t(
-                  "Kidney health screening, clear reports, and practical guidance.",
-                  "किडनी स्वास्थ्य स्क्रीनिंग, स्पष्ट रिपोर्ट और व्यावहारिक मार्गदर्शन।"
-                )}
-              </p>
-            </div>
-            <div>
-              <h3 className="text-white font-semibold mb-4">{t("Quick Links", "त्वरित लिंक")}</h3>
-              <ul className="space-y-2">
-                {navItems.map((item) => (
-                  <li key={item.href}>
-                    <Link
-                      href={item.href}
-                      className="hover:text-white transition-colors"
-                    >
-                      {item.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-white font-semibold mb-4">{t("Features", "विशेषताएं")}</h3>
-              <ul className="space-y-2 text-gray-400">
-                <li>{t("CKD Risk Screening", "सीकेडी जोखिम स्क्रीनिंग")}</li>
-                <li>{t("Personalized Diet Plans", "व्यक्तिगत आहार योजना")}</li>
-                <li>{t("Risk Assessment", "जोखिम मूल्यांकन")}</li>
-                <li>{t("Symptom Checker", "लक्षण चेकर")}</li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-white font-semibold mb-4">{t("Contact & Support", "संपर्क और सहायता")}</h3>
-              <ul className="space-y-2 text-gray-400">
-                <li>{t("Developer: Samanyu Ahuja", "डेवलपर: समन्यु अहुजा")}</li>
-                <li>
-                  <a href="mailto:nephrocareai@gmail.com" className="hover:text-white transition-colors">
-                    nephrocareai@gmail.com
-                  </a>
-                </li>
-                <li>
-                  <a href="https://instagram.com/nephrocareai" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
-                    @nephrocareai
-                  </a>
-                </li>
-                <li>{t("Medical Guidance", "चिकित्सा मार्गदर्शन")}</li>
-                <li>{t("Health Resources", "स्वास्थ्य संसाधन")}</li>
-              </ul>
+              <div>
+                <h2>{t("Information", "जानकारी")}</h2>
+                <Link href="/about">{t("About the project", "परियोजना के बारे में")}</Link>
+                <Link href="/about-ckd">{t("CKD guide", "सीकेडी गाइड")}</Link>
+                <a href="mailto:nephrocareai@gmail.com">Contact</a>
+              </div>
+              <div>
+                <h2>{t("Trust and safety", "विश्वास और सुरक्षा")}</h2>
+                {legalNav.map((item) => <Link key={item.href} href={item.href}>{item.label}</Link>)}
+              </div>
             </div>
           </div>
-          <div className="border-t border-gray-700 mt-8 pt-8 text-center">
-            <p className="text-gray-400">
-              © 2026 NephroCare. Built by Samanyu Ahuja for kidney health awareness.
-            </p>
+
+          <div className="site-footer__bottom">
+            <p>© 2026 NephroCare. Built by Samanyu Ahuja.</p>
+            <p>For awareness only. Seek qualified medical care for diagnosis and treatment.</p>
           </div>
         </div>
       </footer>

@@ -24,6 +24,7 @@ export const useLanguage = (): LanguageState => {
   const setLanguage = (newLanguage: 'en' | 'hi') => {
     globalLanguage = newLanguage;
     localStorage.setItem('nephrocare-language', newLanguage);
+    document.documentElement.lang = newLanguage;
     listeners.forEach(listener => listener());
   };
 
@@ -36,6 +37,8 @@ export const useLanguage = (): LanguageState => {
     const stored = localStorage.getItem('nephrocare-language') as 'en' | 'hi';
     if (stored && stored !== globalLanguage) {
       setLanguage(stored);
+    } else {
+      document.documentElement.lang = globalLanguage;
     }
   }, []);
 

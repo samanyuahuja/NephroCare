@@ -8,7 +8,20 @@ export async function createApplication() {
   const app = express();
 
   app.use(helmet({
-    contentSecurityPolicy: false,
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", "data:", "blob:"],
+        connectSrc: ["'self'"],
+        fontSrc: ["'self'", "data:"],
+        objectSrc: ["'none'"],
+        baseUri: ["'self'"],
+        formAction: ["'self'"],
+        frameAncestors: ["'none'"],
+      },
+    },
     crossOriginEmbedderPolicy: false,
   }));
   app.set("trust proxy", 1);
@@ -51,23 +64,12 @@ export async function createApplication() {
 
   app.use((req, res, next) => {
     const start = Date.now();
-    let capturedJsonResponse: Record<string, unknown> | undefined;
-    const originalResJson = res.json;
-
-    res.json = function (bodyJson, ...args) {
-      capturedJsonResponse = bodyJson;
-      return originalResJson.apply(res, [bodyJson, ...args]);
-    };
 
     res.on("finish", () => {
       if (!req.path.startsWith("/api")) return;
 
       const duration = Date.now() - start;
-      let logLine = `${req.method} ${req.path} ${res.statusCode} in ${duration}ms`;
-      if (capturedJsonResponse) {
-        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
-      }
-      log(logLine.length > 80 ? `${logLine.slice(0, 79)}...` : logLine);
+      log(`${req.method} ${req.path} ${res.statusCode} in ${duration}ms`);
     });
 
     next();
