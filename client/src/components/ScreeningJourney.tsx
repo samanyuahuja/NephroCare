@@ -2,17 +2,17 @@ import { motion, useReducedMotion } from "framer-motion";
 import { t } from "@/hooks/useLanguage";
 
 const reportRows = [
-  ["Serum creatinine", "1.2 mg/dL"],
-  ["Blood pressure", "128 / 82"],
-  ["Blood urea", "32 mg/dL"],
-  ["Symptoms noted", "2"],
+  ["Serum creatinine", "सीरम क्रिएटिनिन", "1.2 mg/dL"],
+  ["Blood pressure", "रक्तचाप", "128 / 82"],
+  ["Blood urea", "ब्लड यूरिया", "32 mg/dL"],
+  ["Symptoms noted", "दर्ज लक्षण", "2"],
 ];
 
 export default function ScreeningJourney() {
   const reduceMotion = useReducedMotion();
 
   return (
-    <figure className="clinical-preview" aria-label="Example of a NephroCare screening summary">
+    <figure className="clinical-preview" aria-label={t("Example of a NephroCare screening summary", "नेफ्रोकेयर स्क्रीनिंग सारांश का उदाहरण")}>
       <figcaption className="clinical-preview__caption">
         <span>{t("Illustrative assessment", "उदाहरण मूल्यांकन")}</span>
         <span>NC / 042</span>
@@ -24,14 +24,14 @@ export default function ScreeningJourney() {
       </div>
 
       <dl className="clinical-preview__rows">
-        {reportRows.map(([label, value], index) => (
+        {reportRows.map(([label, labelHi, value], index) => (
           <motion.div
             key={label}
             initial={reduceMotion ? false : { opacity: 0, x: -12 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.12 + index * 0.08, duration: 0.4 }}
           >
-            <dt>{t(label, label)}</dt>
+            <dt>{t(label, labelHi)}</dt>
             <dd>{value}</dd>
           </motion.div>
         ))}

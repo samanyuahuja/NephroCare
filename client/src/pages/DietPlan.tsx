@@ -2,12 +2,13 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle, XCircle, Droplets, Download } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { ArrowRight, CheckCircle, Download, Droplets, Leaf, ShieldCheck, XCircle } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
-import { generateDietPlanPDF } from "@/lib/pdfGenerator";
 import { useLanguage, t } from "@/hooks/useLanguage";
 import type { DietPlan, CKDAssessment } from "@shared/schema";
+import PageIntro from "@/components/PageIntro";
+import { hasAssessmentAccess } from "@/lib/assessmentAccess";
 
 interface DietPlanProps {
   params: { id: string };
@@ -18,14 +19,11 @@ export default function DietPlan({ params }: DietPlanProps) {
   const [dietType, setDietType] = useState<'vegetarian' | 'non-vegetarian'>('vegetarian');
   const { language } = useLanguage();
 
-  // Check if user has access to this assessment
-  const hasAccess = () => {
-    return true; // Allow access for all users for testing
-  };
+  const hasAccess = hasAssessmentAccess(assessmentId);
 
   const { data: assessment } = useQuery<CKDAssessment>({
     queryKey: ["/api/ckd-assessment", assessmentId],
-    enabled: !isNaN(assessmentId) && hasAccess(),
+    enabled: !isNaN(assessmentId) && hasAccess,
   });
 
   const dietPlanMutation = useMutation({
@@ -41,16 +39,8 @@ export default function DietPlan({ params }: DietPlanProps) {
       };
       
       const response = await apiRequest("POST", "/api/diet-plan", dietPlanData);
-      const result = await response.json();
-      console.log('Diet plan API response:', result);
-      return result;
+      return response.json();
     },
-  });
-
-  const { data: existingDietPlan } = useQuery<DietPlan>({
-    queryKey: ["/api/diet-plan", assessmentId],
-    enabled: !isNaN(assessmentId) && hasAccess(),
-    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   const { data: dietPlan, isLoading, refetch } = useQuery<DietPlan>({
@@ -59,7 +49,7 @@ export default function DietPlan({ params }: DietPlanProps) {
       // Always create new diet plan when diet type changes
       return dietPlanMutation.mutateAsync({ assessmentId, dietType });
     },
-    enabled: !isNaN(assessmentId) && hasAccess(),
+    enabled: !isNaN(assessmentId) && hasAccess,
   });
 
   // Function to parse SHAP features for intelligent recommendations
@@ -477,40 +467,16 @@ export default function DietPlan({ params }: DietPlanProps) {
   };
 
   const generateWaterIntake = (assessment?: CKDAssessment) => {
-    if (!assessment) return "Maintain adequate hydration - 6-8 glasses of water daily. Monitor urine output and adjust intake based on kidney function. Drink water between meals rather than with meals. Spread intake throughout the day. Consult healthcare provider if you have fluid retention or swelling.";
-    
-    const advice = [];
-    const riskScore = assessment.riskScore || 0;
-    const creatinine = parseFloat(assessment.serumCreatinine?.toString() || "0");
-    
-    // Base water intake advice based on kidney function
-    if (riskScore > 0.6 || creatinine > 1.5) {
-      advice.push("Moderate water intake - 4-6 glasses daily (1000-1500ml)");
-      advice.push("Monitor fluid balance carefully and watch for signs of fluid overload like swelling in ankles or shortness of breath");
-      advice.push("Include all fluids (tea, coffee, soups) in daily count");
-      advice.push("Consult nephrologist for personalized fluid restrictions");
-    } else {
-      advice.push("Maintain adequate hydration - 6-8 glasses of water daily (1500-2000ml)");
-      advice.push("Drink more in hot weather or during physical activity");
-      advice.push("Monitor urine color - pale yellow indicates good hydration");
-    }
+    const advice = [
+      "Discuss your personal fluid target with a qualified clinician",
+      "Count all beverages when tracking fluid intake",
+      "Watch for changes in swelling, breathing, thirst, or urine output",
+      "Do not restrict or substantially increase fluids based only on this educational report",
+    ];
 
-    // Additional advice based on specific conditions
-    if (assessment.pedalEdema === "yes") {
-      advice.push("Limit fluid intake due to edema - follow medical advice for exact amounts");
+    if (assessment?.pedalEdema === "yes") {
+      advice.push("Mention the reported swelling when asking for an individualized fluid plan");
     }
-
-    if (assessment.hypertension === "yes") {
-      advice.push("Monitor fluid balance as part of blood pressure management");
-    }
-
-    if (assessment.bloodUrea && assessment.bloodUrea > 40) {
-      advice.push("Moderate fluid intake to prevent further kidney stress");
-    }
-
-    advice.push("Space water intake throughout the day rather than drinking large amounts at once");
-    advice.push("Avoid excessive water during meals to prevent diluting digestive enzymes");
-    advice.push("Reduce intake 2-3 hours before bedtime to improve sleep quality");
 
     return advice.join(". ");
   };
@@ -549,10 +515,11 @@ export default function DietPlan({ params }: DietPlanProps) {
 
   const downloadDietPlan = async () => {
     if (!dietPlan) return;
+    const { generateDietPlanPDF } = await import("@/lib/pdfGenerator");
     await generateDietPlanPDF(dietPlan, assessment);
   };
 
-  if (!hasAccess()) {
+  if (!hasAccess) {
     return (
       <Card className="max-w-md mx-auto">
         <CardContent className="pt-6 text-center">
@@ -576,220 +543,149 @@ export default function DietPlan({ params }: DietPlanProps) {
   const foodsToEat = dietPlan ? dietPlan.foodsToEat.split(', ') : [];
   const foodsToAvoid = dietPlan ? dietPlan.foodsToAvoid.split(', ') : [];
 
+  const factorLabel = (factor: string) => {
+    const labels: Record<string, [string, string]> = {
+      "Serum Creatinine": ["Serum creatinine", "सीरम क्रिएटिनिन"],
+      "Blood Urea": ["Blood urea", "ब्लड यूरिया"],
+      "Blood Pressure": ["Blood pressure", "रक्तचाप"],
+      "Blood Glucose Random": ["Random blood glucose", "रैंडम ब्लड ग्लूकोज"],
+      Albumin: ["Albumin", "एल्ब्यूमिन"],
+      Sodium: ["Sodium", "सोडियम"],
+      Potassium: ["Potassium", "पोटैशियम"],
+      Hemoglobin: ["Hemoglobin", "हीमोग्लोबिन"],
+    };
+
+    const label = labels[factor];
+    return label ? t(label[0], label[1]) : factor;
+  };
+
   return (
-    <div className="max-w-4xl mx-auto">
-      <Card>
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl sm:text-3xl font-bold">{t("Personalized Diet Plan", "व्यक्तिगत आहार योजना")}</CardTitle>
-          <p className="text-gray-600">
-            {t("Based on your CKD risk assessment and analysis of your health parameters", "आपके CKD जोखिम मूल्यांकन और स्वास्थ्य पैरामीटर के विश्लेषण के आधार पर")}
-          </p>
-        </CardHeader>
-        <CardContent>
-          {/* SHAP-Based Analysis Section */}
+    <div className="diet-page app-page">
+      <PageIntro
+        eyebrow={t("Food and fluid guidance", "भोजन और तरल मार्गदर्शन")}
+        title={t("A practical diet brief for discussion.", "चर्चा के लिए एक व्यावहारिक आहार सारांश।")}
+        description={t("Use this educational plan to prepare questions for a renal dietitian or clinician. Individual needs can differ significantly.", "इस शैक्षिक योजना का उपयोग रीनल डाइटिशियन या चिकित्सक के लिए प्रश्न तैयार करने में करें। व्यक्तिगत जरूरतें काफी अलग हो सकती हैं।")}
+        actions={<Button onClick={downloadDietPlan}><Download />{t("Download diet brief", "आहार सारांश डाउनलोड करें")}</Button>}
+        aside={<div className="diet-intro-signal"><Leaf aria-hidden="true" /><strong>{dietType === "vegetarian" ? t("Vegetarian view", "शाकाहारी दृश्य") : t("Non-vegetarian view", "मांसाहारी दृश्य")}</strong><p>{t("Switch the view below without losing this report.", "नीचे दृश्य बदलें, रिपोर्ट सुरक्षित रहेगी।")}</p></div>}
+      />
+
+      <section className="diet-workspace">
+        <div className="diet-workspace__content">
           {assessment && (() => {
-            try {
-              const shapAnalysis = generateShapBasedDietAnalysis(assessment);
-              return (
-                <div className="mb-8 rounded-lg border border-blue-200 bg-blue-50 p-6">
-                  <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
-                    <svg className="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 00-2-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                    </svg>
-                    {t("Diet Plan Factor Analysis", "आहार योजना कारक विश्लेषण")}
-                  </h3>
-                  
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {/* Primary Risk Factors */}
-                    {shapAnalysis.primaryRiskFactors.length > 0 && (
-                      <div className="bg-red-50 p-4 rounded-lg border border-red-200">
-                        <h4 className="font-semibold text-red-800 mb-3 flex items-center">
-                          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                          </svg>
-                          High Risk Factors Requiring Dietary Intervention
-                        </h4>
-                        {shapAnalysis.primaryRiskFactors.map((factor: any, index: number) => (
-                          <div key={index} className="mb-4 p-3 bg-white rounded border border-red-100">
-                            <div className="font-medium text-red-900 mb-1">
-                              {factor.factor}: {factor.value} (Impact: {(factor.impact * 100).toFixed(1)}%)
-                            </div>
-                            <div className="text-sm text-red-700 mb-2">{factor.intervention.explanation}</div>
-                            <div className="text-sm">
-                              <span className="font-medium text-green-700">Recommended: </span>
-                              {factor.intervention.foods?.join(', ')}
-                            </div>
-                            {factor.intervention.avoid && (
-                              <div className="text-sm mt-1">
-                                <span className="font-medium text-red-700">Avoid: </span>
-                                {factor.intervention.avoid.join(', ')}
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    )}
+            const shapAnalysis = generateShapBasedDietAnalysis(assessment);
+            const factors = [...shapAnalysis.primaryRiskFactors, ...shapAnalysis.protectiveFactors].slice(0, 5);
 
-                    {/* Protective Factors */}
-                    {shapAnalysis.protectiveFactors.length > 0 && (
-                      <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-                        <h4 className="font-semibold text-green-800 mb-3 flex items-center">
-                          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                          Protective Factors to Maintain
-                        </h4>
-                        {shapAnalysis.protectiveFactors.map((factor: any, index: number) => (
-                          <div key={index} className="mb-3 p-3 bg-white rounded border border-green-100">
-                            <div className="font-medium text-green-900 mb-1">
-                              {factor.factor}: {factor.value} (Protective Impact: {(factor.impact * 100).toFixed(1)}%)
-                            </div>
-                            <div className="text-sm text-green-700">{factor.intervention.explanation}</div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
+            return (
+              <div className="diet-analysis">
+                <header className="diet-section-heading">
+                  <span>01</span>
+                  <div>
+                    <p className="section-kicker">{t("Assessment context", "मूल्यांकन संदर्भ")}</p>
+                    <h2>{t("Signals to bring into the diet conversation", "आहार संबंधी बातचीत में शामिल करने योग्य संकेत")}</h2>
+                    <p>{t("These values explain why some foods may need a closer look. They do not set a diet or nutrient target on their own.", "ये मान बताते हैं कि किन खाद्य पदार्थों पर अधिक ध्यान देने की जरूरत हो सकती है। ये अपने आप आहार या पोषक लक्ष्य तय नहीं करते।")}</p>
+                  </div>
+                </header>
 
-                    {/* Nutritional Targets */}
-                    <div className="lg:col-span-2 bg-blue-50 p-4 rounded-lg border border-blue-200">
-                      <h4 className="font-semibold text-blue-800 mb-3 flex items-center">
-                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 00-2-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                        </svg>
-                        Personalized Nutritional Targets Based on SHAP Analysis
-                      </h4>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        {Object.entries(shapAnalysis.nutritionalTargets).map(([nutrient, target]: [string, any]) => (
-                          <div key={nutrient} className="bg-white p-3 rounded border border-blue-100">
-                            <div className="font-medium text-blue-900 capitalize">{nutrient}</div>
-                            <div className="text-sm text-blue-700">
-                              {target.min && `${target.min}-`}{target.max || target.target} {target.unit}
-                            </div>
-                            {target.reasoning && (
-                              <div className="text-xs text-blue-600 mt-1">{target.reasoning}</div>
-                            )}
-                          </div>
-                        ))}
+                <div className="diet-factor-ledger">
+                  {factors.length > 0 ? factors.map((factor: any, index: number) => (
+                    <article className="diet-factor-row" key={`${factor.factor}-${index}`}>
+                      <span>{String(index + 1).padStart(2, "0")}</span>
+                      <div>
+                        <strong>{factorLabel(factor.factor)}</strong>
+                        <small>{String(factor.value)}</small>
                       </div>
-                    </div>
+                      <div className="diet-factor-meter" aria-label={`${Math.round(factor.impact * 100)}% model influence`}>
+                        <i style={{ width: `${Math.min(Math.max(Math.abs(factor.impact) * 100, 8), 100)}%` }} />
+                      </div>
+                      <b>{Math.round(Math.abs(factor.impact) * 100)}%</b>
+                    </article>
+                  )) : (
+                    <p className="diet-analysis__empty">{t("No individual factor weighting was available for this report.", "इस रिपोर्ट के लिए व्यक्तिगत कारक भार उपलब्ध नहीं था।")}</p>
+                  )}
+                </div>
+
+                <div className="diet-context-strip">
+                  <ShieldCheck aria-hidden="true" />
+                  <div>
+                    <strong>{t("Use this as appointment preparation", "इसे मुलाकात की तैयारी के रूप में उपयोग करें")}</strong>
+                    <p>{t("Ask a renal dietitian to interpret these signals alongside medicines, repeat labs, body weight and stage of kidney disease.", "रीनल डाइटिशियन से इन संकेतों को दवाओं, दोबारा किए गए लैब टेस्ट, शरीर के वजन और किडनी रोग की अवस्था के साथ समझने के लिए कहें।")}</p>
                   </div>
                 </div>
-              );
-            } catch (error) {
-              console.error('Error in SHAP analysis:', error);
-              return (
-                <div className="mb-8 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-                  <p className="text-yellow-800">
-                    {t("Basic diet recommendations will be provided based on your assessment data.", "आपके मूल्यांकन डेटा के आधार पर बुनियादी आहार सिफारिशें प्रदान की जाएंगी।")}
-                  </p>
-                </div>
-              );
-            }
+              </div>
+            );
           })()}
 
-          {/* Diet Type Toggle */}
-          <div className="flex justify-center mb-6 sm:mb-8">
-            <div className="bg-gray-100 p-1 rounded-lg w-full sm:w-auto">
+          <header className="diet-section-heading diet-section-heading--compact">
+            <span>02</span>
+            <div>
+              <p className="section-kicker">{t("Preference", "पसंद")}</p>
+              <h2>{t("Choose the food pattern to review", "समीक्षा के लिए भोजन का प्रकार चुनें")}</h2>
+            </div>
+          </header>
+
+          <div className="diet-mode" role="group" aria-label={t("Diet type", "आहार प्रकार")}>
+            <div>
               <Button
                 variant={dietType === 'vegetarian' ? 'default' : 'ghost'}
                 onClick={() => toggleDietType('vegetarian')}
-                className="flex-1 sm:flex-none sm:px-6 py-2"
+                aria-pressed={dietType === 'vegetarian'}
               >
                 {t("Vegetarian", "शाकाहारी")}
               </Button>
               <Button
                 variant={dietType === 'non-vegetarian' ? 'default' : 'ghost'}
                 onClick={() => toggleDietType('non-vegetarian')}
-                className="flex-1 sm:flex-none sm:px-6 py-2"
+                aria-pressed={dietType === 'non-vegetarian'}
               >
                 {t("Non-Vegetarian", "मांसाहारी")}
               </Button>
             </div>
           </div>
 
-          {/* Diet Content */}
-          <div id="diet-plan-content" className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8 mb-6 sm:mb-8">
-            {/* Foods to Eat */}
-            <Card className="border-green-200 bg-green-50">
-              <CardHeader>
-                <CardTitle className="flex items-center text-green-800">
-                  <CheckCircle className="mr-3 h-5 w-5" />
-                  {t("Foods to Eat", "खाने योग्य खाद्य पदार्थ")}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-3 text-green-700">
-                  {foodsToEat.map((food: string, index: number) => (
-                    <li key={index} className="flex items-start">
-                      <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 mr-2 flex-shrink-0" />
-                      <span className="text-sm">{food}</span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
+          <div id="diet-plan-content" className="diet-columns">
+            <article className="diet-column diet-column--eat">
+              <header><CheckCircle aria-hidden="true" /><div><span>{t("Review list A", "समीक्षा सूची ए")}</span><h3>{t("Food examples to discuss", "चर्चा के लिए भोजन के उदाहरण")}</h3></div></header>
+              <ul>
+                {foodsToEat.map((food: string, index: number) => <li key={index}><span>{String(index + 1).padStart(2, "0")}</span><p>{food}</p></li>)}
+              </ul>
+            </article>
 
-            {/* Foods to Avoid */}
-            <Card className="border-red-200 bg-red-50">
-              <CardHeader>
-                <CardTitle className="flex items-center text-red-800">
-                  <XCircle className="mr-3 h-5 w-5" />
-                  {t("Foods to Avoid", "बचने योग्य खाद्य पदार्थ")}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-3 text-red-700">
-                  {foodsToAvoid.map((food: string, index: number) => (
-                    <li key={index} className="flex items-start">
-                      <XCircle className="h-4 w-4 text-red-500 mt-0.5 mr-2 flex-shrink-0" />
-                      <span className="text-sm">{food}</span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
+            <article className="diet-column diet-column--avoid">
+              <header><XCircle aria-hidden="true" /><div><span>{t("Review list B", "समीक्षा सूची बी")}</span><h3>{t("Foods to ask about limiting", "सीमित करने के बारे में पूछने योग्य खाद्य पदार्थ")}</h3></div></header>
+              <ul>
+                {foodsToAvoid.map((food: string, index: number) => <li key={index}><span>{String(index + 1).padStart(2, "0")}</span><p>{food}</p></li>)}
+              </ul>
+            </article>
           </div>
 
-          {/* Water Intake Advice */}
-          <Card className="border-blue-200 bg-blue-50 mb-6 sm:mb-8">
-            <CardHeader>
-              <CardTitle className="flex items-center text-blue-800">
-                <Droplets className="mr-3 h-5 w-5" />
-                {t("Water Intake Advice", "पानी का सेवन सलाह")}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-blue-700 space-y-3">
-                {dietPlan?.waterIntakeAdvice.split('. ').map((sentence, index) => (
-                  <div key={index} className="flex items-start">
-                    <Droplets className="h-4 w-4 text-blue-500 mt-0.5 mr-2 flex-shrink-0" />
-                    <p className="text-sm leading-relaxed">{sentence.trim()}.</p>
-                  </div>
-                ))}
-                <div className="mt-4 p-3 bg-blue-100 rounded-lg border border-blue-200">
-                  <p className="text-sm font-medium text-blue-800 mb-2">
-                    {t("Important Water Intake Tips:", "महत्वपूर्ण पानी सेवन सुझाव:")}
-                  </p>
-                  <ul className="text-xs space-y-1 text-blue-700">
-                    <li>• {t("Track your daily fluid intake including all beverages", "सभी पेय पदार्थों सहित अपने दैनिक तरल सेवन को ट्रैक करें")}</li>
-                    <li>• {t("Sip small amounts throughout the day", "दिन भर में छोटी मात्रा में घूंट लें")}</li>
-                    <li>• {t("Monitor for swelling or breathing difficulties", "सूजन या सांस लेने में कठिनाई की निगरानी करें")}</li>
-                    <li>• {t("Adjust based on activity level and weather", "गतिविधि स्तर और मौसम के आधार पर समायोजित करें")}</li>
-                  </ul>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <section className="fluid-guidance">
+            <div className="fluid-guidance__icon"><Droplets aria-hidden="true" /></div>
+            <div>
+              <p className="section-kicker">{t("Fluid discussion", "तरल संबंधी चर्चा")}</p>
+              <h2>{t("Do not guess a personal fluid target", "व्यक्तिगत तरल लक्ष्य का अनुमान न लगाएं")}</h2>
+              <p>{t("Kidney function, swelling, urine output, medicines and heart health can all change what is appropriate. Confirm any increase or restriction with a qualified clinician.", "किडनी की कार्यप्रणाली, सूजन, पेशाब की मात्रा, दवाएं और हृदय स्वास्थ्य सभी सही मात्रा को बदल सकते हैं। किसी भी बढ़ोतरी या कमी की पुष्टि योग्य चिकित्सक से करें।")}</p>
+            </div>
+            <ul>
+              <li>{t("Track all drinks, not only water.", "केवल पानी ही नहीं, सभी पेय नोट करें।")}</li>
+              <li>{t("Mention swelling or shortness of breath promptly.", "सूजन या सांस फूलने की जानकारी तुरंत दें।")}</li>
+              <li>{t("Bring recent lab results to the discussion.", "हाल के लैब परिणाम साथ लेकर जाएं।")}</li>
+            </ul>
+          </section>
 
-          {/* Download Button */}
-          <div className="text-center">
-            <Button size="lg" onClick={downloadDietPlan} className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg bg-green-600 hover:bg-green-700">
-              <Download className="mr-3 h-5 w-5" />
-              {t("Download PDF Diet Plan", "पीडीएफ आहार योजना डाउनलोड करें")}
+          <div className="diet-download">
+            <div>
+              <p className="section-kicker">{t("Take it with you", "इसे साथ ले जाएं")}</p>
+              <h2>{t("Bring the brief to a professional review.", "सारांश को पेशेवर समीक्षा के लिए ले जाएं।")}</h2>
+              <p>{t("Use the PDF to support a conversation, not as a prescription.", "पीडीएफ का उपयोग बातचीत के सहायक के रूप में करें, न कि चिकित्सकीय निर्देश के रूप में।")}</p>
+            </div>
+            <Button size="lg" onClick={downloadDietPlan}>
+              <Download aria-hidden="true" />
+              {t("Download diet brief", "आहार सारांश डाउनलोड करें")}
+              <ArrowRight aria-hidden="true" />
             </Button>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </section>
     </div>
   );
 }

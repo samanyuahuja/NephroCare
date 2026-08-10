@@ -2,7 +2,7 @@
 # Security Verification Script for NephroCare
 # Tests rate limiting, input validation, sanitization, headers, and error handling
 
-BASE="http://localhost:5000"
+BASE="${BASE:-http://localhost:5000}"
 PASS=0
 FAIL=0
 

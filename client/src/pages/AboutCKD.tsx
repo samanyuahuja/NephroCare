@@ -1,362 +1,194 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Heart, Activity, AlertTriangle, Shield, User, Code, Globe, TrendingDown, Calendar, Stethoscope } from "lucide-react";
-import { useLanguage, t } from "@/hooks/useLanguage";
+import { Link } from "wouter";
+import {
+  Activity,
+  AlertTriangle,
+  ArrowRight,
+  BookOpenText,
+  Droplets,
+  ExternalLink,
+  FlaskConical,
+  HeartPulse,
+  ShieldCheck,
+  Stethoscope,
+} from "lucide-react";
+import PageIntro from "@/components/PageIntro";
+import { Button } from "@/components/ui/button";
+import { t, useLanguage } from "@/hooks/useLanguage";
+
+const chapters = [
+  ["overview", "Overview", "परिचय"],
+  ["stages", "CKD stages", "सीकेडी चरण"],
+  ["risk", "Risk factors", "जोखिम कारक"],
+  ["symptoms", "Warning signs", "चेतावनी संकेत"],
+  ["tests", "Useful tests", "महत्वपूर्ण जांच"],
+  ["next", "What to do next", "आगे क्या करें"],
+];
+
+const stages = [
+  { stage: "G1", range: "≥ 90", tone: "stable", title: ["Normal or high filtration", "सामान्य या अधिक फिल्ट्रेशन"], copy: ["CKD requires other evidence of kidney damage at this level.", "इस स्तर पर सीकेडी के लिए किडनी क्षति के अन्य प्रमाण भी आवश्यक हैं।"] },
+  { stage: "G2", range: "60–89", tone: "stable", title: ["Mildly reduced", "हल्की कमी"], copy: ["Other evidence of kidney damage is still needed to classify CKD.", "सीकेडी वर्गीकरण के लिए किडनी क्षति के अन्य प्रमाण भी आवश्यक हैं।"] },
+  { stage: "G3a", range: "45–59", tone: "watch", title: ["Mild to moderate reduction", "हल्की से मध्यम कमी"], copy: ["A clinician interprets the result with age, albumin, history, and repeat testing.", "चिकित्सक इसे आयु, एल्ब्यूमिन, इतिहास और दोबारा जांच के साथ समझते हैं।"] },
+  { stage: "G3b", range: "30–44", tone: "watch", title: ["Moderate to severe reduction", "मध्यम से गंभीर कमी"], copy: ["Closer clinical monitoring is commonly needed.", "आमतौर पर अधिक नियमित चिकित्सकीय निगरानी की आवश्यकता होती है।"] },
+  { stage: "G4", range: "15–29", tone: "urgent", title: ["Severely reduced", "गंभीर कमी"], copy: ["Specialist-led care and planning become especially important.", "विशेषज्ञ की देखरेख और आगे की योजना विशेष रूप से महत्वपूर्ण हो जाती है।"] },
+  { stage: "G5", range: "< 15", tone: "urgent", title: ["Kidney failure range", "किडनी विफलता की सीमा"], copy: ["This needs urgent specialist interpretation and care planning.", "इसके लिए तत्काल विशेषज्ञ व्याख्या और देखभाल योजना की आवश्यकता होती है।"] },
+];
+
+const riskFactors = [
+  { icon: Droplets, title: ["Diabetes", "मधुमेह"], copy: ["High blood glucose can damage the kidneys' filtering system over time.", "लंबे समय तक अधिक रक्त शर्करा किडनी की फिल्टर प्रणाली को नुकसान पहुंचा सकती है।"] },
+  { icon: Activity, title: ["High blood pressure", "उच्च रक्तचाप"], copy: ["Persistent pressure can damage the small blood vessels in the kidneys.", "लगातार अधिक दबाव किडनी की छोटी रक्त वाहिकाओं को नुकसान पहुंचा सकता है।"] },
+  { icon: HeartPulse, title: ["Heart disease", "हृदय रोग"], copy: ["Heart and kidney health share important risk pathways.", "हृदय और किडनी स्वास्थ्य के कई जोखिम कारक जुड़े होते हैं।"] },
+  { icon: ShieldCheck, title: ["Family history", "पारिवारिक इतिहास"], copy: ["A family history of kidney failure can increase the need for screening.", "परिवार में किडनी विफलता का इतिहास स्क्रीनिंग की आवश्यकता बढ़ा सकता है।"] },
+];
+
+const symptoms = [
+  ["Swelling in the legs, feet, ankles, hands, or face", "पैरों, टखनों, हाथों या चेहरे पर सूजन"],
+  ["Changes in urination or foamy urine", "पेशाब में बदलाव या झागदार पेशाब"],
+  ["Ongoing tiredness or sleep difficulty", "लगातार थकान या नींद में कठिनाई"],
+  ["Loss of appetite, nausea, or vomiting", "भूख कम होना, मतली या उल्टी"],
+  ["Shortness of breath", "सांस लेने में कठिनाई"],
+  ["Difficulty concentrating or confusion", "ध्यान लगाने में कठिनाई या भ्रम"],
+];
+
+const tests = [
+  { code: "eGFR", title: ["Estimated filtration rate", "अनुमानित फिल्ट्रेशन दर"], copy: ["A blood-test estimate of how well the kidneys filter blood. It is interpreted over time, not from a single number alone.", "रक्त जांच से किडनी के फिल्ट्रेशन का अनुमान। इसे केवल एक संख्या से नहीं, समय के साथ समझा जाता है।"] },
+  { code: "uACR", title: ["Urine albumin-to-creatinine ratio", "मूत्र एल्ब्यूमिन-टू-क्रिएटिनिन अनुपात"], copy: ["Checks whether albumin is passing into urine, which can be a sign of kidney damage.", "यह जांचता है कि एल्ब्यूमिन मूत्र में जा रहा है या नहीं, जो किडनी क्षति का संकेत हो सकता है।"] },
+  { code: "SCr", title: ["Serum creatinine", "सीरम क्रिएटिनिन"], copy: ["A waste-product measurement used by clinicians to estimate eGFR and assess trends.", "एक अपशिष्ट उत्पाद का माप, जिसका उपयोग चिकित्सक eGFR का अनुमान और समय के साथ बदलाव देखने में करते हैं।"] },
+  { code: "BP", title: ["Blood pressure", "रक्तचाप"], copy: ["A key measurement because blood pressure and kidney function affect one another.", "एक महत्वपूर्ण माप क्योंकि रक्तचाप और किडनी कार्य एक-दूसरे को प्रभावित करते हैं।"] },
+];
 
 export default function AboutCKD() {
-  const { language } = useLanguage();
-  
+  useLanguage();
+
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-primary mb-4">
-          {t("About Chronic Kidney Disease", "क्रोनिक किडनी रोग के बारे में")}
-        </h1>
-        <p className="text-muted-foreground">
-          {t("Complete guide to understanding CKD, stages, and prevention", "सीकेडी, चरणों और रोकथाम को समझने के लिए पूर्ण गाइड")}
-        </p>
+    <div className="guide-page app-page">
+      <PageIntro
+        eyebrow={t("NephroCare field guide", "नेफ्रोकेयर मार्गदर्शिका")}
+        title={t("CKD, explained without the fog.", "सीकेडी, सरल और स्पष्ट भाषा में।")}
+        description={t(
+          "A bilingual guide to the terms, tests, stages, and warning signs that often appear in kidney-health conversations.",
+          "किडनी स्वास्थ्य से जुड़ी बातचीत में आने वाले शब्दों, जांचों, चरणों और चेतावनी संकेतों की द्विभाषी मार्गदर्शिका।",
+        )}
+        actions={
+          <Button asChild>
+            <Link href="/diagnosis">{t("Start an assessment", "मूल्यांकन शुरू करें")}<ArrowRight /></Link>
+          </Button>
+        }
+        aside={
+          <div className="guide-intro-signal">
+            <BookOpenText aria-hidden="true" />
+            <strong>{t("Start with two ideas", "दो बातों से शुरू करें")}</strong>
+            <p>{t("Early CKD may have no symptoms. Blood and urine tests are central to checking kidney health.", "शुरुआती सीकेडी में लक्षण न भी हों। रक्त और मूत्र जांच किडनी स्वास्थ्य की जांच के मुख्य तरीके हैं।")}</p>
+          </div>
+        }
+      />
+
+      <div className="guide-layout">
+        <aside className="guide-nav" aria-label={t("Guide chapters", "गाइड के अध्याय")}>
+          <span>{t("On this page", "इस पेज पर")}</span>
+          <nav>
+            {chapters.map(([id, en, hi], index) => (
+              <a href={`#${id}`} key={id}><b>{String(index + 1).padStart(2, "0")}</b>{t(en, hi)}</a>
+            ))}
+          </nav>
+        </aside>
+
+        <article className="guide-article">
+          <section id="overview" className="guide-chapter guide-overview">
+            <div className="guide-chapter__heading">
+              <span>01</span>
+              <div><p className="section-kicker">{t("The foundation", "बुनियादी जानकारी")}</p><h2>{t("What CKD means", "सीकेडी का अर्थ")}</h2></div>
+            </div>
+            <p className="guide-lede">{t("Chronic kidney disease means the kidneys are damaged or have a structural problem that prevents them from filtering blood as well as they should.", "क्रोनिक किडनी रोग का अर्थ है कि किडनी क्षतिग्रस्त है या उसकी संरचना में ऐसी समस्या है जिससे वह रक्त को ठीक से फिल्टर नहीं कर पाती।")}</p>
+            <div className="guide-definition">
+              <FlaskConical aria-hidden="true" />
+              <div>
+                <strong>{t("One result is not the whole diagnosis", "एक परिणाम पूरा निदान नहीं है")}</strong>
+                <p>{t("Clinicians generally look for kidney damage or reduced function that persists for more than three months, using history, examination, and repeat tests.", "चिकित्सक आमतौर पर तीन महीने से अधिक समय तक बनी किडनी क्षति या कम कार्यक्षमता को इतिहास, जांच और दोबारा परीक्षण के साथ देखते हैं।")}</p>
+              </div>
+            </div>
+          </section>
+
+          <section id="stages" className="guide-chapter">
+            <div className="guide-chapter__heading">
+              <span>02</span>
+              <div><p className="section-kicker">{t("Filtration categories", "फिल्ट्रेशन श्रेणियां")}</p><h2>{t("The eGFR stage map", "eGFR चरण मानचित्र")}</h2></div>
+            </div>
+            <p>{t("The G categories below describe eGFR ranges in mL/min/1.73m². G1 and G2 do not establish CKD without other evidence of kidney damage.", "नीचे G श्रेणियां eGFR सीमा को mL/min/1.73m² में दिखाती हैं। G1 और G2 में अन्य किडनी क्षति के प्रमाण के बिना सीकेडी तय नहीं होती।")}</p>
+            <div className="stage-map" role="list">
+              {stages.map((stage) => (
+                <div className={`stage-map__row stage-map__row--${stage.tone}`} key={stage.stage} role="listitem">
+                  <strong>{stage.stage}</strong>
+                  <span className="stage-map__range">{stage.range}</span>
+                  <div><h3>{t(stage.title[0], stage.title[1])}</h3><p>{t(stage.copy[0], stage.copy[1])}</p></div>
+                </div>
+              ))}
+            </div>
+            <p className="guide-note">{t("Albumin in urine adds important risk information. A clinician reads eGFR and uACR together and considers whether results persist.", "मूत्र में एल्ब्यूमिन जोखिम की महत्वपूर्ण जानकारी देता है। चिकित्सक eGFR और uACR को साथ देखकर और परिणामों के बने रहने पर विचार करते हैं।")}</p>
+          </section>
+
+          <section id="risk" className="guide-chapter">
+            <div className="guide-chapter__heading">
+              <span>03</span>
+              <div><p className="section-kicker">{t("Who should discuss testing", "किसे जांच पर बात करनी चाहिए")}</p><h2>{t("Common risk factors", "सामान्य जोखिम कारक")}</h2></div>
+            </div>
+            <div className="risk-ledger">
+              {riskFactors.map((factor) => {
+                const Icon = factor.icon;
+                return <div key={factor.title[0]}><Icon aria-hidden="true" /><h3>{t(factor.title[0], factor.title[1])}</h3><p>{t(factor.copy[0], factor.copy[1])}</p></div>;
+              })}
+            </div>
+          </section>
+
+          <section id="symptoms" className="guide-chapter">
+            <div className="guide-chapter__heading">
+              <span>04</span>
+              <div><p className="section-kicker">{t("What the body may signal", "शरीर क्या संकेत दे सकता है")}</p><h2>{t("Symptoms and warning signs", "लक्षण और चेतावनी संकेत")}</h2></div>
+            </div>
+            <div className="silent-warning"><AlertTriangle aria-hidden="true" /><p>{t("Early kidney disease often causes no obvious symptoms. Symptoms alone cannot confirm or rule out CKD.", "शुरुआती किडनी रोग में अक्सर स्पष्ट लक्षण नहीं होते। केवल लक्षण सीकेडी की पुष्टि या उसे खारिज नहीं कर सकते।")}</p></div>
+            <ul className="symptom-ledger">
+              {symptoms.map(([en, hi], index) => <li key={en}><span>{String(index + 1).padStart(2, "0")}</span>{t(en, hi)}</li>)}
+            </ul>
+            <div className="urgent-strip">
+              <Stethoscope aria-hidden="true" />
+              <div><strong>{t("Get urgent help for severe symptoms", "गंभीर लक्षणों में तुरंत मदद लें")}</strong><p>{t("Seek urgent medical care for chest pain, severe breathing difficulty, fainting, confusion, sudden major swelling, or very low urine output.", "सीने में दर्द, सांस लेने में गंभीर कठिनाई, बेहोशी, भ्रम, अचानक बहुत अधिक सूजन या बहुत कम पेशाब होने पर तुरंत चिकित्सा सहायता लें।")}</p></div>
+            </div>
+          </section>
+
+          <section id="tests" className="guide-chapter">
+            <div className="guide-chapter__heading">
+              <span>05</span>
+              <div><p className="section-kicker">{t("Useful measurements", "उपयोगी माप")}</p><h2>{t("Four results worth recognising", "चार परिणाम जिन्हें समझना उपयोगी है")}</h2></div>
+            </div>
+            <div className="test-index">
+              {tests.map((test) => <div key={test.code}><code>{test.code}</code><div><h3>{t(test.title[0], test.title[1])}</h3><p>{t(test.copy[0], test.copy[1])}</p></div></div>)}
+            </div>
+          </section>
+
+          <section id="next" className="guide-chapter guide-next">
+            <div className="guide-chapter__heading">
+              <span>06</span>
+              <div><p className="section-kicker">{t("Prepare for a conversation", "बातचीत की तैयारी")}</p><h2>{t("What to ask next", "आगे क्या पूछें")}</h2></div>
+            </div>
+            <ol>
+              <li>{t("Do my eGFR and urine albumin results need to be repeated?", "क्या मेरे eGFR और मूत्र एल्ब्यूमिन परिणाम दोबारा जांचे जाने चाहिए?")}</li>
+              <li>{t("How do these results compare with my previous reports?", "ये परिणाम मेरी पिछली रिपोर्टों से कैसे तुलना करते हैं?")}</li>
+              <li>{t("Could medicines, dehydration, infection, or another condition affect these numbers?", "क्या दवाएं, पानी की कमी, संक्रमण या कोई अन्य स्थिति इन आंकड़ों को प्रभावित कर सकती है?")}</li>
+              <li>{t("Should I speak with a kidney specialist?", "क्या मुझे किडनी विशेषज्ञ से बात करनी चाहिए?")}</li>
+            </ol>
+            <div className="guide-next__actions">
+              <Button asChild><Link href="/diagnosis">{t("Organise my report", "अपनी रिपोर्ट व्यवस्थित करें")}<ArrowRight /></Link></Button>
+              <Button asChild variant="outline"><Link href="/symptom-checker">{t("Review symptoms", "लक्षण देखें")}</Link></Button>
+            </div>
+          </section>
+
+          <section className="guide-sources" aria-labelledby="guide-sources-title">
+            <h2 id="guide-sources-title">{t("Clinical reading sources", "चिकित्सकीय जानकारी के स्रोत")}</h2>
+            <p>{t("These links provide fuller clinical context. NephroCare summarises them for education and does not replace professional interpretation.", "ये लिंक अधिक विस्तृत चिकित्सकीय संदर्भ देते हैं। नेफ्रोकेयर इन्हें शिक्षा के लिए सरल रूप में प्रस्तुत करता है और पेशेवर व्याख्या का स्थान नहीं लेता।")}</p>
+            <a href="https://www.niddk.nih.gov/health-information/kidney-disease/chronic-kidney-disease-ckd/tests-diagnosis" target="_blank" rel="noopener noreferrer">NIDDK: CKD tests and diagnosis <ExternalLink /></a>
+            <a href="https://www.nhs.uk/conditions/kidney-disease/diagnosis/" target="_blank" rel="noopener noreferrer">NHS: CKD diagnosis and stages <ExternalLink /></a>
+          </section>
+        </article>
       </div>
-
-      {/* What is CKD Section */}
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <Heart className="mr-3 h-5 w-5 text-red-500" />
-            {t("What is Chronic Kidney Disease?", "क्रोनिक किडनी रोग क्या है?")}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-muted-foreground">
-            {t("Chronic Kidney Disease (CKD) is a long-term condition where the kidneys gradually lose their ability to filter waste and excess water from the blood. Unlike acute kidney injury, CKD develops slowly over months or years and is usually irreversible.", "क्रोनिक किडनी रोग (सीकेडी) एक दीर्घकालिक स्थिति है जहां गुर्दे धीरे-धीरे रक्त से अपशिष्ट और अतिरिक्त पानी को फिल्टर करने की अपनी क्षमता खो देते हैं। तीव्र गुर्दे की चोट के विपरीत, सीकेडी महीनों या वर्षों में धीरे-धीरे विकसित होता है और आमतौर पर अपरिवर्तनीय होता है।")}
-          </p>
-          
-          <p className="text-muted-foreground">
-            {t("Your kidneys filter about 50 gallons of blood every day, removing toxins and maintaining the right balance of water, salts, and minerals in your body. When kidney function declines, harmful wastes can build up, leading to serious health complications.", "आपके गुर्दे प्रतिदिन लगभग 50 गैलन रक्त को फिल्टर करते हैं, विषाक्त पदार्थों को हटाते हैं और आपके शरीर में पानी, नमक और खनिजों का सही संतुलन बनाए रखते हैं। जब गुर्दे की कार्यक्षमता घटती है, तो हानिकारक अपशिष्ट जमा हो सकते हैं, जिससे गंभीर स्वास्थ्य जटिलताएं हो सकती हैं।")}
-          </p>
-
-          <div className="bg-blue-50 p-4 rounded-lg">
-            <h4 className="font-semibold mb-2 text-blue-900">{t("Key Facts About CKD:", "सीकेडी के बारे में मुख्य तथ्य:")}</h4>
-            <ul className="text-sm text-blue-800 space-y-1">
-              <li>• {t("Affects over 850 million people worldwide", "दुनियाभर में 85 करोड़ से अधिक लोगों को प्रभावित करता है")}</li>
-              <li>• {t("Often called a \"silent killer\" - symptoms appear late", "अक्सर \"मूक हत्यारा\" कहा जाता है - लक्षण देर से दिखाई देते हैं")}</li>
-              <li>• {t("Leading cause of kidney failure requiring dialysis", "डायलिसिस की आवश्यकता वाली गुर्दे की विफलता का प्रमुख कारण")}</li>
-              <li>• {t("Major risk factor for heart disease and stroke", "हृदय रोग और स्ट्रोक के लिए प्रमुख जोखिम कारक")}</li>
-              <li>• {t("Early detection can slow or prevent progression", "प्रारंभिक पहचान प्रगति को धीमा या रोक सकती है")}</li>
-            </ul>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* CKD Stages */}
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <TrendingDown className="mr-3 h-5 w-5 text-orange-500" />
-            {t("CKD Stages (1-5)", "सीकेडी चरण (1-5)")}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <p className="text-muted-foreground mb-4">
-            {t("CKD is classified into 5 stages based on estimated Glomerular Filtration Rate (eGFR), which measures how well your kidneys filter blood.", "सीकेडी को अनुमानित ग्लोमेरुलर फिल्ट्रेशन रेट (ईजीएफआर) के आधार पर 5 चरणों में वर्गीकृत किया गया है, जो मापता है कि आपके गुर्दे कितनी अच्छी तरह रक्त को फिल्टर करते हैं।")}
-          </p>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-4">
-              <div className="border rounded-lg p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="font-semibold">Stage 1 - Normal/High</h4>
-                  <Badge variant="default" className="bg-green-100 text-green-800">eGFR ≥90</Badge>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Normal kidney function with kidney damage (protein in urine, structural abnormalities)
-                </p>
-              </div>
-
-              <div className="border rounded-lg p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="font-semibold">Stage 2 - Mild</h4>
-                  <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">eGFR 60-89</Badge>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Mild decrease in kidney function with evidence of kidney damage
-                </p>
-              </div>
-
-              <div className="border rounded-lg p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="font-semibold">Stage 3a - Moderate</h4>
-                  <Badge variant="secondary" className="bg-orange-100 text-orange-800">eGFR 45-59</Badge>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Moderate decrease in kidney function. Time to see a nephrologist.
-                </p>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <div className="border rounded-lg p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="font-semibold">Stage 3b - Moderate</h4>
-                  <Badge variant="secondary" className="bg-orange-100 text-orange-800">eGFR 30-44</Badge>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Moderate to severe decrease. Prepare for kidney replacement therapy.
-                </p>
-              </div>
-
-              <div className="border rounded-lg p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="font-semibold">Stage 4 - Severe</h4>
-                  <Badge variant="destructive" className="bg-red-100 text-red-800">eGFR 15-29</Badge>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Severe decrease in kidney function. Plan for dialysis or transplant.
-                </p>
-              </div>
-
-              <div className="border rounded-lg p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="font-semibold">Stage 5 - Kidney Failure</h4>
-                  <Badge variant="destructive" className="bg-red-100 text-red-800">eGFR &lt;15</Badge>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Kidney failure. Dialysis or kidney transplant needed to sustain life.
-                </p>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Risk Factors */}
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <AlertTriangle className="mr-3 h-5 w-5 text-yellow-500" />
-            CKD Risk Factors
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h4 className="font-semibold mb-3 text-red-700">High Risk Factors</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>• <strong>Diabetes:</strong> Leading cause of CKD worldwide</li>
-                <li>• <strong>High Blood Pressure:</strong> Damages kidney blood vessels</li>
-                <li>• <strong>Family History:</strong> Genetic predisposition to kidney disease</li>
-                <li>• <strong>Age 60+:</strong> Natural decline in kidney function</li>
-                <li>• <strong>Heart Disease:</strong> Shared risk factors with CKD</li>
-                <li>• <strong>Obesity:</strong> Increases diabetes and hypertension risk</li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-3 text-orange-700">Moderate Risk Factors</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>• <strong>Smoking:</strong> Damages blood vessels and reduces flow</li>
-                <li>• <strong>Ethnicity:</strong> Higher rates in South Asian, African populations</li>
-                <li>• <strong>Autoimmune Diseases:</strong> Lupus, vasculitis</li>
-                <li>• <strong>Kidney Stones:</strong> Recurrent stones can cause damage</li>
-                <li>• <strong>Medications:</strong> Long-term NSAIDs, certain antibiotics</li>
-                <li>• <strong>Urinary Tract Issues:</strong> Blockages, infections</li>
-              </ul>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Symptoms and Warning Signs */}
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <Stethoscope className="mr-3 h-5 w-5 text-blue-500" />
-            Symptoms and Warning Signs
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="bg-yellow-50 p-4 rounded-lg mb-4">
-            <p className="text-yellow-800 font-medium">
-              ⚠️ Important: CKD often has no symptoms in early stages. Regular screening is essential for those at risk.
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h4 className="font-semibold mb-3">Early Stage Symptoms</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>• Fatigue and weakness</li>
-                <li>• Difficulty concentrating</li>
-                <li>• Trouble sleeping</li>
-                <li>• Decreased appetite</li>
-                <li>• Muscle cramps</li>
-                <li>• Swollen feet and ankles</li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-3">Advanced Stage Symptoms</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>• Nausea and vomiting</li>
-                <li>• Changes in urination (frequency, color)</li>
-                <li>• Shortness of breath</li>
-                <li>• Metallic taste in mouth</li>
-                <li>• Persistent itching</li>
-                <li>• High blood pressure</li>
-              </ul>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Prevention and Management */}
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <Shield className="mr-3 h-5 w-5 text-green-500" />
-            Prevention and Management
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h4 className="font-semibold mb-3">Lifestyle Modifications</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>• <strong>Control Blood Sugar:</strong> Keep HbA1c &lt; 7% for diabetics</li>
-                <li>• <strong>Manage Blood Pressure:</strong> Target &lt; 130/80 mmHg</li>
-                <li>• <strong>Healthy Diet:</strong> Low sodium, limit protein if advanced CKD</li>
-                <li>• <strong>Regular Exercise:</strong> 150 minutes moderate activity per week</li>
-                <li>• <strong>Quit Smoking:</strong> Improves circulation and slows progression</li>
-                <li>• <strong>Maintain Healthy Weight:</strong> BMI 18.5-24.9</li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-3">Medical Management</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>• <strong>Regular Monitoring:</strong> Blood tests every 3-6 months</li>
-                <li>• <strong>ACE Inhibitors/ARBs:</strong> Protect kidney function</li>
-                <li>• <strong>Treat Complications:</strong> Anemia, bone disease, acidosis</li>
-                <li>• <strong>Avoid Nephrotoxins:</strong> NSAIDs, contrast dyes</li>
-                <li>• <strong>Vaccinations:</strong> Flu, pneumonia, hepatitis B</li>
-                <li>• <strong>Prepare for RRT:</strong> Dialysis access or transplant planning</li>
-              </ul>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Testing and Diagnosis */}
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <Activity className="mr-3 h-5 w-5 text-blue-600" />
-            Key Laboratory Tests
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h4 className="font-semibold mb-3">Blood Tests</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>• <strong>Serum Creatinine:</strong> Normal: 0.6-1.2 mg/dL</li>
-                <li>• <strong>eGFR:</strong> Normal: ≥90 mL/min/1.73m²</li>
-                <li>• <strong>Blood Urea Nitrogen (BUN):</strong> Normal: 7-20 mg/dL</li>
-                <li>• <strong>Hemoglobin:</strong> CKD anemia if &lt;13 (men), &lt;12 (women)</li>
-                <li>• <strong>Phosphorus:</strong> Elevated in advanced CKD</li>
-                <li>• <strong>Calcium:</strong> Often low in CKD</li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-3">Urine Tests</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>• <strong>Protein (Albumin):</strong> Normal: &lt;30 mg/g creatinine</li>
-                <li>• <strong>Specific Gravity:</strong> Normal: 1.005-1.030</li>
-                <li>• <strong>Microscopy:</strong> RBCs, WBCs, casts</li>
-                <li>• <strong>24-hour Collection:</strong> Total protein excretion</li>
-                <li>• <strong>Microalbumin:</strong> Early diabetic nephropathy marker</li>
-                <li>• <strong>Creatinine Clearance:</strong> Direct GFR measurement</li>
-              </ul>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* When to See a Doctor */}
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <Calendar className="mr-3 h-5 w-5 text-red-500" />
-            When to See a Doctor
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="bg-red-50 p-4 rounded-lg mb-4">
-            <p className="text-red-800 font-medium">
-              🚨 Seek immediate medical attention if you experience:
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h4 className="font-semibold mb-3 text-red-700">Emergency Signs</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>• Severe swelling (face, hands, feet)</li>
-                <li>• Difficulty breathing or chest pain</li>
-                <li>• Seizures or confusion</li>
-                <li>• Blood in urine or very dark urine</li>
-                <li>• Severe nausea and vomiting</li>
-                <li>• Extreme fatigue or weakness</li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-3 text-orange-700">Regular Screening Needed</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>• People with diabetes (annually)</li>
-                <li>• High blood pressure patients</li>
-                <li>• Family history of kidney disease</li>
-                <li>• Age 60+ (every 2 years)</li>
-                <li>• Taking nephrotoxic medications</li>
-                <li>• Previous kidney problems</li>
-              </ul>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* About NephroCare */}
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <Heart className="mr-3 h-5 w-5 text-blue-500" />
-            About NephroCare Platform
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-muted-foreground">
-            NephroCare is an intelligent CKD screening and awareness platform built to help users 
-            assess their kidney health using clinical lab values, symptoms, and medical history. 
-            The platform delivers personalized insights, diet recommendations, and risk assessments 
-            to support early detection and management of chronic kidney disease.
-          </p>
-          
-          <div className="bg-blue-50 p-4 rounded-lg">
-            <h4 className="font-semibold mb-2 text-blue-900">Platform Features:</h4>
-            <ul className="text-sm text-blue-800 space-y-1">
-              <li>• Advanced ML-based CKD risk prediction using 20+ clinical parameters</li>
-              <li>• Interactive symptom checker for quick self-assessment</li>
-              <li>• Personalized diet plans with vegetarian/non-vegetarian options</li>
-              <li>• NephroBot chatbot for medical questions and guidance</li>
-              <li>• Hindi/English language support for wider accessibility</li>
-              <li>• Visual explanations (SHAP, PDP, LIME) for prediction transparency</li>
-            </ul>
-          </div>
-
-          <div className="bg-yellow-50 p-4 rounded-lg">
-            <p className="text-yellow-800 font-medium">
-              ⚠️ Medical Disclaimer: This platform is for educational and screening purposes only. 
-              Always consult healthcare professionals for proper medical diagnosis and treatment. 
-              Do not use this tool as a substitute for professional medical advice.
-            </p>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }

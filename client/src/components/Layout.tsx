@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Activity, Menu, X } from "lucide-react";
+import { Activity, ArrowUpRight, Instagram, Mail, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import LanguageToggle from "@/components/LanguageToggle";
@@ -29,7 +29,7 @@ const legalNav = [
 export default function Layout({ children }: LayoutProps) {
   const [location] = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
-  const { language } = useLanguage();
+  useLanguage();
   const reduceMotion = useReducedMotion();
 
   const isActive = (href: string) =>
@@ -128,6 +128,17 @@ export default function Layout({ children }: LayoutProps) {
 
       <footer className="site-footer">
         <div className="service-shell">
+          <div className="site-footer__statement">
+            <div>
+              <span>{t("Kidney health, made easier to discuss", "किडनी स्वास्थ्य, जिस पर बात करना आसान हो")}</span>
+              <p>{t("Bring clearer questions to your next clinical appointment.", "अपनी अगली चिकित्सकीय मुलाकात में अधिक स्पष्ट प्रश्न लेकर जाएं।")}</p>
+            </div>
+            <Link href="/diagnosis">
+              {t("Begin assessment", "मूल्यांकन शुरू करें")}
+              <ArrowUpRight aria-hidden="true" />
+            </Link>
+          </div>
+
           <div className="site-footer__top">
             <div className="site-footer__identity">
               <Link href="/" className="wordmark wordmark--footer">
@@ -135,6 +146,16 @@ export default function Layout({ children }: LayoutProps) {
                 <span>NephroCare</span>
               </Link>
               <p>{t("A student-built kidney health awareness service.", "छात्र द्वारा निर्मित किडनी स्वास्थ्य जागरूकता सेवा।")}</p>
+              <div className="site-footer__socials" aria-label={t("Official NephroCare contact links", "नेफ्रोकेयर के आधिकारिक संपर्क लिंक")}>
+                <a href="mailto:nephrocareai@gmail.com" aria-label="Email NephroCare">
+                  <Mail aria-hidden="true" />
+                  <span>nephrocareai@gmail.com</span>
+                </a>
+                <a href="https://instagram.com/nephrocareai" target="_blank" rel="noopener noreferrer" aria-label="NephroCare on Instagram">
+                  <Instagram aria-hidden="true" />
+                  <span>@nephrocareai</span>
+                </a>
+              </div>
             </div>
 
             <div className="site-footer__directory">
@@ -148,7 +169,7 @@ export default function Layout({ children }: LayoutProps) {
                 <h2>{t("Information", "जानकारी")}</h2>
                 <Link href="/about">{t("About the project", "परियोजना के बारे में")}</Link>
                 <Link href="/about-ckd">{t("CKD guide", "सीकेडी गाइड")}</Link>
-                <a href="mailto:nephrocareai@gmail.com">Contact</a>
+                <a href="mailto:nephrocareai@gmail.com">{t("Contact", "संपर्क")}</a>
               </div>
               <div>
                 <h2>{t("Trust and safety", "विश्वास और सुरक्षा")}</h2>

@@ -1,5 +1,6 @@
 import { Switch, Route } from "wouter";
 import { lazy, Suspense } from "react";
+import { ReactLenis } from "lenis/react";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -7,6 +8,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import Layout from "@/components/Layout";
 import Home from "@/pages/Home";
 import { AccessibilityStatement, MedicalDisclaimer, PrivacyPolicy, TermsOfUse } from "@/pages/Legal";
+import { useLanguage } from "@/hooks/useLanguage";
 
 const Diagnosis = lazy(() => import("@/pages/Diagnosis"));
 const Results = lazy(() => import("@/pages/Results"));
@@ -44,13 +46,29 @@ function Router() {
 }
 
 function App() {
+  const { language } = useLanguage();
+
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Router />
-      </TooltipProvider>
-    </QueryClientProvider>
+    <ReactLenis
+      root
+      options={{
+        autoRaf: true,
+        anchors: true,
+        lerp: 0.1,
+        smoothWheel: true,
+        stopInertiaOnNavigate: true,
+        respectReducedMotion: true,
+      }}
+    >
+      <div data-language={language}>
+        <QueryClientProvider client={queryClient}>
+          <TooltipProvider>
+            <Toaster />
+            <Router />
+          </TooltipProvider>
+        </QueryClientProvider>
+      </div>
+    </ReactLenis>
   );
 }
 

@@ -1,342 +1,145 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import NumberFlow from "@number-flow/react";
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, TrendingUp, Utensils, Activity } from "lucide-react";
 import { Link } from "wouter";
+import {
+  Activity,
+  ArrowRight,
+  CalendarDays,
+  FileHeart,
+  Plus,
+  ShieldCheck,
+  Utensils,
+} from "lucide-react";
+import PageIntro from "@/components/PageIntro";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLanguage } from "@/hooks/useLanguage";
 import type { CKDAssessment, DietPlan } from "@shared/schema";
 
-const Browse = () => {
+export default function Browse() {
   const { language } = useLanguage();
-  
-  const t = (en: string, hi: string) => (language === 'hi' ? hi : en);
-
-  // Get assessment IDs from localStorage with reactive updates
+  const t = (en: string, hi: string) => language === "hi" ? hi : en;
   const [userAssessmentIds, setUserAssessmentIds] = useState<number[]>([]);
 
   useEffect(() => {
-    const getStoredAssessmentIds = (): number[] => {
+    const updateAssessmentIds = () => {
       try {
-        if (typeof window !== 'undefined' && window.localStorage) {
-          const stored = localStorage.getItem('userAssessmentIds');
-          return stored ? JSON.parse(stored) : [];
-        }
-        return [];
+        const stored = localStorage.getItem("userAssessmentIds");
+        setUserAssessmentIds(stored ? JSON.parse(stored) : []);
       } catch {
-        return [];
+        setUserAssessmentIds([]);
       }
     };
 
-    const updateAssessmentIds = () => {
-      const ids = getStoredAssessmentIds();
-      setUserAssessmentIds(ids);
-      console.log('Browse: Updated assessment IDs:', ids);
-    };
-
-    // Initial load
     updateAssessmentIds();
-
-    // Listen for storage changes (from other tabs/windows)
-    window.addEventListener('storage', updateAssessmentIds);
-
-    // Custom event for same-tab updates
-    window.addEventListener('assessmentIdsUpdated', updateAssessmentIds);
-
+    window.addEventListener("storage", updateAssessmentIds);
+    window.addEventListener("assessmentIdsUpdated", updateAssessmentIds);
     return () => {
-      window.removeEventListener('storage', updateAssessmentIds);
-      window.removeEventListener('assessmentIdsUpdated', updateAssessmentIds);
+      window.removeEventListener("storage", updateAssessmentIds);
+      window.removeEventListener("assessmentIdsUpdated", updateAssessmentIds);
     };
   }, []);
 
-  const { data: assessments, isLoading: assessmentsLoading } = useQuery<CKDAssessment[]>({
+  const { data: assessments = [], isLoading: assessmentsLoading } = useQuery<CKDAssessment[]>({
     queryKey: ["/api/ckd-assessments", "filtered", userAssessmentIds],
     queryFn: async () => {
-      if (userAssessmentIds.length === 0) {
-        console.log('No user assessment IDs found in localStorage');
-        return [];
-      }
-      
-      try {
-        const response = await fetch(`/api/ckd-assessments/filtered?ids=${encodeURIComponent(JSON.stringify(userAssessmentIds))}`);
-        if (!response.ok) {
-          console.error('API response not OK:', response.status, response.statusText);
-          throw new Error(`Failed to fetch assessments: ${response.status}`);
-        }
-        const responseText = await response.text();
-        console.log('Raw API response:', responseText);
-        
-        let allAssessments;
-        try {
-          allAssessments = JSON.parse(responseText);
-        } catch (parseError) {
-          console.error('JSON parse error:', parseError);
-          throw new Error('Invalid JSON response from server');
-        }
-        return allAssessments;
-      } catch (error) {
-        console.error('Failed to fetch assessments:', error);
-        return [];
-      }
+      if (userAssessmentIds.length === 0) return [];
+      const response = await fetch(`/api/ckd-assessments/filtered?ids=${encodeURIComponent(JSON.stringify(userAssessmentIds))}`);
+      if (!response.ok) throw new Error(`Failed to fetch assessments: ${response.status}`);
+      return response.json();
     },
     enabled: userAssessmentIds.length > 0,
   });
 
-  const { data: dietPlans, isLoading: dietPlansLoading } = useQuery<DietPlan[]>({
+  const { data: dietPlans = [], isLoading: dietPlansLoading } = useQuery<DietPlan[]>({
     queryKey: ["/api/diet-plans", "filtered", userAssessmentIds],
     queryFn: async () => {
-      if (userAssessmentIds.length === 0) {
-        console.log('No user assessment IDs for diet plans');
-        return [];
-      }
-      
-      try {
-        const response = await fetch(`/api/diet-plans/filtered?ids=${encodeURIComponent(JSON.stringify(userAssessmentIds))}`);
-        if (!response.ok) throw new Error(`Failed to fetch diet plans: ${response.status}`);
-        return await response.json();
-      } catch (error) {
-        console.error('Failed to fetch diet plans:', error);
-        return [];
-      }
+      if (userAssessmentIds.length === 0) return [];
+      const response = await fetch(`/api/diet-plans/filtered?ids=${encodeURIComponent(JSON.stringify(userAssessmentIds))}`);
+      if (!response.ok) throw new Error(`Failed to fetch diet plans: ${response.status}`);
+      return response.json();
     },
     enabled: userAssessmentIds.length > 0,
   });
 
-  const formatDateTime = (dateString: string | Date | null) => {
-    if (!dateString) return "N/A";
-    const date = new Date(dateString);
-    return date.toLocaleDateString(language === 'hi' ? 'hi-IN' : 'en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
+  const formatDate = (value: string | Date | null) => {
+    if (!value) return t("Date unavailable", "तारीख उपलब्ध नहीं");
+    return new Date(value).toLocaleDateString(language === "hi" ? "hi-IN" : "en-IN", { day: "2-digit", month: "short", year: "numeric" });
   };
 
-  const getRiskBadgeVariant = (riskLevel: string | null) => {
-    switch (riskLevel?.toLowerCase()) {
-      case 'high': return 'destructive';
-      case 'moderate': return 'default';
-      case 'low': return 'secondary';
-      default: return 'outline';
-    }
-  };
+  const completedAssessments = assessments.filter((assessment) => assessment.riskScore !== null && assessment.riskLevel);
+  const latestDate = completedAssessments[0]?.createdAt ? formatDate(completedAssessments[0].createdAt) : "—";
 
-  const assessmentsWithResults = assessments?.filter(a => a.riskScore && a.riskLevel) || [];
+  const EmptyState = ({ type }: { type: "reports" | "diet" }) => {
+    const Icon = type === "reports" ? FileHeart : Utensils;
+    return (
+      <div className="reports-empty">
+        <Icon aria-hidden="true" />
+        <h2>{type === "reports" ? t("No reports on this device", "इस डिवाइस पर कोई रिपोर्ट नहीं") : t("No diet guidance yet", "अभी कोई आहार मार्गदर्शन नहीं")}</h2>
+        <p>{type === "reports" ? t("Complete an assessment and its report reference will appear here.", "मूल्यांकन पूरा करें और उसका रिपोर्ट संदर्भ यहां दिखाई देगा।") : t("Diet guidance becomes available after an assessment.", "मूल्यांकन के बाद आहार मार्गदर्शन उपलब्ध होगा।")}</p>
+        <Button asChild><Link href="/diagnosis">{t("Start assessment", "मूल्यांकन शुरू करें")}<ArrowRight /></Link></Button>
+      </div>
+    );
+  };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <div className="mb-4 border-b-2 border-slate-900 pb-5">
-          <p className="section-kicker mb-3">{t("Private to this browser", "इस ब्राउज़र तक सीमित")}</p>
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white">
-            {t("Browse Results & Diet Plans", "परिणाम और आहार योजनाएं ब्राउज़ करें")}
-          </h1>
-        </div>
-        <p className="text-gray-600 dark:text-gray-300 max-w-3xl">
-          {t(
-            "Browse through your completed assessments with detailed results and view your personalized diet plan history.",
-            "अपने पूर्ण मूल्यांकन और विस्तृत परिणामों को ब्राउज़ करें और अपनी व्यक्तिगत आहार योजना इतिहास देखें।"
-          )}
-        </p>
-      </div>
+    <div className="reports-page app-page">
+      <PageIntro
+        eyebrow={t("Saved on this browser", "इस ब्राउज़र पर सहेजा गया")}
+        title={t("My reports", "मेरी रिपोर्ट")}
+        description={t("A clear index of assessments and diet guidance connected to this device.", "इस डिवाइस से जुड़े मूल्यांकन और आहार मार्गदर्शन का स्पष्ट सूचकांक।")}
+        actions={<Button asChild><Link href="/diagnosis"><Plus />{t("New assessment", "नया मूल्यांकन")}</Link></Button>}
+        aside={<div className="privacy-signal"><ShieldCheck aria-hidden="true" /><strong>{t("Device-linked access", "डिवाइस से जुड़ी पहुंच")}</strong><p>{t("Report references are read from this browser before records are requested.", "रिकॉर्ड मांगने से पहले रिपोर्ट संदर्भ इसी ब्राउज़र से पढ़े जाते हैं।")}</p></div>}
+      />
 
-      <Tabs defaultValue="results" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 mb-8">
-          <TabsTrigger value="results" className="flex items-center gap-2">
-            <TrendingUp className="h-4 w-4" />
-            {t("Assessment Results", "मूल्यांकन परिणाम")}
-          </TabsTrigger>
-          <TabsTrigger value="diet-plans" className="flex items-center gap-2">
-            <Utensils className="h-4 w-4" />
-            {t("Diet History", "आहार इतिहास")}
-          </TabsTrigger>
+      <section className="report-overview" aria-label={t("Report overview", "रिपोर्ट सारांश")}>
+        <div><NumberFlow value={completedAssessments.length} /><span>{t("completed assessments", "पूर्ण मूल्यांकन")}</span></div>
+        <div><NumberFlow value={dietPlans.length} /><span>{t("diet plans", "आहार योजनाएं")}</span></div>
+        <div><strong>{latestDate}</strong><span>{t("latest report", "नवीनतम रिपोर्ट")}</span></div>
+      </section>
+
+      <Tabs defaultValue="results" className="reports-tabs">
+        <TabsList aria-label={t("Report type", "रिपोर्ट का प्रकार")}>
+          <TabsTrigger value="results"><Activity />{t("Assessments", "मूल्यांकन")}<span>{completedAssessments.length}</span></TabsTrigger>
+          <TabsTrigger value="diet-plans"><Utensils />{t("Diet guidance", "आहार मार्गदर्शन")}<span>{dietPlans.length}</span></TabsTrigger>
         </TabsList>
 
         <TabsContent value="results">
-          {assessmentsLoading ? (
-            <div className="flex items-center justify-center min-h-[300px]">
-              <div className="text-lg">{t("Loading results...", "परिणाम लोड हो रहे हैं...")}</div>
-            </div>
-          ) : assessmentsWithResults.length === 0 ? (
-            <Card className="text-center py-16">
-              <CardContent>
-                <TrendingUp className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold mb-2">
-                  {t("No Results Available", "कोई परिणाम उपलब्ध नहीं")}
-                </h3>
-                <p className="text-gray-600 dark:text-gray-300 mb-6">
-                  {t(
-                    "Complete your first CKD assessment to see results here.",
-                    "यहां परिणाम देखने के लिए अपना पहला CKD मूल्यांकन पूरा करें।"
-                  )}
-                </p>
-                <Link href="/diagnosis">
-                  <Button className="bg-primary hover:bg-primary/90">
-                    {t("Take Assessment", "मूल्यांकन लें")}
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {assessmentsWithResults.map((assessment) => (
-                <Card key={assessment.id} className="cursor-pointer transition-colors hover:border-blue-400">
-                  <CardHeader>
-                    <div className="flex items-start justify-between mb-2">
-                      <CardTitle className="text-lg flex items-center gap-2">
-                        {assessment.patientName}
-                      </CardTitle>
-                      <Badge variant={getRiskBadgeVariant(assessment.riskLevel)}>
-                        {assessment.riskLevel} {t("Risk", "जोखिम")}
-                      </Badge>
-                    </div>
-                    <CardDescription className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4" />
-                      {formatDateTime(assessment.createdAt)}
-                    </CardDescription>
-                  </CardHeader>
-                  
-                  <CardContent>
-                    <div className="space-y-3 mb-4">
-                      <div className="flex justify-between">
-                        <span className="text-sm text-gray-500">{t("Risk Score", "जोखिम स्कोर")}</span>
-                        <span className="font-semibold">{(assessment.riskScore! * 100).toFixed(1)}%</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm text-gray-500">{t("Age", "आयु")}</span>
-                        <span className="font-semibold">{assessment.age} {t("years", "वर्ष")}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm text-gray-500">{t("Creatinine", "क्रिएटिनिन")}</span>
-                        <span className="font-semibold">{assessment.serumCreatinine} mg/dL</span>
-                      </div>
-                    </div>
-
-                    <div className="flex gap-2">
-                      <Link href={`/results/${assessment.id}`} className="flex-1">
-                        <Button size="sm" className="w-full">
-                          <Activity className="h-4 w-4 mr-2" />
-                          {t("View Details", "विवरण देखें")}
-                        </Button>
-                      </Link>
-                    </div>
-                  </CardContent>
-                </Card>
+          {assessmentsLoading ? <div className="reports-loading" role="status">{t("Loading reports…", "रिपोर्ट लोड हो रही हैं…")}</div> : completedAssessments.length === 0 ? <EmptyState type="reports" /> : (
+            <section className="report-ledger" aria-labelledby="assessment-ledger-title">
+              <div className="report-ledger__heading"><div><p className="section-kicker">{t("Assessment archive", "मूल्यांकन संग्रह")}</p><h2 id="assessment-ledger-title">{t("Completed reports", "पूर्ण रिपोर्ट")}</h2></div><span>{t("Newest first", "नई रिपोर्ट पहले")}</span></div>
+              <div className="report-ledger__columns" aria-hidden="true"><span>{t("Report", "रिपोर्ट")}</span><span>{t("Date", "तारीख")}</span><span>{t("Risk context", "जोखिम संदर्भ")}</span><span>{t("Score", "स्कोर")}</span><span /></div>
+              {completedAssessments.map((assessment, index) => (
+                <article className="report-row" key={assessment.id}>
+                  <div className="report-row__identity"><span>{String(index + 1).padStart(2, "0")}</span><div><strong>{assessment.patientName || t("Unnamed assessment", "बिना नाम का मूल्यांकन")}</strong><small>NC-{String(assessment.id).padStart(4, "0")}</small></div></div>
+                  <div className="report-row__date"><CalendarDays aria-hidden="true" />{formatDate(assessment.createdAt)}</div>
+                  <div><span className={`risk-label risk-label--${assessment.riskLevel?.toLowerCase()}`}>{assessment.riskLevel} {t("risk", "जोखिम")}</span></div>
+                  <div className="report-row__score"><NumberFlow value={(assessment.riskScore || 0) * 100} format={{ maximumFractionDigits: 1 }} /><span>%</span></div>
+                  <Button asChild variant="ghost" size="icon"><Link href={`/results/${assessment.id}`} aria-label={t("Open report", "रिपोर्ट खोलें")}><ArrowRight /></Link></Button>
+                </article>
               ))}
-            </div>
+            </section>
           )}
         </TabsContent>
 
         <TabsContent value="diet-plans">
-          {dietPlansLoading ? (
-            <div className="flex items-center justify-center min-h-[300px]">
-              <div className="text-lg">{t("Loading diet plans...", "आहार योजनाएं लोड हो रही हैं...")}</div>
-            </div>
-          ) : !dietPlans || dietPlans.length === 0 ? (
-            <Card className="text-center py-16">
-              <CardContent>
-                <Utensils className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold mb-2">
-                  {t("No Diet Plans Available", "कोई आहार योजना उपलब्ध नहीं")}
-                </h3>
-                <p className="text-gray-600 dark:text-gray-300 mb-6">
-                  {t(
-                    "Complete your first CKD assessment to get personalized diet recommendations.",
-                    "व्यक्तिगत आहार सिफारिशें पाने के लिए अपना पहला CKD मूल्यांकन पूरा करें।"
-                  )}
-                </p>
-                <Link href="/diagnosis">
-                  <Button className="bg-primary hover:bg-primary/90">
-                    {t("Take Assessment", "मूल्यांकन लें")}
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {dietPlans.map((plan) => (
-                <Card key={plan.id} className="transition-colors hover:border-blue-400">
-                  <CardHeader>
-                    <div className="flex items-start justify-between mb-2">
-                      <CardTitle className="text-lg flex items-center gap-2">
-                        <Utensils className="h-5 w-5 text-primary" />
-                        {t("Diet Plan", "आहार योजना")} #{plan.id}
-                      </CardTitle>
-                      <Badge variant="outline">
-                        {plan.dietType || t("Personalized", "व्यक्तिगत")}
-                      </Badge>
-                    </div>
-                    <CardDescription className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4" />
-                      {formatDateTime(plan.createdAt)}
-                    </CardDescription>
-                  </CardHeader>
-                  
-                  <CardContent>
-                    <div className="space-y-3 mb-4">
-                      <div className="text-sm">
-                        <span className="font-semibold text-green-600">{t("Diet Type:", "आहार प्रकार:")}</span>
-                        <p className="text-gray-600 mt-1 capitalize">
-                          {plan.dietType || t("Personalized", "व्यक्तिगत")}
-                        </p>
-                      </div>
-                      
-                      {plan.foodsToEat && (
-                        <div className="text-sm">
-                          <span className="font-semibold text-blue-600">{t("Foods to Eat:", "खाने योग्य खाद्य:")}</span>
-                          <p className="text-gray-600 mt-1 line-clamp-2">
-                            {plan.foodsToEat.substring(0, 100)}...
-                          </p>
-                        </div>
-                      )}
-                      
-                      {plan.waterIntakeAdvice && (
-                        <div className="text-sm">
-                          <span className="font-semibold text-blue-600">{t("Water Intake:", "पानी का सेवन:")}</span>
-                          <p className="text-gray-600 mt-1 line-clamp-1">
-                            {plan.waterIntakeAdvice.substring(0, 80)}...
-                          </p>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="flex gap-2">
-                      <Link href={`/diet-plan/${plan.assessmentId}`} className="flex-1">
-                        <Button size="sm" className="w-full">
-                          <Utensils className="h-4 w-4 mr-2" />
-                          {t("View Full Plan", "पूरी योजना देखें")}
-                        </Button>
-                      </Link>
-                    </div>
-                  </CardContent>
-                </Card>
+          {dietPlansLoading ? <div className="reports-loading" role="status">{t("Loading diet guidance…", "आहार मार्गदर्शन लोड हो रहा है…")}</div> : dietPlans.length === 0 ? <EmptyState type="diet" /> : (
+            <section className="diet-ledger" aria-labelledby="diet-ledger-title">
+              <div className="report-ledger__heading"><div><p className="section-kicker">{t("Nutrition archive", "पोषण संग्रह")}</p><h2 id="diet-ledger-title">{t("Diet guidance", "आहार मार्गदर्शन")}</h2></div></div>
+              {dietPlans.map((plan, index) => (
+                <article className="diet-row" key={plan.id}>
+                  <span className="diet-row__number">{String(index + 1).padStart(2, "0")}</span>
+                  <Utensils aria-hidden="true" />
+                  <div><strong>{t("Diet plan", "आहार योजना")} #{plan.id}</strong><p>{plan.dietType || t("Personalised", "व्यक्तिगत")}</p></div>
+                  <time>{formatDate(plan.createdAt)}</time>
+                  <Button asChild variant="outline"><Link href={`/diet-plan/${plan.assessmentId}`}>{t("Open plan", "योजना खोलें")}<ArrowRight /></Link></Button>
+                </article>
               ))}
-            </div>
+            </section>
           )}
-
-          <div className="mt-8 p-6 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-            <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">
-              {t("Need a New Diet Plan?", "नई आहार योजना चाहिए?")}
-            </h3>
-            <p className="text-blue-700 dark:text-blue-300 mb-4">
-              {t(
-                "Take a complete CKD assessment to get a fresh diet plan tailored to your current health condition.",
-                "अपनी वर्तमान स्वास्थ्य स्थिति के अनुसार एक नई आहार योजना पाने के लिए एक पूर्ण CKD मूल्यांकन करें।"
-              )}
-            </p>
-            <Link href="/diagnosis">
-              <Button>
-                <Activity className="mr-2 h-4 w-4" />
-                {t("Take New Assessment", "नया मूल्यांकन लें")}
-              </Button>
-            </Link>
-          </div>
         </TabsContent>
       </Tabs>
     </div>
   );
-};
-
-export default Browse;
+}

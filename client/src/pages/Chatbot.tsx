@@ -1,10 +1,18 @@
-import { useState, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
+import {
+  Bot,
+  BookOpenText,
+  ChevronRight,
+  Info,
+  RotateCcw,
+  Send,
+  ShieldAlert,
+  User,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Bot, User, Send, RotateCcw } from "lucide-react";
-import { useLanguage, t } from "@/hooks/useLanguage";
+import { Textarea } from "@/components/ui/textarea";
+import { t, useLanguage } from "@/hooks/useLanguage";
 
 interface LocalChatMessage {
   id: number;
@@ -16,101 +24,63 @@ interface LocalChatMessage {
 export default function Chatbot() {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<LocalChatMessage[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const { language } = useLanguage();
+  const conversationEnd = useRef<HTMLDivElement>(null);
+  useLanguage();
 
-  // Load messages from localStorage on component mount
   useEffect(() => {
     try {
       const storedMessages = localStorage.getItem("nephroBotMessages");
-      if (storedMessages) {
-        setMessages(JSON.parse(storedMessages));
-      }
+      if (storedMessages) setMessages(JSON.parse(storedMessages));
     } catch (error) {
       console.error("Error loading chat messages:", error);
     }
   }, []);
 
-  // Save messages to localStorage whenever messages change
   useEffect(() => {
     try {
       localStorage.setItem("nephroBotMessages", JSON.stringify(messages));
     } catch (error) {
       console.error("Error saving chat messages:", error);
     }
+    conversationEnd.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }, [messages]);
 
   const sendMessageMutation = useMutation({
     mutationFn: async (userMessage: string) => {
-      // Call Flask chatbot API through our server
       try {
         const response = await fetch("/api/chat-direct", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            message: userMessage,
-          }),
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: userMessage }),
         });
 
-        if (!response.ok) {
-          console.error(
-            "API Response not OK:",
-            response.status,
-            response.statusText,
-          );
-          throw new Error("Failed to get response from NephroBot");
-        }
-
+        if (!response.ok) throw new Error("Failed to get response from NephroBot");
         const data = await response.json();
-        console.log("Chatbot response received:", data);
-        return (
-          data.reply ||
-          "I'm having trouble processing your message. Please try again."
-        );
+        return data.reply || t("I could not process that question. Please try again.", "मैं उस प्रश्न को समझ नहीं पाया। कृपया दोबारा प्रयास करें।");
       } catch (error) {
         console.error("Error calling chatbot:", error);
-        return "I'm having trouble processing your message. Please try again later.";
+        return t("NephroBot is temporarily unavailable. Please try again later.", "नेफ्रोबॉट अभी उपलब्ध नहीं है। कृपया बाद में दोबारा प्रयास करें।");
       }
     },
     onSuccess: (botResponse, userMessage) => {
-      const newMessage: LocalChatMessage = {
-        id: Date.now(),
-        message: userMessage,
-        response: botResponse,
-        timestamp: new Date().toISOString(),
-      };
-
-      setMessages((prev) => [...prev, newMessage]);
+      setMessages((current) => [...current, { id: Date.now(), message: userMessage, response: botResponse, timestamp: new Date().toISOString() }]);
       setMessage("");
-      setIsLoading(false);
-    },
-    onError: (error) => {
-      console.error("Error sending message:", error);
-      setIsLoading(false);
     },
   });
 
   const handleSendMessage = () => {
-    if (message.trim() && !isLoading) {
-      setIsLoading(true);
-      sendMessageMutation.mutate(message.trim());
-    }
+    if (message.trim() && !sendMessageMutation.isPending) sendMessageMutation.mutate(message.trim());
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
       handleSendMessage();
     }
   };
 
   const askQuestion = (question: string) => {
-    if (!isLoading) {
-      setIsLoading(true);
-      sendMessageMutation.mutate(question);
-    }
+    if (!sendMessageMutation.isPending) sendMessageMutation.mutate(question);
   };
 
   const clearChat = () => {
@@ -120,162 +90,92 @@ export default function Chatbot() {
 
   const sampleQuestions = [
     t("What does high creatinine mean?", "उच्च क्रिएटिनिन का क्या मतलब है?"),
-    t("How to improve hemoglobin?", "हीमोग्लोबिन कैसे बढ़ाएं?"),
-    t("What are CKD symptoms?", "CKD के लक्षण क्या हैं?"),
-    t(
-      "How can I prevent CKD progression?",
-      "मैं CKD की प्रगति कैसे रोक सकता हूं?",
-    ),
-    t(
-      "What foods should I avoid with kidney disease?",
-      "गुर्दे की बीमारी में कौन से खाद्य पदार्थों से बचना चाहिए?",
-    ),
+    t("Which tests check kidney health?", "कौन-सी जांच किडनी स्वास्थ्य की जानकारी देती हैं?"),
+    t("What are common CKD warning signs?", "सीकेडी के सामान्य चेतावनी संकेत क्या हैं?"),
+    t("How should I prepare for a kidney appointment?", "किडनी से जुड़ी अपॉइंटमेंट की तैयारी कैसे करूं?"),
+    t("What questions should I ask about my eGFR?", "अपने eGFR के बारे में मुझे क्या पूछना चाहिए?"),
   ];
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <Card className="h-[500px] sm:h-[600px] flex flex-col">
-        {/* Chat Header */}
-        <CardHeader className="bg-primary text-white rounded-t-xl p-3 sm:p-6">
-          <div className="flex items-center justify-between">
-            <div className="flex-1 min-w-0">
-              <h1 className="flex items-center text-lg font-semibold sm:text-xl">
-                <Bot className="mr-2 sm:mr-3 h-5 w-5 sm:h-6 sm:w-6" />
-                <span className="truncate">
-                  {t("NephroBot Assistant", "नेफ्रोबॉट सहायक")}
-                </span>
-              </h1>
-              <p className="text-blue-100 text-xs sm:text-sm hidden sm:block">
-                {t(
-                  "Ask me anything about CKD, your results, or kidney health",
-                  "CKD, आपके परिणाम, या गुर्दे के स्वास्थ्य के बारे में मुझसे कुछ भी पूछें",
-                )}
-              </p>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={clearChat}
-              className="ml-2 flex items-center gap-1 sm:gap-2 bg-white/20 border-white/30 text-white hover:bg-white/30 text-xs sm:text-sm"
-            >
-              <RotateCcw className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden sm:inline">{t("Reset", "रीसेट")}</span>
+    <div className="chat-page">
+      <header className="tool-header tool-header--chat">
+        <div>
+          <p className="section-kicker">{t("Kidney-health conversation", "किडनी स्वास्थ्य संवाद")}</p>
+          <h1>{t("Ask NephroBot", "नेफ्रोबॉट से पूछें")}</h1>
+          <p>{t("Explore a term, prepare for an appointment, or ask for a simpler explanation.", "किसी शब्द को समझें, अपॉइंटमेंट की तैयारी करें या आसान व्याख्या पूछें।")}</p>
+        </div>
+        <div className="chat-status"><span aria-hidden="true" />{t("Educational assistant", "शैक्षिक सहायक")}</div>
+      </header>
+
+      <div className="chat-workspace">
+        <aside className="chat-sidebar">
+          <div className="chat-sidebar__heading"><BookOpenText aria-hidden="true" /><div><strong>{t("Starting points", "शुरुआती प्रश्न")}</strong><span>{t("Choose one or write your own", "एक चुनें या अपना प्रश्न लिखें")}</span></div></div>
+          <div className="chat-prompts">
+            {sampleQuestions.map((question, index) => (
+              <button type="button" key={question} onClick={() => askQuestion(question)} disabled={sendMessageMutation.isPending}>
+                <span>{String(index + 1).padStart(2, "0")}</span>
+                <p>{question}</p>
+                <ChevronRight aria-hidden="true" />
+              </button>
+            ))}
+          </div>
+          <div className="chat-safety-note"><ShieldAlert aria-hidden="true" /><p>{t("Do not use NephroBot for emergencies, diagnosis, medication changes, or treatment decisions.", "आपातकाल, निदान, दवा में बदलाव या उपचार के निर्णय के लिए नेफ्रोबॉट का उपयोग न करें।")}</p></div>
+        </aside>
+
+        <section className="conversation" aria-label={t("NephroBot conversation", "नेफ्रोबॉट संवाद")}>
+          <div className="conversation__bar">
+            <div><Bot aria-hidden="true" /><span>NephroBot</span></div>
+            <Button variant="ghost" size="sm" onClick={clearChat} disabled={messages.length === 0}>
+              <RotateCcw />{t("Clear", "साफ करें")}
             </Button>
           </div>
-        </CardHeader>
 
-        {/* Chat Messages */}
-        <CardContent className="flex-1 p-2 sm:p-4 overflow-y-auto bg-gray-50 chat-container">
-          <div className="space-y-4">
-            {/* Welcome Message */}
-            <div className="flex items-start">
-              <div className="w-6 h-6 sm:w-8 sm:h-8 bg-primary rounded-full flex items-center justify-center mr-2 sm:mr-3 flex-shrink-0">
-                <Bot className="h-3 w-3 sm:h-4 sm:w-4 text-white" />
-              </div>
-              <div className="bg-white p-2 sm:p-3 rounded-lg shadow-sm max-w-xs sm:max-w-md">
-                <p className="text-gray-800 text-sm sm:text-base">
-                  {t(
-                    "Hello! I'm NephroBot, your CKD assistant. I can help explain your results, answer questions about kidney health, or provide guidance on managing your condition. What would you like to know?",
-                    "नमस्ते! मैं नेफ्रोबॉट हूं, आपका CKD सहायक। मैं आपके परिणामों को समझाने, गुर्दे के स्वास्थ्य के बारे में प्रश्नों के उत्तर देने, या आपकी स्थिति के प्रबंधन पर मार्गदर्शन प्रदान करने में मदद कर सकता हूं। आप क्या जानना चाहते हैं?",
-                  )}
-                </p>
-              </div>
-            </div>
+          <div className="conversation__messages chat-container" aria-live="polite">
+            <article className="message message--assistant">
+              <div className="message__identity"><Bot aria-hidden="true" /><span>NephroBot</span></div>
+              <p>{t("Hello. I can explain kidney-health terms and help you prepare questions for a qualified professional. What would you like to understand?", "नमस्ते। मैं किडनी स्वास्थ्य के शब्द समझा सकता हूं और योग्य पेशेवर के लिए प्रश्न तैयार करने में मदद कर सकता हूं। आप क्या समझना चाहते हैं?")}</p>
+            </article>
 
-            {/* Sample Questions */}
-            {messages.length === 0 && (
-              <div className="flex flex-wrap gap-1 sm:gap-2 mt-3 sm:mt-4">
-                {sampleQuestions.map((question, index) => (
-                  <Button
-                    key={index}
-                    variant="outline"
-                    size="sm"
-                    onClick={() => askQuestion(question)}
-                    className="text-xs flex-shrink-0"
-                    disabled={isLoading}
-                  >
-                    {question}
-                  </Button>
-                ))}
-              </div>
-            )}
-
-            {/* Chat History */}
-            {messages.map((msg) => (
-              <div key={msg.id} className="space-y-4">
-                {/* User Message */}
-                <div className="flex items-start justify-end chat-message">
-                  <div className="bg-primary text-white p-2 sm:p-3 rounded-lg shadow-sm max-w-xs sm:max-w-md">
-                    <p className="text-sm sm:text-base">{msg.message}</p>
-                  </div>
-                  <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gray-400 rounded-full flex items-center justify-center ml-2 sm:ml-3 flex-shrink-0">
-                    <User className="h-3 w-3 sm:h-4 sm:w-4 text-white" />
-                  </div>
-                </div>
-
-                {/* AI Response */}
-                <div className="flex items-start chat-message">
-                  <div className="w-6 h-6 sm:w-8 sm:h-8 bg-primary rounded-full flex items-center justify-center mr-2 sm:mr-3 flex-shrink-0">
-                    <Bot className="h-3 w-3 sm:h-4 sm:w-4 text-white" />
-                  </div>
-                  <div className="bg-white p-2 sm:p-3 rounded-lg shadow-sm max-w-xs sm:max-w-md">
-                    <div className="text-gray-800 text-sm sm:text-base whitespace-pre-wrap">
-                      {msg.response}
-                    </div>
-                  </div>
-                </div>
+            {messages.map((item) => (
+              <div key={item.id} className="message-pair">
+                <article className="message message--user">
+                  <div className="message__identity"><User aria-hidden="true" /><span>{t("You", "आप")}</span></div>
+                  <p>{item.message}</p>
+                </article>
+                <article className="message message--assistant">
+                  <div className="message__identity"><Bot aria-hidden="true" /><span>NephroBot</span></div>
+                  <p className="whitespace-pre-wrap">{item.response}</p>
+                </article>
               </div>
             ))}
 
-            {/* Loading indicator */}
             {sendMessageMutation.isPending && (
-              <div className="flex items-start">
-                <div className="w-6 h-6 sm:w-8 sm:h-8 bg-primary rounded-full flex items-center justify-center mr-2 sm:mr-3 flex-shrink-0">
-                  <Bot className="h-3 w-3 sm:h-4 sm:w-4 text-white" />
-                </div>
-                <div className="bg-white p-2 sm:p-3 rounded-lg shadow-sm">
-                  <div className="flex space-x-1">
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                    <div
-                      className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                      style={{ animationDelay: "0.1s" }}
-                    ></div>
-                    <div
-                      className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                      style={{ animationDelay: "0.2s" }}
-                    ></div>
-                  </div>
-                </div>
-              </div>
+              <article className="message message--assistant message--thinking">
+                <div className="message__identity"><Bot aria-hidden="true" /><span>NephroBot</span></div>
+                <div className="thinking-dots" aria-label={t("NephroBot is responding", "नेफ्रोबॉट उत्तर दे रहा है")}><i /><i /><i /></div>
+              </article>
             )}
+            <div ref={conversationEnd} />
           </div>
-        </CardContent>
 
-        {/* Chat Input */}
-        <div className="p-3 sm:p-4 border-t border-gray-200">
-          <div className="flex gap-2">
-            <Input
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder={t(
-                "Type your question...",
-                "अपना प्रश्न टाइप करें...",
-              )}
-              disabled={sendMessageMutation.isPending}
-              className="flex-1 text-sm sm:text-base"
-            />
-            <Button
-              onClick={handleSendMessage}
-              disabled={!message.trim() || sendMessageMutation.isPending}
-              size="sm"
-              className="px-3 sm:px-4"
-            >
-              <Send className="h-3 w-3 sm:h-4 sm:w-4" />
-            </Button>
+          <div className="conversation__composer">
+            <div className="composer-field">
+              <Textarea
+                value={message}
+                onChange={(event) => setMessage(event.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder={t("Ask a kidney-health question…", "किडनी स्वास्थ्य से जुड़ा प्रश्न पूछें…")}
+                disabled={sendMessageMutation.isPending}
+                rows={2}
+              />
+              <Button onClick={handleSendMessage} disabled={!message.trim() || sendMessageMutation.isPending} size="icon" aria-label={t("Send question", "प्रश्न भेजें")}>
+                <Send />
+              </Button>
+            </div>
+            <p><Info aria-hidden="true" />{t("Responses are general information, not medical advice.", "उत्तर सामान्य जानकारी हैं, चिकित्सकीय सलाह नहीं।")}</p>
           </div>
-        </div>
-      </Card>
+        </section>
+      </div>
     </div>
   );
 }

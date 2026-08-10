@@ -1,4 +1,5 @@
 import { useState } from "react";
+import NumberFlow from "@number-flow/react";
 import { useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -9,11 +10,12 @@ import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { User, FlaskConical, FileText, BarChart3, ChevronDown, Stethoscope } from "lucide-react";
+import { User, FlaskConical, FileText, BarChart3, ChevronDown, Stethoscope, ClipboardCheck, ShieldCheck } from "lucide-react";
 import { insertCKDAssessmentSchema, type InsertCKDAssessment } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage, t } from "@/hooks/useLanguage";
+import PageIntro from "@/components/PageIntro";
 
 export default function Diagnosis() {
   const [, setLocation] = useLocation();
@@ -78,8 +80,6 @@ export default function Diagnosis() {
         const updatedIds = [...storedIds, data.id];
         localStorage.setItem('userAssessmentIds', JSON.stringify(updatedIds));
         
-        console.log('Assessment stored with ID:', data.id, 'Updated IDs:', updatedIds);
-        
         // Dispatch custom event to notify other components
         window.dispatchEvent(new CustomEvent('assessmentIdsUpdated'));
         
@@ -115,20 +115,34 @@ export default function Diagnosis() {
     mutation.mutate(data);
   };
 
+  const reviewedFields = Object.keys(form.formState.dirtyFields).length;
+  const reviewProgress = Math.min(100, Math.round((reviewedFields / 20) * 100));
+
   return (
-    <div className="max-w-4xl mx-auto">
-      <Card>
-        <CardHeader className="text-center">
-          <h1 className="text-2xl sm:text-3xl font-bold">
-            {t("CKD Risk Assessment", "सीकेडी जोखिम मूल्यांकन")}
-          </h1>
-          <p className="text-gray-600">
-            {t(
-              "Please fill out the medical parameters below for accurate CKD risk prediction.",
-              "सटीक सीकेडी जोखिम भविष्यवाणी के लिए कृपया नीचे दिए गए चिकित्सा पैरामीटर भरें।"
-            )}
-          </p>
-        </CardHeader>
+    <div className="assessment-page app-page">
+      <PageIntro
+        eyebrow={t("Structured preliminary screening", "व्यवस्थित प्रारंभिक स्क्रीनिंग")}
+        title={t("CKD risk assessment", "सीकेडी जोखिम मूल्यांकन")}
+        description={t(
+          "Work from a recent report, review each value, and mark anything you do not know. The result is educational context, not a diagnosis.",
+          "हाल की रिपोर्ट से हर मान की समीक्षा करें और जो पता न हो उसे अज्ञात चुनें। परिणाम शैक्षिक संदर्भ है, निदान नहीं।",
+        )}
+        aside={<div className="assessment-intro-note"><ShieldCheck aria-hidden="true" /><strong>{t("Before entering data", "डेटा दर्ज करने से पहले")}</strong><p>{t("Use your own report and check units carefully. Do not guess a laboratory value.", "अपनी रिपोर्ट का उपयोग करें और इकाइयों को ध्यान से जांचें। लैब मान का अनुमान न लगाएं।")}</p></div>}
+      />
+
+      <div className="assessment-workspace">
+        <aside className="assessment-rail">
+          <div className="assessment-progress"><NumberFlow value={reviewProgress} /><span>%</span><p>{t("fields reviewed", "फ़ील्ड की समीक्षा")}</p><i><b style={{ width: `${reviewProgress}%` }} /></i></div>
+          <nav aria-label={t("Assessment sections", "मूल्यांकन के भाग")}>
+            <a href="#patient-information"><span>01</span><div><User /><p>{t("Patient and report", "रोगी और रिपोर्ट")}</p></div></a>
+            <a href="#laboratory-results"><span>02</span><div><FlaskConical /><p>{t("Laboratory values", "प्रयोगशाला मान")}</p></div></a>
+            <a href="#medical-conditions"><span>03</span><div><FileText /><p>{t("Health history", "स्वास्थ्य इतिहास")}</p></div></a>
+          </nav>
+          <div className="assessment-rail__boundary"><ClipboardCheck /><p>{t("Every value can change the result. Review before submitting.", "हर मान परिणाम बदल सकता है। सबमिट करने से पहले समीक्षा करें।")}</p></div>
+        </aside>
+
+        <section className="assessment-sheet">
+          <div className="assessment-sheet__heading"><p className="section-kicker">{t("Report workspace", "रिपोर्ट कार्यक्षेत्र")}</p><h2>{t("Enter only what you can verify", "केवल वही दर्ज करें जिसकी पुष्टि कर सकते हैं")}</h2></div>
         
         {/* Symptom Checker Section */}
         <div className="mx-4 sm:mx-6 mb-6">
@@ -365,11 +379,11 @@ export default function Diagnosis() {
           </Collapsible>
         </div>
 
-        <CardContent>
+        <CardContent className="assessment-sheet__content">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
               {/* Patient Information */}
-              <Card>
+              <Card id="patient-information" className="assessment-block">
                 <CardHeader>
                   <CardTitle className="flex items-center text-xl">
                     <User className="mr-3 h-5 w-5 text-primary" />
@@ -501,7 +515,7 @@ export default function Diagnosis() {
               </Card>
 
               {/* Laboratory Results */}
-              <Card>
+              <Card id="laboratory-results" className="assessment-block">
                 <CardHeader>
                   <CardTitle className="flex items-center text-xl">
                     <FlaskConical className="mr-3 h-5 w-5 text-primary" />
@@ -876,11 +890,11 @@ export default function Diagnosis() {
               </Card>
 
               {/* Medical Conditions */}
-              <Card>
+              <Card id="medical-conditions" className="assessment-block">
                 <CardHeader>
                   <CardTitle className="flex items-center text-xl">
                     <FileText className="mr-3 h-5 w-5 text-primary" />
-                    Medical Conditions
+                    {t("Medical Conditions", "चिकित्सकीय स्थितियां")}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
@@ -1001,13 +1015,14 @@ export default function Diagnosis() {
                   disabled={mutation.isPending}
                 >
                   <BarChart3 className="mr-3 h-5 w-5" />
-                  {mutation.isPending ? "Generating Prediction..." : "Generate Prediction"}
+                  {mutation.isPending ? t("Generating report…", "रिपोर्ट बनाई जा रही है…") : t("Generate preliminary report", "प्रारंभिक रिपोर्ट बनाएं")}
                 </Button>
               </div>
             </form>
           </Form>
         </CardContent>
-      </Card>
+        </section>
+      </div>
     </div>
   );
 }

@@ -258,10 +258,10 @@ export function PDPPlot({ assessment }: PDPPlotProps) {
             </div>
             
             {/* Curve simulation */}
-            <svg className="absolute inset-0 w-full h-full">
+            <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
               <path
-                d={`M 0,${192 - (data[0].y / 100) * 192} ${data.map((point, i) => 
-                  `L ${(i / (data.length - 1)) * 100}%,${192 - (point.y / 100) * 192}`
+                d={`M 0,${100 - data[0].y} ${data.map((point, i) =>
+                  `L ${(i / (data.length - 1)) * 100},${100 - point.y}`
                 ).join(' ')}`}
                 stroke="#3B82F6"
                 strokeWidth="2"
@@ -271,9 +271,9 @@ export function PDPPlot({ assessment }: PDPPlotProps) {
               
               {/* User point */}
               <circle
-                cx={`${((value - data[0].x) / (data[data.length - 1].x - data[0].x)) * 100}%`}
-                cy={192 - (userPoint.y / 100) * 192}
-                r="4"
+                cx={((value - data[0].x) / (data[data.length - 1].x - data[0].x)) * 100}
+                cy={100 - userPoint.y}
+                r="1.8"
                 fill="#EF4444"
                 stroke="white"
                 strokeWidth="2"

@@ -1,46 +1,47 @@
-import { useState, useEffect } from 'react';
+import { useCallback, useSyncExternalStore } from "react";
+
+type Language = "en" | "hi";
 
 interface LanguageState {
-  language: 'en' | 'hi';
-  setLanguage: (language: 'en' | 'hi') => void;
+  language: Language;
+  setLanguage: (language: Language) => void;
   toggleLanguage: () => void;
 }
 
-// Simple language state management without external dependencies
-let globalLanguage: 'en' | 'hi' = 'en';
+const getStoredLanguage = (): Language => {
+  if (typeof window === "undefined") return "en";
+  return localStorage.getItem("nephrocare-language") === "hi" ? "hi" : "en";
+};
+
+let globalLanguage: Language = getStoredLanguage();
 const listeners: Set<() => void> = new Set();
+const subscribe = (listener: () => void) => {
+  listeners.add(listener);
+  return () => listeners.delete(listener);
+};
+
+if (typeof document !== "undefined") {
+  document.documentElement.lang = globalLanguage;
+}
 
 export const useLanguage = (): LanguageState => {
-  const [language, setLocalLanguage] = useState(globalLanguage);
+  const language = useSyncExternalStore<Language>(
+    subscribe,
+    () => globalLanguage,
+    () => "en" as Language,
+  );
 
-  useEffect(() => {
-    const updateLanguage = () => setLocalLanguage(globalLanguage);
-    listeners.add(updateLanguage);
-    return () => {
-      listeners.delete(updateLanguage);
-    };
-  }, []);
-
-  const setLanguage = (newLanguage: 'en' | 'hi') => {
+  const setLanguage = useCallback((newLanguage: Language) => {
+    if (newLanguage === globalLanguage) return;
     globalLanguage = newLanguage;
-    localStorage.setItem('nephrocare-language', newLanguage);
+    localStorage.setItem("nephrocare-language", newLanguage);
     document.documentElement.lang = newLanguage;
-    listeners.forEach(listener => listener());
-  };
-
-  const toggleLanguage = () => {
-    setLanguage(globalLanguage === 'en' ? 'hi' : 'en');
-  };
-
-  // Initialize from localStorage on first load
-  useEffect(() => {
-    const stored = localStorage.getItem('nephrocare-language') as 'en' | 'hi';
-    if (stored && stored !== globalLanguage) {
-      setLanguage(stored);
-    } else {
-      document.documentElement.lang = globalLanguage;
-    }
+    listeners.forEach((listener) => listener());
   }, []);
+
+  const toggleLanguage = useCallback(() => {
+    setLanguage(globalLanguage === "en" ? "hi" : "en");
+  }, [setLanguage]);
 
   return {
     language,
@@ -49,7 +50,6 @@ export const useLanguage = (): LanguageState => {
   };
 };
 
-// Translation helper
 export const t = (en: string, hi: string) => {
-  return globalLanguage === 'hi' ? hi : en;
+  return globalLanguage === "hi" ? hi : en;
 };

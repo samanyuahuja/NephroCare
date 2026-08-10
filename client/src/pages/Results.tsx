@@ -1,15 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
+import NumberFlow from "@number-flow/react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { BarChart3, TrendingUp, Lightbulb, Bot, Utensils, Download, MessageCircle, Heart, Stethoscope, Pill, AlertTriangle, CheckCircle } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { ArrowRight, BarChart3, TrendingUp, Lightbulb, Bot, Utensils, Download, MessageCircle, AlertTriangle, FileText, ShieldCheck } from "lucide-react";
 import { useLanguage, t } from "@/hooks/useLanguage";
 import { SHAPPlot } from "@/components/charts/SHAPPlot";
 import { PDPPlot } from "@/components/charts/PDPPlot";
 import { LIMEExplanation } from "@/components/charts/LIMEExplanation";
-import { generateAssessmentPDF } from "@/lib/pdfGenerator";
 import type { CKDAssessment } from "@shared/schema";
+import PageIntro from "@/components/PageIntro";
+import { hasAssessmentAccess } from "@/lib/assessmentAccess";
 
 interface ResultsProps {
   params: { id: string };
@@ -19,14 +20,11 @@ export default function Results({ params }: ResultsProps) {
   const assessmentId = parseInt(params.id);
   const { language } = useLanguage();
 
-  // Check if user has access to this assessment
-  const hasAccess = () => {
-    return true; // Allow access for all users for testing
-  };
+  const hasAccess = hasAssessmentAccess(assessmentId);
 
   const { data: assessment, isLoading, error } = useQuery<CKDAssessment>({
     queryKey: ["/api/ckd-assessment", assessmentId],
-    enabled: !isNaN(assessmentId) && hasAccess(),
+    enabled: !isNaN(assessmentId) && hasAccess,
   });
 
   if (isLoading) {
@@ -37,7 +35,7 @@ export default function Results({ params }: ResultsProps) {
     );
   }
 
-  if (!hasAccess()) {
+  if (!hasAccess) {
     return (
       <Card className="max-w-md mx-auto">
         <CardContent className="pt-6 text-center">
@@ -315,9 +313,6 @@ export default function Results({ params }: ResultsProps) {
       .sort((a, b) => b.impact - a.impact) // Sort by highest risk contribution first
       .slice(0, 3);
     
-    console.log('SHAP Features for recommendations:', shapFeatures);
-    console.log('Top 3 negative features:', negativeFeatures);
-
     // If no negative features found, fallback to hardcoded recommendations
     if (negativeFeatures.length === 0) {
       return recommendations
@@ -428,13 +423,10 @@ export default function Results({ params }: ResultsProps) {
       }
     });
 
-    console.log('Generated SHAP recommendations:', shapRecommendations);
-    console.log('Final SHAP recommendations being returned:', shapRecommendations);
     return shapRecommendations;
   };
 
   const personalizedRecommendations = getPersonalizedRecommendations(assessment, shapFeatures);
-  console.log('Final recommendations displayed:', personalizedRecommendations);
 
   const getRiskBadgeVariant = (level: string) => {
     const lowerLevel = level.toLowerCase();
@@ -445,318 +437,69 @@ export default function Results({ params }: ResultsProps) {
 
   const downloadReport = async () => {
     try {
+      const { generateAssessmentPDF } = await import("@/lib/pdfGenerator");
       await generateAssessmentPDF(assessment);
     } catch (error) {
       console.error('PDF generation failed:', error);
     }
   };
 
+  const riskPercent = Math.max(0, Math.min(100, riskScore * 100));
+  const riskTone = riskLevel.toLowerCase().includes("high") ? "high" : riskLevel.toLowerCase().includes("moderate") ? "moderate" : "low";
+  const topFactors = [...shapFeatures].sort((a, b) => Math.abs(b.impact) - Math.abs(a.impact)).slice(0, 5);
+  const reportDate = assessment.createdAt
+    ? new Date(assessment.createdAt).toLocaleDateString(language === "hi" ? "hi-IN" : "en-IN", { day: "2-digit", month: "short", year: "numeric" })
+    : t("Date unavailable", "तारीख उपलब्ध नहीं");
+
   return (
-    <div className="max-w-6xl mx-auto space-y-8">
-      {/* Risk Score Card */}
-      <Card>
-        <CardContent className="p-8 text-center">
-          <h1 className="text-3xl font-bold text-gray-900 mb-6">
-            CKD Risk Assessment Results
-          </h1>
-          
-          <div className={`${
-            riskLevel.toLowerCase().includes('high') ? 'bg-red-600' :
-            riskLevel.toLowerCase().includes('moderate') ? 'bg-orange-600' :
-            'bg-green-600'
-          } text-white rounded-xl p-8 mb-6 inline-block`}>
-            <div className="text-6xl font-bold mb-2">{(riskScore * 100).toFixed(1)}%</div>
-            <div className="text-xl">CKD Risk Score</div>
+    <div className="results-page app-page">
+      <PageIntro
+        eyebrow={t("Preliminary screening report", "प्रारंभिक स्क्रीनिंग रिपोर्ट")}
+        title={t("Your result, with the reasoning visible.", "आपका परिणाम, स्पष्ट कारणों के साथ।")}
+        description={t("Review the estimate, inspect the factors behind it, then take the full report to a qualified clinician.", "अनुमान देखें, उसके कारण समझें और पूरी रिपोर्ट योग्य चिकित्सक के पास ले जाएं।")}
+        actions={<><Button onClick={downloadReport}><Download />{t("Download report", "रिपोर्ट डाउनलोड करें")}</Button><Button asChild variant="outline"><Link href={`/diet-plan/${assessmentId}`}><Utensils />{t("Open diet guidance", "आहार मार्गदर्शन खोलें")}</Link></Button></>}
+        aside={<div className="report-id"><FileText aria-hidden="true" /><span>{t("Report", "रिपोर्ट")}</span><strong>NC-{String(assessmentId).padStart(4, "0")}</strong><small>{reportDate}</small></div>}
+      />
+
+      <section className={`risk-summary risk-summary--${riskTone}`} aria-labelledby="risk-summary-title">
+        <div className="risk-dial" style={{ "--risk-value": `${riskPercent * 3.6}deg` } as React.CSSProperties}>
+          <div><NumberFlow value={riskPercent} format={{ maximumFractionDigits: 1 }} /><span>%</span><small>{t("screening estimate", "स्क्रीनिंग अनुमान")}</small></div>
+        </div>
+        <div className="risk-summary__copy"><p className="section-kicker">{t("Result context", "परिणाम संदर्भ")}</p><h2 id="risk-summary-title">{riskLevel} {t("risk indication", "जोखिम संकेत")}</h2><p>{t(riskTone === "high" ? "This estimate needs prompt clinical review. It cannot confirm CKD or explain the cause by itself." : riskTone === "moderate" ? "This estimate deserves timely review with a clinician and comparison with repeat laboratory testing." : "This estimate is lower, but it cannot rule out kidney disease or replace recommended testing.", riskTone === "high" ? "इस अनुमान की शीघ्र चिकित्सकीय समीक्षा जरूरी है। यह अकेले सीकेडी की पुष्टि या कारण नहीं बता सकता।" : riskTone === "moderate" ? "इस अनुमान की समय पर चिकित्सकीय समीक्षा और दोबारा लैब जांच से तुलना जरूरी है।" : "यह अनुमान कम है, लेकिन किडनी रोग को खारिज या आवश्यक जांच का स्थान नहीं ले सकता।")}</p></div>
+        <div className="risk-summary__facts"><div><span>{t("Patient", "रोगी")}</span><strong>{assessment.patientName}</strong></div><div><span>{t("Age", "आयु")}</span><strong>{assessment.age}</strong></div><div><span>{t("Creatinine", "क्रिएटिनिन")}</span><strong>{assessment.serumCreatinine} mg/dL</strong></div><div><span>{t("Blood pressure", "रक्तचाप")}</span><strong>{assessment.bloodPressure} mmHg</strong></div></div>
+      </section>
+
+      <section className="factor-section" aria-labelledby="factor-title">
+        <div className="section-intro"><p className="section-kicker">{t("Model explanation", "मॉडल की व्याख्या")}</p><h2 id="factor-title">{t("What influenced this estimate", "इस अनुमान को किसने प्रभावित किया")}</h2><p>{t("Longer bars indicate a stronger influence in the model. They do not prove that a factor caused disease.", "लंबी पट्टियां मॉडल में अधिक प्रभाव दिखाती हैं। वे यह सिद्ध नहीं करतीं कि उसी कारक ने रोग पैदा किया।")}</p></div>
+        <div className="factor-studio">
+          <div className="factor-chart"><div className="studio-label"><BarChart3 />SHAP {t("feature importance", "फीचर प्रभाव")}</div><SHAPPlot features={shapFeatures} /></div>
+          <div className="factor-ledger">
+            {topFactors.length > 0 ? topFactors.map((factor, index) => <div key={`${factor.feature}-${index}`}><span>{String(index + 1).padStart(2, "0")}</span><div><strong>{factor.feature}</strong><p>{factor.impact > 0 ? t("Raised the model estimate", "मॉडल अनुमान बढ़ाया") : t("Lowered the model estimate", "मॉडल अनुमान घटाया")}</p></div><NumberFlow value={Math.abs(factor.impact * 100)} format={{ maximumFractionDigits: 1 }} /><small>%</small></div>) : <p className="factor-ledger__empty">{t("No factor detail was returned for this report.", "इस रिपोर्ट के लिए कारक विवरण उपलब्ध नहीं है।")}</p>}
           </div>
-          
-          <Badge variant={getRiskBadgeVariant(riskLevel)} className={`text-lg px-4 py-2 mb-6 ${
-            riskLevel.toLowerCase().includes('high') ? 'bg-red-100 text-red-800 border-red-300' :
-            riskLevel.toLowerCase().includes('moderate') ? 'bg-orange-100 text-orange-800 border-orange-300' :
-            'bg-green-100 text-green-800 border-green-300'
-          }`}>
-            {riskLevel}
-          </Badge>
-          
-          <p className="text-gray-600 text-lg max-w-2xl mx-auto mb-6">
-            Based on the medical information entered, this screening indicates a {riskLevel.toLowerCase()}
-            for Chronic Kidney Disease. {riskLevel.toLowerCase().includes('high') ? 
-            'Please consult with a healthcare professional for proper medical evaluation.' :
-            'Continue monitoring your kidney health and maintain healthy lifestyle habits.'}
-          </p>
-          
-          <div className="flex flex-wrap gap-4 justify-center">
-            <Button onClick={downloadReport} className="bg-blue-600 hover:bg-blue-700">
-              <Download className="mr-2 h-4 w-4" />
-              {t("Download PDF Report", "पीडीएफ रिपोर्ट डाउनलोड करें")}
-            </Button>
-            <Link href={`/diet-plan/${assessmentId}`}>
-              <Button variant="outline" className="border-green-600 text-green-600 hover:bg-green-50">
-                <Utensils className="mr-2 h-4 w-4" />
-                {t("Get Diet Plan", "आहार योजना प्राप्त करें")}
-              </Button>
-            </Link>
-            <Link href="/chatbot">
-              <Button variant="outline" className="border-blue-600 text-blue-700 hover:bg-blue-50">
-                <MessageCircle className="mr-2 h-4 w-4" />
-                {t("Chat with NephroBot", "नेफ्रोबॉट से चैट करें")}
-              </Button>
-            </Link>
-          </div>
-        </CardContent>
-      </Card>
+        </div>
+      </section>
 
-      {/* Visual Explanations */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* SHAP Plot */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <BarChart3 className="mr-3 h-5 w-5 text-primary" />
-              SHAP Feature Importance
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="mb-4 p-4 bg-blue-50 rounded-lg">
-              <h4 className="font-semibold mb-2 text-blue-900">How to Read This Chart:</h4>
-              <ul className="text-sm text-blue-800 space-y-1">
-                <li>• Red bars show factors increasing CKD risk</li>
-                <li>• Blue bars show factors decreasing CKD risk</li>
-                <li>• Longer bars = stronger impact on prediction</li>
-                <li>• Numbers show how much each factor affects your risk score</li>
-              </ul>
-            </div>
-            <div id="shap-plot">
-              <SHAPPlot features={shapFeatures} />
-            </div>
-          </CardContent>
-        </Card>
+      <section className="explanation-section" aria-labelledby="explanation-title">
+        <div className="section-intro"><p className="section-kicker">{t("Three ways to inspect", "समझने के तीन तरीके")}</p><h2 id="explanation-title">{t("Explore the model from different angles", "मॉडल को अलग-अलग दृष्टिकोण से देखें")}</h2></div>
+        <div className="explanation-grid">
+          <article><div className="studio-label"><TrendingUp />PDP</div><h3>{t("How one value changes the estimate", "एक मान अनुमान को कैसे बदलता है")}</h3><p>{t("The line shows the model's response as one input changes while other information is held steady.", "यह रेखा दिखाती है कि एक इनपुट बदलने पर मॉडल कैसे प्रतिक्रिया देता है, जबकि बाकी जानकारी स्थिर रहती है।")}</p><div className="explanation-visual"><PDPPlot assessment={assessment} /></div></article>
+          <article><div className="studio-label"><Lightbulb />LIME</div><h3>{t("A local explanation for this report", "इस रिपोर्ट की स्थानीय व्याख्या")}</h3><p>{t("LIME approximates which inputs mattered near this specific prediction.", "LIME अनुमान लगाता है कि इस खास भविष्यवाणी के पास कौन-से इनपुट महत्वपूर्ण थे।")}</p><div className="explanation-visual"><LIMEExplanation features={shapFeatures} /></div></article>
+        </div>
+      </section>
 
-        {/* PDP Plot */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <TrendingUp className="mr-3 h-5 w-5 text-primary" />
-              Partial Dependence Plot
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="mb-4 p-4 bg-green-50 rounded-lg">
-              <h4 className="font-semibold mb-2 text-green-900">How to Read This Chart:</h4>
-              <ul className="text-sm text-green-800 space-y-1">
-                <li>• Shows how changing one value affects CKD risk</li>
-                <li>• Your current value is marked with a red dot</li>
-                <li>• Higher line = higher CKD risk at that value</li>
-                <li>• Normal ranges are shaded in green</li>
-              </ul>
-            </div>
-            <div id="pdp-plot-container">
-              <PDPPlot assessment={assessment} />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* LIME Explanation */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Lightbulb className="mr-3 h-5 w-5 text-primary" />
-              LIME Local Explanation
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="mb-4 rounded-lg border border-blue-100 bg-blue-50 p-4">
-              <h4 className="mb-2 font-semibold text-blue-900">How to Read This Analysis:</h4>
-              <ul className="space-y-1 text-sm text-blue-800">
-                <li>• Shows which factors contributed most to YOUR specific result</li>
-                <li>• Green text = factors that decreased your risk</li>
-                <li>• Red text = factors that increased your risk</li>
-                <li>• Percentages show the strength of each factor's influence</li>
-              </ul>
-            </div>
-            <div id="lime-explanation">
-              <LIMEExplanation features={shapFeatures} />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* NephroBot Preview */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Bot className="mr-3 h-5 w-5 text-primary" />
-              NephroBot Assistant
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="bg-gray-50 rounded-lg p-4 mb-4">
-              <div className="text-sm text-gray-600 mb-2">NephroBot:</div>
-              <div className="text-gray-800">
-                {(() => {
-                  if (shapFeatures.length === 0) {
-                    return "I can help explain your results and provide guidance on managing your kidney health. Feel free to ask any questions!";
-                  }
-                  
-                  // Find the highest impact factor (positive values increase risk)
-                  const highestRiskFactor = shapFeatures
-                    .filter(f => f.impact > 0)
-                    .sort((a, b) => b.impact - a.impact)[0];
-                  
-                  if (!highestRiskFactor) {
-                    return "Good news! Most of your health factors are protective and decrease CKD risk. Continue maintaining healthy lifestyle habits and regular monitoring.";
-                  }
-                  
-                  const featureName = highestRiskFactor.feature.toLowerCase();
-                  const impactPercentage = (highestRiskFactor.impact * 100).toFixed(1);
-                  
-                  if (featureName.includes('creatinine')) {
-                    return `Your ${highestRiskFactor.feature.toLowerCase()} is the primary risk factor (${impactPercentage}% impact). Normal levels are typically 0.6-1.2 mg/dL. Consider consulting a nephrologist for kidney function evaluation.`;
-                  } else if (featureName.includes('hemoglobin')) {
-                    return `Your ${highestRiskFactor.feature.toLowerCase()} is the primary risk factor (${impactPercentage}% impact). Low hemoglobin may indicate anemia related to kidney disease. Consider iron supplements and kidney function monitoring.`;
-                  } else if (featureName.includes('urea')) {
-                    return `Your ${highestRiskFactor.feature.toLowerCase()} is the primary risk factor (${impactPercentage}% impact). Elevated blood urea suggests reduced kidney filtering. Consider dietary protein moderation and increased hydration.`;
-                  } else if (featureName.includes('age')) {
-                    return `Your ${highestRiskFactor.feature.toLowerCase()} is the primary risk factor (${impactPercentage}% impact). Age-related kidney function decline is natural. Focus on preventive care and regular monitoring.`;
-                  } else if (featureName.includes('pressure')) {
-                    return `Your ${highestRiskFactor.feature.toLowerCase()} is the primary risk factor (${impactPercentage}% impact). High blood pressure damages kidneys over time. Consider BP medications and lifestyle modifications.`;
-                  } else if (featureName.includes('hypertension')) {
-                    return `Your ${highestRiskFactor.feature.toLowerCase()} is the primary risk factor (${impactPercentage}% impact). Hypertension history increases kidney disease risk. Maintain strict BP control and regular monitoring.`;
-                  } else if (featureName.includes('diabetes')) {
-                    return `Your ${highestRiskFactor.feature.toLowerCase()} is the primary risk factor (${impactPercentage}% impact). Diabetes can cause kidney damage over time. Focus on tight glucose control and kidney-protective medications.`;
-                  } else {
-                    return `Your ${highestRiskFactor.feature.toLowerCase()} is the primary risk factor (${impactPercentage}% impact). This factor contributes significantly to your CKD risk. Would you like specific guidance on managing this condition?`;
-                  }
-                })()}
-              </div>
-            </div>
-            <Link href="/chatbot">
-              <Button className="w-full">
-                <MessageCircle className="mr-2 h-4 w-4" />
-                Ask NephroBot
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Personalized Recommendations */}
       {personalizedRecommendations.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center text-2xl">
-              <Pill className="mr-3 h-6 w-6 text-green-600" />
-              {t("Personalized Health Recommendations", "व्यक्तिगत स्वास्थ्य सिफारिशें")}
-            </CardTitle>
-            <p className="text-muted-foreground">
-              {t("Top risk factors affecting your CKD assessment with causes, remedies, and treatments", "आपके CKD मूल्यांकन को प्रभावित करने वाले शीर्ष जोखिम कारक कारणों, उपचारों और उपचारों के साथ")}
-            </p>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-6">
-              {personalizedRecommendations.map((rec, index) => (
-                <Card key={index} className={`border-l-4 ${rec.severity === 'high' ? 'border-l-red-500 bg-red-50' : 'border-l-orange-500 bg-orange-50'}`}>
-                  <CardContent className="pt-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <div>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                          {index + 1}. {rec.factor}
-                        </h3>
-                        <p className="text-sm text-gray-600">
-                          {t("Current Value", "वर्तमान मूल्य")}: <span className="font-medium">{rec.value}</span>
-                        </p>
-                      </div>
-                      <Badge variant={rec.severity === 'high' ? 'destructive' : 'secondary'}>
-                        {t(rec.severity === 'high' ? 'High Risk' : 'Moderate Risk', rec.severity === 'high' ? 'उच्च जोखिम' : 'मध्यम जोखिम')}
-                      </Badge>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="space-y-2">
-                        <div className="flex items-center">
-                          <AlertTriangle className="h-4 w-4 text-red-600 mr-2" />
-                          <h4 className="font-semibold text-red-800">
-                            {t("Causes", "कारण")}
-                          </h4>
-                        </div>
-                        <p className="text-sm text-gray-700 leading-relaxed">
-                          {rec.causes}
-                        </p>
-                      </div>
-
-                      <div className="space-y-2">
-                        <div className="flex items-center">
-                          <Heart className="h-4 w-4 text-blue-600 mr-2" />
-                          <h4 className="font-semibold text-blue-800">
-                            {t("Remedies", "उपचार")}
-                          </h4>
-                        </div>
-                        <p className="text-sm text-gray-700 leading-relaxed">
-                          {rec.remedies}
-                        </p>
-                      </div>
-
-                      <div className="space-y-2">
-                        <div className="flex items-center">
-                          <Stethoscope className="h-4 w-4 text-green-600 mr-2" />
-                          <h4 className="font-semibold text-green-800">
-                            {t("Medical Treatment", "चिकित्सा उपचार")}
-                          </h4>
-                        </div>
-                        <p className="text-sm text-gray-700 leading-relaxed">
-                          {rec.treatment}
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-
-            <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-              <div className="flex items-start">
-                <CheckCircle className="h-5 w-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0" />
-                <div>
-                  <h4 className="font-semibold text-blue-900 mb-2">
-                    {t("Important Note", "महत्वपूर्ण नोट")}
-                  </h4>
-                  <p className="text-sm text-blue-800">
-                    {t(
-                      "These recommendations are based on your assessment data and are for educational purposes only. Always consult with your healthcare provider before making any medical decisions or changes to your treatment plan.",
-                      "ये सिफारिशें आपके मूल्यांकन डेटा पर आधारित हैं और केवल शैक्षिक उद्देश्यों के लिए हैं। कोई भी चिकित्सा निर्णय लेने या अपनी उपचार योजना में बदलाव करने से पहले हमेशा अपने स्वास्थ्य सेवा प्रदाता से सलाह लें।"
-                    )}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <section className="review-priorities" aria-labelledby="review-priorities-title">
+          <div className="section-intro"><p className="section-kicker">{t("Appointment preparation", "अपॉइंटमेंट की तैयारी")}</p><h2 id="review-priorities-title">{t("Values to discuss with a clinician", "चिकित्सक से चर्चा करने वाले मान")}</h2><p>{t("These are conversation prompts, not treatment instructions.", "ये बातचीत के प्रश्न हैं, उपचार निर्देश नहीं।")}</p></div>
+          <div className="priority-list">{personalizedRecommendations.slice(0, 4).map((recommendation, index) => <article key={`${recommendation.factor}-${index}`}><span>{String(index + 1).padStart(2, "0")}</span><div><h3>{recommendation.factor}</h3><p>{t("Entered value", "दर्ज मान")}: <strong>{recommendation.value}</strong></p></div><p>{t("Ask what this value means in the context of your history, medicines, symptoms, and repeat tests.", "पूछें कि आपके इतिहास, दवाओं, लक्षणों और दोबारा जांच के संदर्भ में इस मान का क्या अर्थ है।")}</p><AlertTriangle aria-hidden="true" /></article>)}</div>
+        </section>
       )}
 
-      {/* Action Buttons */}
-      <Card>
-        <CardContent className="p-8 text-center">
-          <h3 className="text-xl font-semibold text-gray-900 mb-6">
-            {t("Next Steps", "अगले कदम")}
-          </h3>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href={`/diet-plan/${assessmentId}`}>
-              <Button size="lg" className="bg-green-600 hover:bg-green-700">
-                <Utensils className="mr-2 h-4 w-4" />
-                {t("Create Diet Plan", "आहार योजना बनाएं")}
-              </Button>
-            </Link>
-            <Button size="lg" variant="outline" onClick={downloadReport}>
-              <Download className="mr-2 h-4 w-4" />
-              {t("Download Report", "रिपोर्ट डाउनलोड करें")}
-            </Button>
-            <Link href="/chatbot">
-              <Button size="lg" variant="outline">
-                <MessageCircle className="mr-2 h-4 w-4" />
-                {t("Ask NephroBot", "नेफ्रोबॉट से पूछें")}
-              </Button>
-            </Link>
-          </div>
-        </CardContent>
-      </Card>
+      <section className="results-next">
+        <div><Bot aria-hidden="true" /><div><p className="section-kicker">{t("Need a simpler explanation?", "और आसान व्याख्या चाहिए?")}</p><h2>{t("Take a question to NephroBot", "नेफ्रोबॉट से प्रश्न पूछें")}</h2><p>{t("Use the assistant to unpack a term, then verify medical decisions with a qualified professional.", "किसी शब्द को समझने के लिए सहायक का उपयोग करें, फिर चिकित्सकीय निर्णय योग्य पेशेवर से जांचें।")}</p></div></div>
+        <Button asChild><Link href="/chatbot"><MessageCircle />{t("Ask NephroBot", "नेफ्रोबॉट से पूछें")}<ArrowRight /></Link></Button>
+      </section>
+
+      <div className="medical-boundary"><ShieldCheck /><p>{t("This preliminary report cannot diagnose CKD, recommend medication, or determine treatment. Seek urgent care for severe or rapidly worsening symptoms.", "यह प्रारंभिक रिपोर्ट सीकेडी का निदान, दवा की सिफारिश या उपचार तय नहीं कर सकती। गंभीर या तेजी से बिगड़ते लक्षणों में तुरंत चिकित्सा सहायता लें।")}</p></div>
     </div>
   );
 }

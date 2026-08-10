@@ -9,17 +9,13 @@ interface LanguageToggleProps {
 export default function LanguageToggle({ className = "" }: LanguageToggleProps) {
   const { language, toggleLanguage } = useLanguage();
 
-  const handleToggle = () => {
-    toggleLanguage();
-    console.log(`Language switched to: ${language === "en" ? "Hindi" : "English"}`);
-  };
-
   return (
     <Button
-      variant="outline"
+      variant="ghost"
       size="sm"
-      onClick={handleToggle}
-      className={`flex items-center gap-2 ${className}`}
+      onClick={toggleLanguage}
+      aria-label={language === "en" ? "Switch to Hindi" : "Switch to English"}
+      className={`language-toggle ${className}`}
     >
       <Globe className="h-4 w-4" />
       {language === "en" ? "हिंदी" : "English"}
