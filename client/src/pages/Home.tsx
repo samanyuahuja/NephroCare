@@ -1,382 +1,226 @@
 import { Link } from "wouter";
-import { Brain, ChartLine, Utensils, Stethoscope, Activity } from "lucide-react";
+import {
+  Activity,
+  ArrowRight,
+  ChartLine,
+  FileText,
+  ShieldCheck,
+  Stethoscope,
+  Utensils,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useLanguage, t } from "@/hooks/useLanguage";
+import { t } from "@/hooks/useLanguage";
+
+const tools = [
+  {
+    href: "/diagnosis",
+    icon: Activity,
+    title: ["CKD Risk Assessment", "सीकेडी जोखिम मूल्यांकन"],
+    copy: [
+      "Enter health history and recent report values to receive a preliminary risk estimate.",
+      "प्रारंभिक जोखिम अनुमान के लिए स्वास्थ्य इतिहास और हाल की रिपोर्ट के मान दर्ज करें।",
+    ],
+  },
+  {
+    href: "/symptom-checker",
+    icon: Stethoscope,
+    title: ["Symptom Checker", "लक्षण जांच"],
+    copy: [
+      "Review common kidney-health symptoms and understand when clinical advice may be needed.",
+      "किडनी स्वास्थ्य के सामान्य लक्षणों की समीक्षा करें और समझें कि चिकित्सकीय सलाह कब आवश्यक हो सकती है।",
+    ],
+  },
+  {
+    href: "/browse",
+    icon: FileText,
+    title: ["Reports & History", "रिपोर्ट और इतिहास"],
+    copy: [
+      "Return to completed assessments, reports, and saved diet guidance from this browser.",
+      "इस ब्राउज़र में सहेजे गए मूल्यांकन, रिपोर्ट और आहार मार्गदर्शन दोबारा देखें।",
+    ],
+  },
+];
+
+const steps = [
+  {
+    number: "01",
+    title: ["Use a recent report", "हाल की रिपोर्ट का उपयोग करें"],
+    copy: [
+      "Keep your blood and urine test values nearby before starting the assessment.",
+      "मूल्यांकन शुरू करने से पहले रक्त और मूत्र जांच के मान अपने पास रखें।",
+    ],
+  },
+  {
+    number: "02",
+    title: ["Complete the screening", "स्क्रीनिंग पूरी करें"],
+    copy: [
+      "Add the information you know. Optional fields can be left blank when unavailable.",
+      "जो जानकारी उपलब्ध है वह दर्ज करें। अनुपलब्ध वैकल्पिक फ़ील्ड खाली छोड़े जा सकते हैं।",
+    ],
+  },
+  {
+    number: "03",
+    title: ["Review the result", "परिणाम की समीक्षा करें"],
+    copy: [
+      "Read the estimated risk level and contributing factors, then discuss concerns with a clinician.",
+      "अनुमानित जोखिम और संबंधित कारक पढ़ें, फिर चिंताओं पर चिकित्सक से चर्चा करें।",
+    ],
+  },
+];
 
 export default function Home() {
-  const { language } = useLanguage();
-  
   return (
-    <div className="space-y-12">
-      {/* Hero Section */}
-      <div className="bg-gradient-to-br from-blue-50 via-white to-blue-50 rounded-3xl p-6 md:p-12 lg:p-16 shadow-2xl border border-blue-100">
-        <div className="max-w-5xl mx-auto text-center">
-          {/* Main Title with Enhanced Typography */}
-          <div className="mb-10">
-            <h1 className="text-4xl sm:text-6xl md:text-8xl lg:text-9xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-blue-600 to-blue-800 mb-6 tracking-tight leading-none">
-              {t("NephroCare", "नेफ्रोकेयर")}
+    <div className="space-y-10 md:space-y-14">
+      <section className="overflow-hidden rounded-2xl border border-blue-100 bg-blue-50">
+        <div className="grid gap-10 px-6 py-10 md:px-10 md:py-14 lg:grid-cols-[1.35fr_0.65fr] lg:items-center lg:px-14">
+          <div className="max-w-3xl">
+            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white px-3 py-1.5 text-sm font-semibold text-blue-700">
+              <ShieldCheck className="h-4 w-4" />
+              {t("Kidney health screening", "किडनी स्वास्थ्य स्क्रीनिंग")}
+            </div>
+
+            <h1 className="mb-5 text-4xl font-bold leading-tight text-gray-900 sm:text-5xl lg:text-6xl">
+              {t("Understand your kidney health with greater clarity.", "अपनी किडनी के स्वास्थ्य को अधिक स्पष्टता से समझें।")}
             </h1>
-            <div className="w-32 h-2 bg-gradient-to-r from-blue-500 to-blue-700 mx-auto rounded-full shadow-lg"></div>
-          </div>
-          
-          {/* Enhanced Subheader */}
-          <div className="mb-12">
-            <p className="text-sm sm:text-base md:text-lg lg:text-xl font-semibold text-blue-600 mb-3 tracking-wide uppercase">
+
+            <p className="mb-8 max-w-2xl text-lg leading-8 text-gray-600">
               {t(
-                "India's First Kidney Risk Assessment Tool",
-                "भारत का पहला किडनी जोखिम मूल्यांकन उपकरण"
+                "NephroCare helps you organise symptoms, medical history, and laboratory values into a clear preliminary CKD risk report.",
+                "नेफ्रोकेयर लक्षणों, चिकित्सा इतिहास और लैब मानों को एक स्पष्ट प्रारंभिक सीकेडी जोखिम रिपोर्ट में व्यवस्थित करने में मदद करता है।"
               )}
             </p>
-            <p className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-800 mb-4 leading-tight">
+
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <Button asChild size="lg" className="h-12 px-6 text-base shadow-sm">
+                <Link href="/diagnosis">
+                  <Activity className="h-5 w-5" />
+                  {t("Start assessment", "मूल्यांकन शुरू करें")}
+                </Link>
+              </Button>
+              <Button asChild size="lg" variant="outline" className="h-12 border-blue-200 bg-white px-6 text-base text-blue-700 hover:bg-blue-100">
+                <Link href="/symptom-checker">
+                  <Stethoscope className="h-5 w-5" />
+                  {t("Check symptoms", "लक्षण जांचें")}
+                </Link>
+              </Button>
+            </div>
+
+            <p className="mt-6 text-sm leading-6 text-gray-500">
               {t(
-                "Advanced CKD Prediction & Healthcare Guidance",
-                "उन्नत सीकेडी भविष्यवाणी और स्वास्थ्य देखभाल मार्गदर्शन"
-              )}
-            </p>
-            <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600 max-w-4xl mx-auto leading-relaxed font-medium">
-              {t(
-                "Powered by machine learning algorithms for early detection and personalized recommendations",
-                "प्रारंभिक पहचान और व्यक्तिगत सिफारिशों के लिए मशीन लर्निंग एल्गोरिदम द्वारा संचालित"
+                "For awareness and preliminary screening only. NephroCare does not replace medical diagnosis or treatment.",
+                "केवल जागरूकता और प्रारंभिक स्क्रीनिंग के लिए। नेफ्रोकेयर चिकित्सकीय निदान या उपचार का विकल्प नहीं है।"
               )}
             </p>
           </div>
 
-          {/* Enhanced CTA Buttons */}
-          <div className="flex flex-col lg:flex-row gap-6 justify-center items-center mb-16">
-            <Link href="/diagnosis">
-              <Button className="group relative bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 hover:from-blue-700 hover:via-blue-800 hover:to-blue-900 text-white px-6 sm:px-8 md:px-12 py-4 sm:py-5 md:py-6 text-lg sm:text-xl font-black rounded-2xl sm:rounded-3xl shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 border-0 w-full sm:w-auto sm:min-w-[280px] md:min-w-[300px]">
-                <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 rounded-3xl transition-opacity duration-300"></div>
-                <div className="relative flex items-center justify-center">
-                  <Activity className="mr-2 sm:mr-3 md:mr-4 h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 group-hover:rotate-12 transition-transform duration-300" />
-                  {t("START ASSESSMENT NOW", "अभी मूल्यांकन शुरू करें")}
-                </div>
-                <div className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-blue-400 to-blue-600 opacity-0 group-hover:opacity-30 blur transition-opacity duration-300"></div>
-              </Button>
-            </Link>
-            
-            <Link href="/symptom-checker">
-              <Button variant="outline" className="group px-6 sm:px-8 md:px-10 py-4 sm:py-5 text-base sm:text-lg font-bold rounded-xl sm:rounded-2xl border-2 sm:border-3 border-blue-600 text-blue-700 hover:bg-blue-600 hover:text-white transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 shadow-xl hover:shadow-2xl w-full sm:w-auto sm:min-w-[220px] md:min-w-[240px] bg-white/80 backdrop-blur-sm">
-                <Stethoscope className="mr-2 sm:mr-3 h-5 w-5 sm:h-6 sm:w-6 group-hover:bounce transition-all duration-300" />
-                {t("Check Symptoms", "लक्षण जांचें")}
-              </Button>
-            </Link>
-          </div>
-
-          {/* Trust Indicators */}
-          <div className="flex flex-wrap justify-center items-center gap-4 sm:gap-6 md:gap-8 text-xs sm:text-sm text-gray-500 font-semibold">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-              {t("Machine Learning Powered", "मशीन लर्निंग संचालित")}
+          <div className="rounded-xl border border-blue-100 bg-white p-6 shadow-sm">
+            <div className="mb-6 flex items-center justify-between border-b border-gray-100 pb-4">
+              <div>
+                <p className="text-sm font-medium text-gray-500">{t("Assessment", "मूल्यांकन")}</p>
+                <h2 className="text-xl font-semibold text-gray-900">{t("What you may need", "आपको क्या चाहिए")}</h2>
+              </div>
+              <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-blue-100 text-blue-700">
+                <FileText className="h-6 w-6" />
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
-              {t("Clinically Validated", "चिकित्सकीय रूप से सत्यापित")}
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-purple-500 rounded-full animate-pulse"></div>
-              {t("Personalized Results", "व्यक्तिगत परिणाम")}
-            </div>
+            <ul className="space-y-4 text-sm">
+              <li className="flex items-center justify-between gap-4"><span className="text-gray-700">{t("Health history", "स्वास्थ्य इतिहास")}</span><span className="font-medium text-blue-700">{t("Required", "आवश्यक")}</span></li>
+              <li className="flex items-center justify-between gap-4"><span className="text-gray-700">{t("Blood and urine values", "रक्त और मूत्र मान")}</span><span className="font-medium text-blue-700">{t("Recommended", "अनुशंसित")}</span></li>
+              <li className="flex items-center justify-between gap-4"><span className="text-gray-700">{t("Current symptoms", "वर्तमान लक्षण")}</span><span className="font-medium text-gray-500">{t("Optional", "वैकल्पिक")}</span></li>
+            </ul>
           </div>
         </div>
-      </div>
-      {/* Features Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <Card className="medical-card">
+      </section>
+
+      <section aria-labelledby="tools-heading">
+        <div className="mb-6 max-w-3xl">
+          <p className="mb-2 text-sm font-semibold uppercase text-blue-700">{t("NephroCare tools", "नेफ्रोकेयर उपकरण")}</p>
+          <h2 id="tools-heading" className="text-3xl font-bold text-gray-900">{t("Start with what you need today", "आज अपनी आवश्यकता से शुरुआत करें")}</h2>
+          <p className="mt-3 text-gray-600">{t("Each section is designed for a specific kidney-health task, without unnecessary steps.", "हर अनुभाग एक विशेष किडनी स्वास्थ्य कार्य के लिए बनाया गया है, बिना अनावश्यक चरणों के।")}</p>
+        </div>
+
+        <div className="grid gap-6 md:grid-cols-3">
+          {tools.map((tool) => {
+            const Icon = tool.icon;
+            return (
+              <Card key={tool.href} className="medical-card flex h-full flex-col border-blue-100">
+                <CardHeader>
+                  <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-lg bg-blue-50 text-blue-700">
+                    <Icon className="h-6 w-6" />
+                  </div>
+                  <CardTitle className="text-xl">{t(tool.title[0], tool.title[1])}</CardTitle>
+                </CardHeader>
+                <CardContent className="flex flex-1 flex-col">
+                  <p className="mb-6 flex-1 leading-7 text-gray-600">{t(tool.copy[0], tool.copy[1])}</p>
+                  <Link href={tool.href} className="inline-flex items-center gap-2 font-semibold text-blue-700 hover:text-blue-800">
+                    {t("Open tool", "उपकरण खोलें")}
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      </section>
+
+      <section className="rounded-2xl border border-gray-200 bg-white px-6 py-8 md:px-10 md:py-10" aria-labelledby="steps-heading">
+        <div className="grid gap-8 lg:grid-cols-[0.75fr_1.25fr]">
+          <div>
+            <p className="mb-2 text-sm font-semibold uppercase text-blue-700">{t("How it works", "यह कैसे काम करता है")}</p>
+            <h2 id="steps-heading" className="text-3xl font-bold text-gray-900">{t("A straightforward screening process", "एक सरल स्क्रीनिंग प्रक्रिया")}</h2>
+            <p className="mt-4 leading-7 text-gray-600">{t("The assessment is designed to be completed with information from a recent medical report.", "मूल्यांकन को हाल की मेडिकल रिपोर्ट की जानकारी के साथ पूरा करने के लिए बनाया गया है।")}</p>
+          </div>
+          <div className="divide-y divide-gray-200">
+            {steps.map((step) => (
+              <div key={step.number} className="grid gap-3 py-5 first:pt-0 last:pb-0 sm:grid-cols-[3rem_1fr]">
+                <span className="text-lg font-bold text-blue-600">{step.number}</span>
+                <div>
+                  <h3 className="font-semibold text-gray-900">{t(step.title[0], step.title[1])}</h3>
+                  <p className="mt-1 leading-6 text-gray-600">{t(step.copy[0], step.copy[1])}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="grid gap-6 md:grid-cols-2">
+        <Card className="border-blue-100">
           <CardHeader>
-            <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-4">
-              <Brain className="h-8 w-8 text-primary" />
+            <div className="mb-2 flex h-11 w-11 items-center justify-center rounded-lg bg-blue-50 text-blue-700">
+              <ChartLine className="h-6 w-6" />
             </div>
-            <CardTitle className="text-xl">
-              {t("Advanced Diagnosis", "उन्नत निदान")}
-            </CardTitle>
+            <CardTitle>{t("Clear result context", "स्पष्ट परिणाम संदर्भ")}</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-gray-600">
-              {t(
-                "Sophisticated algorithms analyze your medical parameters to predict CKD risk with high accuracy using proven models.",
-                "परिष्कृत एल्गोरिदम आपके मेडिकल पैरामीटर का विश्लेषण करके सिद्ध मॉडल का उपयोग करके उच्च सटीकता के साथ सीकेडी जोखिम की भविष्यवाणी करते हैं।"
-              )}
-            </p>
+            <p className="leading-7 text-gray-600">{t("Results include the estimated risk level, the information entered, and an explanation of the factors that influenced the estimate.", "परिणाम में अनुमानित जोखिम स्तर, दर्ज की गई जानकारी और अनुमान को प्रभावित करने वाले कारकों की व्याख्या शामिल है।")}</p>
           </CardContent>
         </Card>
-
-        <Card className="medical-card">
+        <Card className="border-blue-100">
           <CardHeader>
-            <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-4">
-              <ChartLine className="h-8 w-8 text-primary" />
+            <div className="mb-2 flex h-11 w-11 items-center justify-center rounded-lg bg-blue-50 text-blue-700">
+              <Utensils className="h-6 w-6" />
             </div>
-            <CardTitle className="text-xl">
-              {t("Explainable Results", "समझने योग्य परिणाम")}
-            </CardTitle>
+            <CardTitle>{t("Practical diet guidance", "व्यावहारिक आहार मार्गदर्शन")}</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-gray-600">
-              {t(
-                "Understand your results with SHAP plots, dependency charts, and clear explanations of risk factors.",
-                "SHAP प्लॉट, निर्भरता चार्ट और जोखिम कारकों के स्पष्ट स्पष्टीकरण के साथ अपने परिणामों को समझें।"
-              )}
-            </p>
+            <p className="leading-7 text-gray-600">{t("Diet suggestions are based on the assessment inputs and are presented as general guidance to discuss with a qualified professional.", "आहार सुझाव मूल्यांकन की जानकारी पर आधारित सामान्य मार्गदर्शन हैं, जिन पर योग्य विशेषज्ञ से चर्चा की जानी चाहिए।")}</p>
           </CardContent>
         </Card>
+      </section>
 
-        <Card className="medical-card">
-          <CardHeader>
-            <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-4">
-              <Utensils className="h-8 w-8 text-primary" />
-            </div>
-            <CardTitle className="text-xl">
-              {t("Smart Diet Plans", "स्मार्ट आहार योजना")}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-gray-600">
-              {t(
-                "Get personalized nutrition recommendations based on your assessment results and dietary preferences.",
-                "अपने मूल्यांकन परिणामों और आहार वरीयताओं के आधार पर व्यक्तिगत पोषण सिफारिशें प्राप्त करें।"
-              )}
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-      {/* Statistics Section */}
-      <Card>
-        <CardContent className="p-4 sm:p-6 md:p-8">
-          <div className="text-center mb-6 md:mb-8">
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
-              {t("Trusted by Healthcare Professionals", "स्वास्थ्य पेशेवरों द्वारा भरोसेमंद")}
-            </h2>
-            <p className="text-gray-600">
-              {t(
-                "Our prediction model has been validated with clinical data and provides reliable insights.",
-                "हमारे भविष्यवाणी मॉडल को क्लिनिकल डेटा के साथ मान्यता प्राप्त है और विश्वसनीय अंतर्दृष्टि प्रदान करता है।"
-              )}
-            </p>
+      <section className="rounded-2xl border border-blue-100 bg-blue-50 p-6 md:p-8">
+        <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+          <div className="max-w-2xl">
+            <h2 className="text-2xl font-bold text-gray-900">{t("Ready to review your kidney-health information?", "अपनी किडनी स्वास्थ्य जानकारी की समीक्षा के लिए तैयार हैं?")}</h2>
+            <p className="mt-2 text-gray-600">{t("The assessment usually takes only a few minutes when your report values are ready.", "रिपोर्ट के मान तैयार होने पर मूल्यांकन में सामान्यतः कुछ ही मिनट लगते हैं।")}</p>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 md:gap-8 text-center">
-            <div>
-              <div className="text-2xl sm:text-3xl font-bold text-primary mb-2">95%</div>
-              <div className="text-sm sm:text-base text-gray-600">{t("Accuracy Rate", "सटीकता दर")}</div>
-            </div>
-            <div>
-              <div className="text-2xl sm:text-3xl font-bold text-primary mb-2">10,000+</div>
-              <div className="text-sm sm:text-base text-gray-600">{t("Assessments", "मूल्यांकन")}</div>
-            </div>
-            <div>
-              <div className="text-2xl sm:text-3xl font-bold text-primary mb-2">1000+</div>
-              <div className="text-sm sm:text-base text-gray-600">{t("Hours of Development", "विकास के घंटे")}</div>
-            </div>
-            <div>
-              <div className="text-2xl sm:text-3xl font-bold text-primary mb-2">24/7</div>
-              <div className="text-sm sm:text-base text-gray-600">{t("AI Support", "एआई सहायता")}</div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Patient Testimonials */}
-      <Card>
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl sm:text-3xl font-bold text-gray-900">
-            {t("Patient Success Stories", "रोगी सफलता की कहानियाँ")}
-          </CardTitle>
-          <p className="text-gray-600">
-            {t("Real experiences from patients across India", "भारत भर के रोगियों के वास्तविक अनुभव")}
-          </p>
-        </CardHeader>
-        <CardContent className="p-4 sm:p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="bg-gradient-to-br from-blue-50 to-white p-6 rounded-xl border-2 border-blue-100 shadow-md" data-testid="testimonial-1">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                  RS
-                </div>
-                <div className="ml-3">
-                  <h4 className="font-semibold text-gray-900">Ramesh Sharma</h4>
-                  <p className="text-sm text-gray-600">Mumbai, Maharashtra</p>
-                </div>
-              </div>
-              <p className="text-gray-700 leading-relaxed">
-                {t(
-                  "This platform helped me catch my kidney problems early. The detailed explanations and diet recommendations have been invaluable in managing my condition. Highly recommend for anyone concerned about kidney health.",
-                  "इस प्लेटफॉर्म ने मुझे अपनी किडनी की समस्याओं को जल्दी पकड़ने में मदद की। विस्तृत स्पष्टीकरण और आहार सिफारिशें मेरी स्थिति के प्रबंधन में अमूल्य रही हैं। किडनी स्वास्थ्य के बारे में चिंतित किसी भी व्यक्ति के लिए अत्यधिक अनुशंसित।"
-                )}
-              </p>
-            </div>
-
-            <div className="bg-gradient-to-br from-blue-50 to-white p-6 rounded-xl border-2 border-blue-100 shadow-md" data-testid="testimonial-2">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                  PK
-                </div>
-                <div className="ml-3">
-                  <h4 className="font-semibold text-gray-900">Priya Kapoor</h4>
-                  <p className="text-sm text-gray-600">Delhi</p>
-                </div>
-              </div>
-              <p className="text-gray-700 leading-relaxed">
-                {t(
-                  "As a diabetic patient, I was worried about kidney complications. NephroCare's assessment gave me peace of mind and actionable steps. The chatbot answered all my questions with medical accuracy.",
-                  "एक मधुमेह रोगी के रूप में, मुझे किडनी जटिलताओं की चिंता थी। नेफ्रोकेयर के मूल्यांकन ने मुझे मानसिक शांति और कार्रवाई योग्य कदम दिए। चैटबॉट ने मेरे सभी प्रश्नों का चिकित्सा सटीकता के साथ उत्तर दिया।"
-                )}
-              </p>
-            </div>
-
-            <div className="bg-gradient-to-br from-blue-50 to-white p-6 rounded-xl border-2 border-blue-100 shadow-md" data-testid="testimonial-3">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                  VR
-                </div>
-                <div className="ml-3">
-                  <h4 className="font-semibold text-gray-900">Vikram Reddy</h4>
-                  <p className="text-sm text-gray-600">Hyderabad, Telangana</p>
-                </div>
-              </div>
-              <p className="text-gray-700 leading-relaxed">
-                {t(
-                  "The SHAP analysis helped me understand which of my health parameters were most concerning. I showed the report to my doctor who appreciated the detailed breakdown. Very professional tool.",
-                  "SHAP विश्लेषण ने मुझे यह समझने में मदद की कि मेरे कौन से स्वास्थ्य मापदंड सबसे अधिक चिंताजनक थे। मैंने रिपोर्ट अपने डॉक्टर को दिखाई, जिन्होंने विस्तृत विवरण की सराहना की। बहुत पेशेवर उपकरण।"
-                )}
-              </p>
-            </div>
-
-            <div className="bg-gradient-to-br from-blue-50 to-white p-6 rounded-xl border-2 border-blue-100 shadow-md" data-testid="testimonial-4">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                  AM
-                </div>
-                <div className="ml-3">
-                  <h4 className="font-semibold text-gray-900">Anjali Mehta</h4>
-                  <p className="text-sm text-gray-600">Ahmedabad, Gujarat</p>
-                </div>
-              </div>
-              <p className="text-gray-700 leading-relaxed">
-                {t(
-                  "My father has been dealing with high blood pressure for years. This tool identified his early stage kidney issues before symptoms appeared. The preventive diet plan has made a real difference in his health.",
-                  "मेरे पिता वर्षों से उच्च रक्तचाप से जूझ रहे हैं। इस उपकरण ने लक्षण प्रकट होने से पहले उनकी प्रारंभिक चरण की किडनी समस्याओं की पहचान की। निवारक आहार योजना ने उनके स्वास्थ्य में वास्तविक अंतर लाया है।"
-                )}
-              </p>
-            </div>
-
-            <div className="bg-gradient-to-br from-blue-50 to-white p-6 rounded-xl border-2 border-blue-100 shadow-md" data-testid="testimonial-5">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                  SK
-                </div>
-                <div className="ml-3">
-                  <h4 className="font-semibold text-gray-900">Suresh Kumar</h4>
-                  <p className="text-sm text-gray-600">Bangalore, Karnataka</p>
-                </div>
-              </div>
-              <p className="text-gray-700 leading-relaxed">
-                {t(
-                  "Being a tech professional, I appreciated the scientific approach with machine learning models. The predictions were accurate and matched my clinical diagnosis. Great initiative for public health awareness.",
-                  "एक तकनीकी पेशेवर होने के नाते, मैंने मशीन लर्निंग मॉडल के साथ वैज्ञानिक दृष्टिकोण की सराहना की। भविष्यवाणियां सटीक थीं और मेरे नैदानिक निदान से मेल खाती थीं। सार्वजनिक स्वास्थ्य जागरूकता के लिए महान पहल।"
-                )}
-              </p>
-            </div>
-
-            <div className="bg-gradient-to-br from-blue-50 to-white p-6 rounded-xl border-2 border-blue-100 shadow-md" data-testid="testimonial-6">
-              <div className="flex items-center mb-4">
-                <div className="w-12 h-12 bg-teal-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                  MG
-                </div>
-                <div className="ml-3">
-                  <h4 className="font-semibold text-gray-900">Meera Gupta</h4>
-                  <p className="text-sm text-gray-600">Pune, Maharashtra</p>
-                </div>
-              </div>
-              <p className="text-gray-700 leading-relaxed">
-                {t(
-                  "The personalized diet recommendations based on my lab results were spot on. I have been following them for three months and my creatinine levels have stabilized. Thank you for this wonderful service.",
-                  "मेरे लैब परिणामों के आधार पर व्यक्तिगत आहार सिफारिशें बिल्कुल सटीक थीं। मैं तीन महीने से उनका पालन कर रही हूं और मेरे क्रिएटिनिन स्तर स्थिर हो गए हैं। इस अद्भुत सेवा के लिए धन्यवाद।"
-                )}
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Medical Professional Endorsement */}
-      <Card className="bg-gradient-to-br from-green-50 via-white to-green-50 border-2 border-green-200">
-        <CardContent className="p-6 sm:p-8">
-          <div className="flex items-start gap-4">
-            <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center text-white font-bold text-2xl flex-shrink-0">
-              DC
-            </div>
-            <div className="flex-1">
-              <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
-                Dr. Davindar Chopra
-              </h3>
-              <p className="text-green-700 font-semibold mb-3">
-                Chopra Hospital, Chandigarh
-              </p>
-              <blockquote className="text-gray-700 text-lg leading-relaxed border-l-4 border-green-500 pl-4">
-                {t(
-                  "Great app, valuable for the society for diabetic and CKD patients, has a high accuracy rate.",
-                  "महान ऐप, मधुमेह और सीकेडी रोगियों के लिए समाज के लिए मूल्यवान, उच्च सटीकता दर है।"
-                )}
-              </blockquote>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* FAQ Section */}
-      <Card>
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl sm:text-3xl font-bold text-gray-900">
-            {t("Frequently Asked Questions", "अक्सर पूछे जाने वाले प्रश्न")}
-          </CardTitle>
-          <p className="text-gray-600">
-            {t("Get quick answers to common questions about CKD assessment", "CKD मूल्यांकन के बारे में सामान्य प्रश्नों के त्वरित उत्तर प्राप्त करें")}
-          </p>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-6">
-            <div className="border-l-4 border-blue-500 pl-4">
-              <h3 className="font-semibold text-lg mb-2">
-                {t("How accurate is the CKD prediction?", "CKD भविष्यवाणी कितनी सटीक है?")}
-              </h3>
-              <p className="text-gray-600">
-                {t("Our ML model achieves 95% accuracy using validated clinical parameters including serum creatinine, blood urea, and other key biomarkers.", "हमारा ML मॉडल सीरम क्रिएटिनिन, ब्लड यूरिया और अन्य प्रमुख बायोमार्कर सहित मान्यता प्राप्त क्लिनिकल मापदंडों का उपयोग करके 95% सटीकता प्राप्त करता है।")}
-              </p>
-            </div>
-            <div className="border-l-4 border-green-500 pl-4">
-              <h3 className="font-semibold text-lg mb-2">
-                {t("What medical reports do I need?", "मुझे किन मेडिकल रिपोर्ट्स की आवश्यकता है?")}
-              </h3>
-              <p className="text-gray-600">
-                {t("You'll need blood tests showing creatinine, urea, glucose levels, and urine analysis for albumin and other parameters. Check our Medical Report Locator guide.", "आपको क्रिएटिनिन, यूरिया, ग्लूकोज़ के स्तर दिखाने वाले रक्त परीक्षण और एल्ब्यूमिन और अन्य मापदंडों के लिए मूत्र विश्लेषण की आवश्यकता होगी। हमारी मेडिकल रिपोर्ट लोकेटर गाइड देखें।")}
-              </p>
-            </div>
-            <div className="border-l-4 border-purple-500 pl-4">
-              <h3 className="font-semibold text-lg mb-2">
-                {t("Can I trust this for medical decisions?", "क्या मैं चिकित्सा निर्णयों के लिए इस पर भरोसा कर सकता हूं?")}
-              </h3>
-              <p className="text-gray-600">
-                {t("This is a screening tool only. Always consult qualified healthcare professionals for diagnosis and treatment decisions. Our predictions are meant to guide early awareness.", "यह केवल एक स्क्रीनिंग टूल है। निदान और उपचार निर्णयों के लिए हमेशा योग्य स्वास्थ्य पेशेवरों से सलाह लें। हमारी भविष्यवाणियां प्रारंभिक जागरूकता का मार्गदर्शन करने के लिए हैं।")}
-              </p>
-            </div>
-            <div className="border-l-4 border-orange-500 pl-4">
-              <h3 className="font-semibold text-lg mb-2">
-                {t("How does the diet plan work?", "आहार योजना कैसे काम करती है?")}
-              </h3>
-              <p className="text-gray-600">
-                {t("Based on your risk assessment, we generate personalized dietary recommendations focusing on kidney-friendly foods, protein management, and sodium control.", "आपके जोखिम मूल्यांकन के आधार पर, हम किडनी-फ्रेंडली खाद्य पदार्थों, प्रोटीन प्रबंधन और सोडियम नियंत्रण पर ध्यान देने वाली व्यक्तिगत आहार सिफारिशें बनाते हैं।")}
-              </p>
-            </div>
-            <div className="border-l-4 border-red-500 pl-4">
-              <h3 className="font-semibold text-lg mb-2">
-                {t("Is my health data secure?", "क्या मेरा स्वास्थ्य डेटा सुरक्षित है?")}
-              </h3>
-              <p className="text-gray-600">
-                {t("Yes, all assessments are stored locally in your browser only. We don't store personal health information on our servers, ensuring complete privacy.", "हां, सभी मूल्यांकन केवल आपके ब्राउज़र में स्थानीय रूप से संग्रहीत हैं। हम अपने सर्वर पर व्यक्तिगत स्वास्थ्य जानकारी संग्रहीत नहीं करते हैं, जिससे पूर्ण गोपनीयता सुनिश्चित होती है।")}
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+          <Button asChild size="lg" className="h-12 shrink-0 px-6">
+            <Link href="/diagnosis">{t("Begin assessment", "मूल्यांकन शुरू करें")}<ArrowRight className="h-5 w-5" /></Link>
+          </Button>
+        </div>
+      </section>
     </div>
   );
 }

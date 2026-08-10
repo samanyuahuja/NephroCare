@@ -28,7 +28,7 @@ export default function Layout({ children }: LayoutProps) {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Navigation */}
-      <nav className="bg-white dark:bg-gray-900 shadow-lg border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50">
+      <nav className="bg-white dark:bg-gray-900 shadow-sm border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
@@ -43,9 +43,9 @@ export default function Layout({ children }: LayoutProps) {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
                     location === item.href
-                      ? "text-primary bg-primary/10 shadow-sm"
+                      ? "text-primary bg-primary/10"
                       : "text-gray-600 dark:text-gray-300 hover:text-primary hover:bg-gray-50 dark:hover:bg-gray-800"
                   }`}
                 >
@@ -78,9 +78,9 @@ export default function Layout({ children }: LayoutProps) {
                         <Link
                           key={item.href}
                           href={item.href}
-                          className={`block px-4 py-3 rounded-lg text-base font-medium transition-all duration-200 ${
+                          className={`block px-4 py-3 rounded-lg text-base font-medium transition-colors duration-200 ${
                             location === item.href
-                              ? "text-primary bg-primary/10 shadow-sm"
+                              ? "text-primary bg-primary/10"
                               : "text-gray-600 dark:text-gray-300 hover:text-primary hover:bg-gray-50 dark:hover:bg-gray-800"
                           }`}
                           onClick={() => setIsOpen(false)}
@@ -118,8 +118,8 @@ export default function Layout({ children }: LayoutProps) {
               </div>
               <p className="text-gray-400">
                 {t(
-                  "Professional kidney health prediction and personalized care solutions.",
-                  "पेशेवर गुर्दे के स्वास्थ्य की भविष्यवाणी और व्यक्तिगत देखभाल समाधान।"
+                  "Kidney health screening, clear reports, and practical guidance.",
+                  "किडनी स्वास्थ्य स्क्रीनिंग, स्पष्ट रिपोर्ट और व्यावहारिक मार्गदर्शन।"
                 )}
               </p>
             </div>
@@ -141,7 +141,7 @@ export default function Layout({ children }: LayoutProps) {
             <div>
               <h3 className="text-white font-semibold mb-4">{t("Features", "विशेषताएं")}</h3>
               <ul className="space-y-2 text-gray-400">
-                <li>{t("ML-powered Prediction", "एमएल-संचालित भविष्यवाणी")}</li>
+                <li>{t("CKD Risk Screening", "सीकेडी जोखिम स्क्रीनिंग")}</li>
                 <li>{t("Personalized Diet Plans", "व्यक्तिगत आहार योजना")}</li>
                 <li>{t("Risk Assessment", "जोखिम मूल्यांकन")}</li>
                 <li>{t("Symptom Checker", "लक्षण चेकर")}</li>
@@ -168,7 +168,7 @@ export default function Layout({ children }: LayoutProps) {
           </div>
           <div className="border-t border-gray-700 mt-8 pt-8 text-center">
             <p className="text-gray-400">
-              © 2025 NephroCare. Built by Samanyu Ahuja for kidney health awareness.
+              © 2026 NephroCare. Built by Samanyu Ahuja for kidney health awareness.
             </p>
           </div>
         </div>

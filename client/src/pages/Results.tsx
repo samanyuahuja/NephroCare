@@ -478,7 +478,7 @@ export default function Results({ params }: ResultsProps) {
           </Badge>
           
           <p className="text-gray-600 text-lg max-w-2xl mx-auto mb-6">
-            Based on your medical parameters, our ML model indicates a {riskLevel.toLowerCase()} 
+            Based on the medical information entered, this screening indicates a {riskLevel.toLowerCase()}
             for Chronic Kidney Disease. {riskLevel.toLowerCase().includes('high') ? 
             'Please consult with a healthcare professional for proper medical evaluation.' :
             'Continue monitoring your kidney health and maintain healthy lifestyle habits.'}
@@ -579,7 +579,7 @@ export default function Results({ params }: ResultsProps) {
           </CardContent>
         </Card>
 
-        {/* AI Chatbot Preview */}
+        {/* NephroBot Preview */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
@@ -631,7 +631,7 @@ export default function Results({ params }: ResultsProps) {
             <Link href="/chatbot">
               <Button className="w-full">
                 <MessageCircle className="mr-2 h-4 w-4" />
-                Ask AI Assistant
+                Ask NephroBot
               </Button>
             </Link>
           </CardContent>
@@ -741,7 +741,7 @@ export default function Results({ params }: ResultsProps) {
             <Link href={`/diet-plan/${assessmentId}`}>
               <Button size="lg" className="bg-green-600 hover:bg-green-700">
                 <Utensils className="mr-2 h-4 w-4" />
-                {t("Generate AI Diet Plan", "AI आहार योजना बनाएं")}
+                {t("Create Diet Plan", "आहार योजना बनाएं")}
               </Button>
             </Link>
             <Button size="lg" variant="outline" onClick={downloadReport}>
@@ -751,7 +751,7 @@ export default function Results({ params }: ResultsProps) {
             <Link href="/chatbot">
               <Button size="lg" variant="outline">
                 <MessageCircle className="mr-2 h-4 w-4" />
-                {t("Ask AI Questions", "AI से प्रश्न पूछें")}
+                {t("Ask NephroBot", "नेफ्रोबॉट से पूछें")}
               </Button>
             </Link>
           </div>

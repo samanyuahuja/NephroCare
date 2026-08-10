@@ -591,12 +591,12 @@ export default function DietPlan({ params }: DietPlanProps) {
             try {
               const shapAnalysis = generateShapBasedDietAnalysis(assessment);
               return (
-                <div className="mb-8 p-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
+                <div className="mb-8 rounded-lg border border-blue-200 bg-blue-50 p-6">
                   <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
                     <svg className="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 00-2-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                     </svg>
-                    {t("AI-Powered SHAP Analysis for Your Diet Plan", "आपकी आहार योजना के लिए AI-संचालित SHAP विश्लेषण")}
+                    {t("Diet Plan Factor Analysis", "आहार योजना कारक विश्लेषण")}
                   </h3>
                   
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
