@@ -1,10 +1,10 @@
-import { Link, useLocation } from "wouter";
+import { useState } from "react";
 import { Activity, Menu } from "lucide-react";
+import { Link, useLocation } from "wouter";
+import LanguageToggle from "@/components/LanguageToggle";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { useState } from "react";
-import LanguageToggle from "@/components/LanguageToggle";
-import { useLanguage, t } from "@/hooks/useLanguage";
+import { t } from "@/hooks/useLanguage";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -13,164 +13,100 @@ interface LayoutProps {
 export default function Layout({ children }: LayoutProps) {
   const [location] = useLocation();
   const [isOpen, setIsOpen] = useState(false);
-  const { language } = useLanguage();
 
   const navItems = [
-    { href: "/", label: t("Home", "होम") },
+    { href: "/", label: t("Overview", "अवलोकन") },
     { href: "/diagnosis", label: t("Assessment", "मूल्यांकन") },
-    { href: "/browse", label: t("Browse", "ब्राउज़") },
     { href: "/symptom-checker", label: t("Symptoms", "लक्षण") },
+    { href: "/browse", label: t("Reports", "रिपोर्ट") },
     { href: "/chatbot", label: t("NephroBot", "नेफ्रोबॉट") },
-    { href: "/about", label: t("About", "के बारे में") },
-    { href: "/about-ckd", label: t("About CKD", "सीकेडी के बारे में") },
+    { href: "/about-ckd", label: t("CKD guide", "सीकेडी गाइड") },
+    { href: "/about", label: t("About", "परिचय") },
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Navigation */}
-      <nav className="bg-white dark:bg-gray-900 shadow-lg border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            {/* Logo */}
-            <Link href="/" className="flex items-center space-x-3">
-              <Activity className="h-8 w-8 text-primary" />
-              <span className="text-xl font-bold text-gray-900 dark:text-white">NephroCare</span>
-            </Link>
+    <div className="site-shell">
+      <header className="site-header">
+        <div className="site-header__inner">
+          <Link href="/" className="site-brand" aria-label="NephroCare home">
+            <Activity aria-hidden="true" />
+            <span>NephroCare</span>
+          </Link>
 
-            {/* Desktop Navigation */}
-            <div className="hidden lg:flex items-center space-x-1">
-              {navItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                    location === item.href
-                      ? "text-primary bg-primary/10 shadow-sm"
-                      : "text-gray-600 dark:text-gray-300 hover:text-primary hover:bg-gray-50 dark:hover:bg-gray-800"
-                  }`}
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </div>
+          <nav className="site-nav" aria-label={t("Primary navigation", "मुख्य नेविगेशन")}>
+            {navItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={location === item.href ? "is-active" : ""}
+                aria-current={location === item.href ? "page" : undefined}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
 
-            {/* Right Side Actions */}
-            <div className="flex items-center space-x-4">
-              <div className="hidden lg:block">
-                <LanguageToggle />
-              </div>
-
-              {/* Mobile Menu Button */}
-              <div className="lg:hidden">
-                <Sheet open={isOpen} onOpenChange={setIsOpen}>
-                  <SheetTrigger asChild>
-                    <Button variant="ghost" size="icon" className="text-gray-600 dark:text-gray-300 hover:text-primary">
-                      <Menu className="h-6 w-6" />
-                    </Button>
-                  </SheetTrigger>
-                  <SheetContent side="right" className="w-80">
-                    <div className="flex items-center space-x-3 mb-8">
-                      <Activity className="h-8 w-8 text-primary" />
-                      <span className="text-xl font-bold text-gray-900 dark:text-white">NephroCare</span>
-                    </div>
-                    <nav className="space-y-2">
-                      {navItems.map((item) => (
-                        <Link
-                          key={item.href}
-                          href={item.href}
-                          className={`block px-4 py-3 rounded-lg text-base font-medium transition-all duration-200 ${
-                            location === item.href
-                              ? "text-primary bg-primary/10 shadow-sm"
-                              : "text-gray-600 dark:text-gray-300 hover:text-primary hover:bg-gray-50 dark:hover:bg-gray-800"
-                          }`}
-                          onClick={() => setIsOpen(false)}
-                        >
-                          {item.label}
-                        </Link>
-                      ))}
-                      <div className="pt-6 border-t border-gray-200 dark:border-gray-700 mt-6">
-                        <div className="flex justify-center">
-                          <LanguageToggle />
-                        </div>
-                      </div>
-                    </nav>
-                  </SheetContent>
-                </Sheet>
-              </div>
+          <div className="site-header__actions">
+            <span className="site-status"><i />{t("Screening tool", "स्क्रीनिंग टूल")}</span>
+            <LanguageToggle />
+            <div className="site-mobile-menu">
+              <Sheet open={isOpen} onOpenChange={setIsOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon" aria-label={t("Open navigation", "नेविगेशन खोलें")}>
+                    <Menu />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="site-mobile-panel">
+                  <div className="site-brand site-brand--panel">
+                    <Activity aria-hidden="true" />
+                    <span>NephroCare</span>
+                  </div>
+                  <nav aria-label={t("Mobile navigation", "मोबाइल नेविगेशन")}>
+                    {navItems.map((item) => (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        className={location === item.href ? "is-active" : ""}
+                        onClick={() => setIsOpen(false)}
+                      >
+                        {item.label}
+                      </Link>
+                    ))}
+                  </nav>
+                  <LanguageToggle className="site-mobile-language" />
+                </SheetContent>
+              </Sheet>
             </div>
           </div>
         </div>
-      </nav>
+      </header>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className={location === "/" ? "site-main site-main--home" : "site-main"}>
         {children}
       </main>
 
-      {/* Footer */}
-      <footer className="bg-gray-900 text-gray-300 py-12 mt-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-              <div className="flex items-center space-x-3 mb-4">
-                <Activity className="h-8 w-8 text-primary" />
-                <span className="text-xl font-bold text-white">NephroCare</span>
-              </div>
-              <p className="text-gray-400">
-                {t(
-                  "Professional kidney health prediction and personalized care solutions.",
-                  "पेशेवर गुर्दे के स्वास्थ्य की भविष्यवाणी और व्यक्तिगत देखभाल समाधान।"
-                )}
-              </p>
+      <footer className="site-footer">
+        <div className="site-footer__inner">
+          <div className="site-footer__brand">
+            <div className="site-brand site-brand--footer">
+              <Activity aria-hidden="true" />
+              <span>NephroCare</span>
             </div>
-            <div>
-              <h3 className="text-white font-semibold mb-4">{t("Quick Links", "त्वरित लिंक")}</h3>
-              <ul className="space-y-2">
-                {navItems.map((item) => (
-                  <li key={item.href}>
-                    <Link
-                      href={item.href}
-                      className="hover:text-white transition-colors"
-                    >
-                      {item.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-white font-semibold mb-4">{t("Features", "विशेषताएं")}</h3>
-              <ul className="space-y-2 text-gray-400">
-                <li>{t("ML-powered Prediction", "एमएल-संचालित भविष्यवाणी")}</li>
-                <li>{t("Personalized Diet Plans", "व्यक्तिगत आहार योजना")}</li>
-                <li>{t("Risk Assessment", "जोखिम मूल्यांकन")}</li>
-                <li>{t("Symptom Checker", "लक्षण चेकर")}</li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-white font-semibold mb-4">{t("Contact & Support", "संपर्क और सहायता")}</h3>
-              <ul className="space-y-2 text-gray-400">
-                <li>{t("Developer: Samanyu Ahuja", "डेवलपर: समन्यु अहुजा")}</li>
-                <li>
-                  <a href="mailto:nephrocareai@gmail.com" className="hover:text-white transition-colors">
-                    nephrocareai@gmail.com
-                  </a>
-                </li>
-                <li>
-                  <a href="https://instagram.com/nephrocareai" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
-                    @nephrocareai
-                  </a>
-                </li>
-                <li>{t("Medical Guidance", "चिकित्सा मार्गदर्शन")}</li>
-                <li>{t("Health Resources", "स्वास्थ्य संसाधन")}</li>
-              </ul>
-            </div>
+            <p>{t("Kidney health screening and education.", "किडनी स्वास्थ्य स्क्रीनिंग और शिक्षा।")}</p>
           </div>
-          <div className="border-t border-gray-700 mt-8 pt-8 text-center">
-            <p className="text-gray-400">
-              © 2025 NephroCare. Built by Samanyu Ahuja for kidney health awareness.
-            </p>
+          <div className="site-footer__links">
+            <Link href="/diagnosis">{t("Start assessment", "मूल्यांकन शुरू करें")}</Link>
+            <Link href="/about-ckd">{t("Read the CKD guide", "सीकेडी गाइड पढ़ें")}</Link>
+            <a href="mailto:nephrocareai@gmail.com">nephrocareai@gmail.com</a>
           </div>
+          <div className="site-footer__disclaimer">
+            <strong>{t("Medical notice", "चिकित्सा सूचना")}</strong>
+            <p>{t("This platform supports education and preliminary screening. It is not a substitute for professional medical advice, diagnosis, or treatment.", "यह प्लेटफॉर्म शिक्षा और प्रारंभिक स्क्रीनिंग में सहायता करता है। यह पेशेवर चिकित्सा सलाह, निदान या उपचार का विकल्प नहीं है।")}</p>
+          </div>
+        </div>
+        <div className="site-footer__bottom">
+          <span>© 2026 NephroCare</span>
+          <span>{t("Built by Samanyu Ahuja", "समन्यु अहुजा द्वारा निर्मित")}</span>
         </div>
       </footer>
     </div>
