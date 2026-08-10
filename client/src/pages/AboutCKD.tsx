@@ -246,7 +246,7 @@ export default function AboutCKD() {
       <Card className="mb-8">
         <CardHeader>
           <CardTitle className="flex items-center">
-            <Activity className="mr-3 h-5 w-5 text-purple-500" />
+            <Activity className="mr-3 h-5 w-5 text-blue-600" />
             Key Laboratory Tests
           </CardTitle>
         </CardHeader>

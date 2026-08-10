@@ -61,6 +61,227 @@
   }
 }
 
+.site-scroll-progress {
+  position: fixed;
+  z-index: 70;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  transform-origin: left center;
+  background: hsl(207, 90%, 54%);
+  pointer-events: none;
+}
+
+html[data-motion-ready="true"] [data-motion-reveal],
+html[data-motion-ready="true"] [data-motion-item] {
+  opacity: 0;
+  transform: translateY(28px) scale(0.985);
+}
+
+html[data-motion-ready="true"] [data-motion-item] {
+  transform: translateY(18px);
+}
+
+html[data-motion-ready="true"] [data-motion-state="visible"] {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  transition:
+    opacity 640ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.nephrocare-hero {
+  position: relative;
+  isolation: isolate;
+}
+
+.nephrocare-hero::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  right: -12%;
+  bottom: -42%;
+  width: 52%;
+  aspect-ratio: 1;
+  border: 1px solid hsl(207, 82%, 88%);
+  border-radius: 50%;
+}
+
+.screening-journey {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid hsl(214, 75%, 88%);
+  border-radius: 12px;
+  background: hsl(0, 0%, 100%);
+  box-shadow: 0 18px 48px hsla(215, 40%, 30%, 0.1);
+  overflow: hidden;
+}
+
+.screening-journey__header,
+.screening-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.screening-journey__header {
+  padding: 20px 22px;
+  border-bottom: 1px solid hsl(214, 32%, 92%);
+}
+
+.screening-journey__header div,
+.screening-summary > div:first-child {
+  display: grid;
+  gap: 2px;
+}
+
+.screening-journey__header span,
+.screening-summary span {
+  color: hsl(215, 16%, 47%);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.screening-journey__header strong,
+.screening-summary strong {
+  color: hsl(220, 25%, 12%);
+  font-size: 16px;
+}
+
+.screening-journey__header > svg {
+  width: 28px;
+  height: 28px;
+  color: hsl(207, 90%, 54%);
+}
+
+.screening-journey__inputs {
+  display: grid;
+  gap: 10px;
+  padding: 18px 22px 8px;
+}
+
+.screening-input {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) 20px;
+  align-items: center;
+  gap: 10px;
+}
+
+.screening-input > svg:first-child {
+  width: 17px;
+  height: 17px;
+  color: hsl(207, 70%, 45%);
+}
+
+.screening-input > svg:last-child {
+  width: 16px;
+  height: 16px;
+  color: hsl(142, 60%, 38%);
+}
+
+.screening-input div {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.screening-input span {
+  color: hsl(215, 22%, 30%);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.screening-input i {
+  display: block;
+  width: 100%;
+  height: 4px;
+  border-radius: 4px;
+  background: hsl(214, 40%, 94%);
+  overflow: hidden;
+}
+
+.screening-input b {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: hsl(207, 90%, 54%);
+  transform-origin: left center;
+}
+
+.screening-journey__path {
+  position: relative;
+  height: 54px;
+  margin: 0 22px;
+}
+
+.screening-journey__path svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.screening-path__track,
+.screening-path__active {
+  fill: none;
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+
+.screening-path__track {
+  stroke: hsl(214, 32%, 91%);
+}
+
+.screening-path__active {
+  stroke: hsl(207, 90%, 54%);
+}
+
+.screening-journey__path span {
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  transform: translateY(-50%);
+  border: 1px solid hsl(207, 80%, 82%);
+  border-radius: 50%;
+  color: hsl(207, 90%, 45%);
+  background: white;
+}
+
+.screening-journey__path span svg {
+  width: 16px;
+  height: 16px;
+}
+
+.screening-summary {
+  margin: 0 22px 22px;
+  padding: 16px;
+  border: 1px solid hsl(207, 70%, 88%);
+  border-radius: 8px;
+  background: hsl(214, 100%, 97%);
+}
+
+.screening-summary__status {
+  display: inline-flex !important;
+  grid-auto-flow: column;
+  align-items: center;
+  gap: 6px !important;
+  color: hsl(142, 58%, 32%);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.screening-summary__status i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: hsl(142, 62%, 40%);
+}
+
 /* Medical themed styles */
 .medical-gradient {
   background: hsl(207, 90%, 54%);
@@ -81,6 +302,52 @@
 /* Animation for medical cards */
 .medical-card {
   @apply transition-shadow duration-200 hover:shadow-md;
+}
+
+@media (max-width: 640px) {
+  html[data-motion-ready="true"] [data-motion-reveal],
+  html[data-motion-ready="true"] [data-motion-item] {
+    transform: translateY(16px);
+  }
+
+  .nephrocare-hero::after {
+    right: -35%;
+    bottom: -10%;
+    width: 92%;
+  }
+
+  .screening-journey__header,
+  .screening-journey__inputs {
+    padding-right: 18px;
+    padding-left: 18px;
+  }
+
+  .screening-journey__path,
+  .screening-summary {
+    margin-right: 18px;
+    margin-left: 18px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  html[data-motion-ready="true"] [data-motion-reveal],
+  html[data-motion-ready="true"] [data-motion-item] {
+    opacity: 1;
+    transform: none;
+  }
+
+  .site-scroll-progress {
+    display: none;
+  }
 }
 
 /* SHAP plot styles */

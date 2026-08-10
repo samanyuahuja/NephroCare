@@ -3,7 +3,9 @@ import { Activity, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useState } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import LanguageToggle from "@/components/LanguageToggle";
+import SiteMotion from "@/components/SiteMotion";
 import { useLanguage, t } from "@/hooks/useLanguage";
 
 interface LayoutProps {
@@ -14,6 +16,7 @@ export default function Layout({ children }: LayoutProps) {
   const [location] = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const { language } = useLanguage();
+  const reduceMotion = useReducedMotion();
 
   const navItems = [
     { href: "/", label: t("Home", "होम") },
@@ -27,6 +30,7 @@ export default function Layout({ children }: LayoutProps) {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <SiteMotion routeKey={location} />
       {/* Navigation */}
       <nav className="bg-white dark:bg-gray-900 shadow-sm border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -103,9 +107,18 @@ export default function Layout({ children }: LayoutProps) {
       </nav>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {children}
-      </main>
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.main
+          key={location}
+          className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
+          initial={reduceMotion ? false : { opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={reduceMotion ? undefined : { opacity: 0, y: -6 }}
+          transition={{ duration: 0.36, ease: [0.22, 1, 0.36, 1] }}
+        >
+          {children}
+        </motion.main>
+      </AnimatePresence>
 
       {/* Footer */}
       <footer className="bg-gray-900 text-gray-300 py-12 mt-16">

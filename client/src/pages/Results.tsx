@@ -496,7 +496,7 @@ export default function Results({ params }: ResultsProps) {
               </Button>
             </Link>
             <Link href="/chatbot">
-              <Button variant="outline" className="border-purple-600 text-purple-600 hover:bg-purple-50">
+              <Button variant="outline" className="border-blue-600 text-blue-700 hover:bg-blue-50">
                 <MessageCircle className="mr-2 h-4 w-4" />
                 {t("Chat with NephroBot", "नेफ्रोबॉट से चैट करें")}
               </Button>
@@ -564,9 +564,9 @@ export default function Results({ params }: ResultsProps) {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="mb-4 p-4 bg-purple-50 rounded-lg">
-              <h4 className="font-semibold mb-2 text-purple-900">How to Read This Analysis:</h4>
-              <ul className="text-sm text-purple-800 space-y-1">
+            <div className="mb-4 rounded-lg border border-blue-100 bg-blue-50 p-4">
+              <h4 className="mb-2 font-semibold text-blue-900">How to Read This Analysis:</h4>
+              <ul className="space-y-1 text-sm text-blue-800">
                 <li>• Shows which factors contributed most to YOUR specific result</li>
                 <li>• Green text = factors that decreased your risk</li>
                 <li>• Red text = factors that increased your risk</li>
