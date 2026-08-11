@@ -35,8 +35,8 @@
   --rule: hsl(194, 20%, 82%);
   --soft-shadow: 0 18px 55px hsla(199, 45%, 17%, 0.09);
   --strong-shadow: 0 26px 70px hsla(199, 48%, 13%, 0.16);
-  --font-sans: "Manrope Variable", Manrope, sans-serif;
-  --font-editorial: "Newsreader Variable", Newsreader, serif;
+  --font-sans: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-editorial: var(--font-sans);
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
 }

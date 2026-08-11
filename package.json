@@ -11,8 +11,6 @@
     "db:push": "drizzle-kit push"
   },
   "dependencies": {
-    "@fontsource-variable/manrope": "^5.3.0",
-    "@fontsource-variable/newsreader": "^5.3.0",
     "@hookform/resolvers": "^3.10.0",
     "@jridgewell/trace-mapping": "^0.3.25",
     "@number-flow/react": "^0.6.2",
