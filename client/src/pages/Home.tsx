@@ -91,15 +91,11 @@ export default function Home() {
     <div className="home-page app-page">
       <section className="home-hero" aria-labelledby="home-title">
         <div className="home-hero__copy">
-          <p className="section-kicker">{t("Kidney health screening, thoughtfully organised", "किडनी स्वास्थ्य स्क्रीनिंग, सोच-समझकर व्यवस्थित")}</p>
-          <h1 id="home-title">
-            {t("Understand the numbers.", "अपने आंकड़े समझें।")}
-            <span>{t("Know what to ask next.", "जानें आगे क्या पूछना है।")}</span>
-          </h1>
+          <h1 id="home-title">NephroCare</h1>
           <p className="home-hero__lede">
             {t(
-              "NephroCare brings laboratory values, symptoms, and health history into one readable preliminary review you can take to a clinician.",
-              "नेफ्रोकेयर लैब मान, लक्षण और स्वास्थ्य इतिहास को एक स्पष्ट प्रारंभिक समीक्षा में लाता है जिसे आप चिकित्सक के पास ले जा सकते हैं।",
+              "Kidney health screening, made clearer.",
+              "किडनी स्वास्थ्य स्क्रीनिंग, अब और स्पष्ट।",
             )}
           </p>
           <div className="home-hero__actions">
