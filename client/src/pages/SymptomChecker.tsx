@@ -6,7 +6,6 @@ import {
   ArrowLeft,
   ArrowRight,
   ChevronDown,
-  Info,
 } from "lucide-react";
 import PageIntro from "@/components/PageIntro";
 import { Button } from "@/components/ui/button";
@@ -142,7 +141,7 @@ export default function SymptomChecker() {
       <section className="symptom-picker" aria-labelledby="symptom-picker-title">
         <div className="symptom-picker__heading">
           <div><p className="section-kicker">{t("Current symptoms", "वर्तमान लक्षण")}</p><h2 id="symptom-picker-title">{t("A structured symptom register", "व्यवस्थित लक्षण सूची")}</h2></div>
-          <p><Info />{t("This review organises signs for discussion; it does not diagnose their cause.", "यह समीक्षा चर्चा के लिए संकेत व्यवस्थित करती है; यह उनके कारण का निदान नहीं करती।")}</p>
+          <p><strong>{t("Scope", "सीमा")}</strong>{t("This review organises signs for discussion; it does not diagnose their cause.", "यह समीक्षा चर्चा के लिए संकेत व्यवस्थित करती है; यह उनके कारण का निदान नहीं करती।")}</p>
         </div>
         <div className="symptom-register">
           {symptomGroups.map((group, groupIndex) => (

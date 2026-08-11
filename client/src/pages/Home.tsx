@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 import {
   ArrowDown,
   ArrowRight,
-  ShieldCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import DoctorEndorsement from "@/components/DoctorEndorsement";
@@ -111,7 +110,7 @@ export default function Home() {
             </Link>
           </div>
           <div className="home-hero__boundary">
-            <ShieldCheck aria-hidden="true" />
+            <strong>{t("Screening boundary", "स्क्रीनिंग सीमा")}</strong>
             <p>{t("Educational screening only. NephroCare does not diagnose disease or replace medical care.", "केवल शैक्षिक स्क्रीनिंग। नेफ्रोकेयर रोग का निदान या चिकित्सा देखभाल का स्थान नहीं लेता।")}</p>
           </div>
         </div>

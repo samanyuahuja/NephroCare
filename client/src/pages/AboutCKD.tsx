@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { AlertTriangle, ArrowRight, ExternalLink } from "lucide-react";
+import { ArrowRight, ExternalLink } from "lucide-react";
 import PageIntro from "@/components/PageIntro";
 import { Button } from "@/components/ui/button";
 import { t, useLanguage } from "@/hooks/useLanguage";
@@ -130,7 +130,7 @@ export default function AboutCKD() {
               <span>04</span>
               <div><p className="section-kicker">{t("What the body may signal", "शरीर क्या संकेत दे सकता है")}</p><h2>{t("Symptoms and warning signs", "लक्षण और चेतावनी संकेत")}</h2></div>
             </div>
-            <div className="silent-warning"><AlertTriangle aria-hidden="true" /><p>{t("Early kidney disease often causes no obvious symptoms. Symptoms alone cannot confirm or rule out CKD.", "शुरुआती किडनी रोग में अक्सर स्पष्ट लक्षण नहीं होते। केवल लक्षण सीकेडी की पुष्टि या उसे खारिज नहीं कर सकते।")}</p></div>
+            <div className="silent-warning"><strong>{t("Important", "महत्वपूर्ण")}</strong><p>{t("Early kidney disease often causes no obvious symptoms. Symptoms alone cannot confirm or rule out CKD.", "शुरुआती किडनी रोग में अक्सर स्पष्ट लक्षण नहीं होते। केवल लक्षण सीकेडी की पुष्टि या उसे खारिज नहीं कर सकते।")}</p></div>
             <ul className="symptom-ledger">
               {symptoms.map(([en, hi], index) => <li key={en}><span>{String(index + 1).padStart(2, "0")}</span>{t(en, hi)}</li>)}
             </ul>

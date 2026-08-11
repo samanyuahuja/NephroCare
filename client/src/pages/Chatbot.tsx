@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { ChevronRight, Info, RotateCcw, Send } from "lucide-react";
+import { RotateCcw, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { t, useLanguage } from "@/hooks/useLanguage";
@@ -110,7 +110,6 @@ export default function Chatbot() {
               <button type="button" key={question} onClick={() => askQuestion(question)} disabled={sendMessageMutation.isPending}>
                 <span>{String(index + 1).padStart(2, "0")}</span>
                 <p>{question}</p>
-                <ChevronRight aria-hidden="true" />
               </button>
             ))}
           </div>
@@ -167,7 +166,7 @@ export default function Chatbot() {
                 <Send />
               </Button>
             </div>
-            <p><Info aria-hidden="true" />{t("Responses are general information, not medical advice.", "उत्तर सामान्य जानकारी हैं, चिकित्सकीय सलाह नहीं।")}</p>
+            <p><strong>{t("Scope", "सीमा")}</strong>{t("Responses are general information, not medical advice.", "उत्तर सामान्य जानकारी हैं, चिकित्सकीय सलाह नहीं।")}</p>
           </div>
         </section>
       </div>
