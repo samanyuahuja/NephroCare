@@ -41,6 +41,20 @@ const symptoms: Symptom[] = [
   { id: "backpain", name: ["Persistent flank or back pain", "लगातार कमर या बगल में दर्द"], description: ["Pain near the side or lower back can have several causes and may need examination.", "बगल या कमर के पास दर्द के कई कारण हो सकते हैं और जांच की आवश्यकता हो सकती है।"], severity: 3, urgency: "moderate", group: ["Pain", "दर्द"] },
 ];
 
+const symptomGroups: Array<{ name: CopyPair; symptoms: Symptom[] }> = [
+  { name: ["Energy and general health", "ऊर्जा और सामान्य स्वास्थ्य"], symptoms: symptoms.filter((symptom) => ["fatigue", "appetite", "skin", "concentration", "cramps"].includes(symptom.id)) },
+  { name: ["Fluid and urinary changes", "तरल और मूत्र संबंधी बदलाव"], symptoms: symptoms.filter((symptom) => ["swelling", "urination", "foamy", "blood"].includes(symptom.id)) },
+  { name: ["Breathing and circulation", "सांस और रक्त संचार"], symptoms: symptoms.filter((symptom) => ["breath", "pressure"].includes(symptom.id)) },
+  { name: ["Pain and digestion", "दर्द और पाचन"], symptoms: symptoms.filter((symptom) => ["nausea", "backpain"].includes(symptom.id)) },
+];
+
+const urgencyCopy: Record<Symptom["urgency"], CopyPair> = {
+  low: ["Observe", "निगरानी"],
+  moderate: ["Discuss", "चर्चा करें"],
+  high: ["Timely review", "समय पर समीक्षा"],
+  urgent: ["Prompt review", "शीघ्र समीक्षा"],
+};
+
 interface AssessmentResult {
   totalScore: number;
   level: "minimal" | "low" | "moderate" | "high";
@@ -120,33 +134,49 @@ export default function SymptomChecker() {
     <div className="symptoms-page app-page">
       <PageIntro
         eyebrow={t("Symptom review", "लक्षण समीक्षा")}
-        title={t("Notice the pattern, not just one symptom.", "सिर्फ एक लक्षण नहीं, पूरे पैटर्न पर ध्यान दें।")}
-        description={t("Select what you are experiencing now. Open any item for plain-language context before continuing.", "जो लक्षण अभी हैं उन्हें चुनें। आगे बढ़ने से पहले किसी भी लक्षण की आसान जानकारी खोलें।")}
+        title={t("What are you noticing today?", "आज आप क्या महसूस कर रहे हैं?")}
+        description={t("Mark every current symptom. Each entry includes context and a suggested level of attention.", "हर मौजूदा लक्षण चुनें। प्रत्येक संकेत के साथ संदर्भ और ध्यान देने का सुझाया स्तर दिया गया है।")}
         aside={<div className="selection-meter"><NumberFlow value={selectedSymptoms.length} /><span>{t("selected", "चुने गए")}</span><small>{t("of 13 signs", "13 संकेतों में से")}</small></div>}
       />
 
       <section className="symptom-picker" aria-labelledby="symptom-picker-title">
-        <div className="symptom-picker__heading"><div><p className="section-kicker">{t("Current symptoms", "वर्तमान लक्षण")}</p><h2 id="symptom-picker-title">{t("Select every sign that applies", "लागू होने वाले सभी संकेत चुनें")}</h2></div><p><Info />{t("Severity numbers organise this screen; they are not a medical diagnosis.", "गंभीरता संख्या इस स्क्रीन को व्यवस्थित करती है; यह चिकित्सकीय निदान नहीं है।")}</p></div>
-        <div className="symptom-grid">
-          {symptoms.map((symptom) => {
-            const selected = selectedSymptoms.includes(symptom.id);
-            return (
-              <Collapsible key={symptom.id}>
-                <div className={`symptom-item ${selected ? "is-selected" : ""}`}>
-                  <Checkbox
-                    id={symptom.id}
-                    checked={selected}
-                    onCheckedChange={() => toggleSymptom(symptom.id)}
-                    aria-label={t(`Select ${symptom.name[0]}`, `${symptom.name[1]} चुनें`)}
-                  />
-                  <label htmlFor={symptom.id}><span>{t(...symptom.group)}</span><strong>{t(...symptom.name)}</strong></label>
-                  <div className={`urgency-dots urgency-dots--${symptom.urgency}`} aria-label={`${symptom.severity} / 5`}><i /><i /><i /><i /><i /></div>
-                  <CollapsibleTrigger asChild><button className="symptom-info-button" type="button" aria-label={t("More information", "अधिक जानकारी")}><ChevronDown /></button></CollapsibleTrigger>
-                  <CollapsibleContent className="symptom-item__detail"><p>{t(...symptom.description)}</p><span>{t(symptom.urgency === "urgent" ? "Urgent review" : symptom.urgency === "high" ? "Timely review" : "Monitor and discuss", symptom.urgency === "urgent" ? "तत्काल समीक्षा" : symptom.urgency === "high" ? "समय पर समीक्षा" : "निगरानी और चर्चा")}</span></CollapsibleContent>
-                </div>
-              </Collapsible>
-            );
-          })}
+        <div className="symptom-picker__heading">
+          <div><p className="section-kicker">{t("Current symptoms", "वर्तमान लक्षण")}</p><h2 id="symptom-picker-title">{t("A structured symptom register", "व्यवस्थित लक्षण सूची")}</h2></div>
+          <p><Info />{t("This review organises signs for discussion; it does not diagnose their cause.", "यह समीक्षा चर्चा के लिए संकेत व्यवस्थित करती है; यह उनके कारण का निदान नहीं करती।")}</p>
+        </div>
+        <div className="symptom-register">
+          {symptomGroups.map((group, groupIndex) => (
+            <section className="symptom-group" key={group.name[0]} aria-labelledby={`symptom-group-${groupIndex}`}>
+              <header className="symptom-group__header">
+                <span>{String(groupIndex + 1).padStart(2, "0")}</span>
+                <h3 id={`symptom-group-${groupIndex}`}>{t(...group.name)}</h3>
+                <small>{group.symptoms.length} {t(group.symptoms.length === 1 ? "sign" : "signs", "संकेत")}</small>
+              </header>
+              <div className="symptom-group__rows">
+                {group.symptoms.map((symptom) => {
+                  const selected = selectedSymptoms.includes(symptom.id);
+                  const symptomIndex = symptoms.findIndex((item) => item.id === symptom.id) + 1;
+                  return (
+                    <Collapsible key={symptom.id}>
+                      <div className={`symptom-item symptom-item--${symptom.urgency} ${selected ? "is-selected" : ""}`}>
+                        <span className="symptom-item__number">{String(symptomIndex).padStart(2, "0")}</span>
+                        <Checkbox
+                          id={symptom.id}
+                          checked={selected}
+                          onCheckedChange={() => toggleSymptom(symptom.id)}
+                          aria-label={t(`Select ${symptom.name[0]}`, `${symptom.name[1]} चुनें`)}
+                        />
+                        <label htmlFor={symptom.id}><strong>{t(...symptom.name)}</strong></label>
+                        <span className="symptom-item__priority">{t(...urgencyCopy[symptom.urgency])}</span>
+                        <CollapsibleTrigger asChild><button className="symptom-info-button" type="button" aria-label={t("More information", "अधिक जानकारी")}><ChevronDown /></button></CollapsibleTrigger>
+                        <CollapsibleContent className="symptom-item__detail"><p>{t(...symptom.description)}</p><span>{t(...urgencyCopy[symptom.urgency])}</span></CollapsibleContent>
+                      </div>
+                    </Collapsible>
+                  );
+                })}
+              </div>
+            </section>
+          ))}
         </div>
       </section>
 

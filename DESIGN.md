@@ -16,9 +16,9 @@ Preserve the existing Activity-mark wordmark and blue, navy, teal, coral, lime, 
 
 ## Typography
 
-- Interface and body: Manrope Variable.
-- Editorial display moments and selected health explanations: Newsreader Variable.
-- Use sentence case. Do not use Inter, default system type, negative letter spacing, or viewport-scaled font sizes.
+- Interface, body, and display: the original native system sans-serif stack.
+- Use weight, scale, rules, and colour to create hierarchy without introducing a second typeface.
+- Use sentence case. Do not use negative letter spacing or viewport-scaled font sizes.
 - Keep body measure between 58 and 72 characters where practical. Hindi copy may run wider when required for comfortable wrapping.
 
 ## Color

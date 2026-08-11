@@ -91,7 +91,7 @@ export default function Home() {
     <div className="home-page app-page">
       <section className="home-hero" aria-labelledby="home-title">
         <div className="home-hero__copy">
-          <h1 id="home-title">NephroCare</h1>
+          <h1 id="home-title">Nephro<span>Care</span></h1>
           <p className="home-hero__lede">
             {t(
               "Kidney health screening, made clearer.",
