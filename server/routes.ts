@@ -6,7 +6,7 @@ import OpenAI from "openai";
 import { z } from "zod";
 import { checkDatabaseConnection } from "./db.js";
 
-// --- SECURITY: OpenAI key loaded from environment variable only (OWASP A07:2021) ---
+// The provider key is read server-side and is never exposed to the client.
 const openai = process.env.OPENAI_API_KEY
   ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
   : null;
@@ -70,7 +70,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Message is required" });
       }
 
-      const reply = await getAIPoweredNephroBotResponse(sanitizedMessage);
+      const reply = await getNephroBotResponse(sanitizedMessage);
       return res.json({ reply });
       
     } catch (error) {
@@ -422,48 +422,20 @@ function runCKDPrediction(data: Record<string, unknown>): PredictionResult {
   };
 }
 
-// AI-powered NephroBot using OpenAI GPT-4o with intelligent fallback
-async function getAIPoweredNephroBotResponse(message: string): Promise<string> {
+async function getNephroBotResponse(message: string): Promise<string> {
   if (!openai) {
-    return getEnhancedNephroBotResponse(message);
+    return getLocalNephroBotResponse(message);
   }
 
   try {
-    // Use the newest OpenAI model GPT-4o which was released May 13, 2024. Do not change this unless explicitly requested by the user
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
         {
           role: "system",
-          content: `You are NephroBot, an advanced AI medical specialist focused exclusively on nephrology and kidney health. Your expertise includes:
+          content: `You are NephroBot, an educational kidney-health assistant.
 
-CORE SPECIALIZATIONS:
-- Chronic Kidney Disease (CKD) diagnosis, staging, and management
-- Acute kidney injury (AKI) recognition and treatment
-- Laboratory interpretation (creatinine, eGFR, BUN, proteinuria, electrolytes)
-- Renal replacement therapy (hemodialysis, peritoneal dialysis, transplant)
-- Nephrology pharmacology and drug dosing adjustments
-- Renal nutrition and dietary management
-- Mineral bone disease and CKD complications
-- Hypertension management in kidney disease
-- Diabetic nephropathy and other glomerular diseases
-
-RESPONSE GUIDELINES:
-- Provide detailed, evidence-based medical information
-- Use current nephrology guidelines and best practices
-- Explain complex concepts clearly for patients and healthcare providers
-- Include specific values, ranges, and clinical recommendations
-- Always emphasize the importance of consulting healthcare providers
-- Be comprehensive but organized with clear sections
-- Use medical terminology appropriately with explanations
-
-SAFETY DISCLAIMERS:
-- Always remind users that this information is educational
-- Emphasize the need for professional medical consultation
-- Never provide specific diagnoses for individual cases
-- Recommend emergency care when appropriate
-
-Format responses with clear sections, bullet points, and medical accuracy. Be the most knowledgeable kidney specialist the user could consult with.`
+Explain general kidney-health terms in plain language and help users prepare questions for a qualified clinician. Keep answers concise and organised. Do not diagnose a user, interpret an individual case, prescribe treatment, recommend medication changes, or provide a personalised diet or fluid target. Explain that reference ranges and care plans vary by laboratory and patient. If a message describes emergency warning signs, advise the user to seek urgent medical care. State uncertainty plainly and direct personal medical questions to a qualified professional.`
         },
         {
           role: "user",
@@ -474,29 +446,25 @@ Format responses with clear sections, bullet points, and medical accuracy. Be th
       temperature: 0.3, // Lower temperature for more accurate medical information
     });
 
-    return response.choices[0].message.content || getEnhancedNephroBotResponse(message);
+    return response.choices[0].message.content || getLocalNephroBotResponse(message);
     
   } catch (error: any) {
     console.error('OpenAI API error:', error);
     
-    // Check if it's a quota/rate limit error and provide enhanced fallback
     if (error.code === 'insufficient_quota' || error.status === 429) {
-      console.log('Using enhanced medical knowledge fallback due to API quota limits');
-      return getEnhancedNephroBotResponse(message);
+      console.log('Using local NephroBot responses because the provider is unavailable');
+      return getLocalNephroBotResponse(message);
     }
-    
-    // For other errors, use enhanced fallback
-    return getEnhancedNephroBotResponse(message);
+
+    return getLocalNephroBotResponse(message);
   }
 }
 
-// Enhanced medical knowledge fallback system
-function getEnhancedNephroBotResponse(message: string): string {
+function getLocalNephroBotResponse(message: string): string {
   const msg = message.toLowerCase();
 
-  // Greetings with medical focus
   if (/(hello|hi|hey|good morning|good afternoon|good evening|greetings)/i.test(msg)) {
-    return "Hello! I'm NephroBot, your AI-powered kidney health specialist. I'm equipped with comprehensive medical knowledge about chronic kidney disease, lab interpretations, treatments, and lifestyle management. Whether you need help understanding lab results, CKD stages, medications, or dietary recommendations, I'm here to provide detailed, evidence-based information. What kidney health question can I help you with today?";
+    return "Hello. I can explain general kidney-health terms and help you prepare questions for a qualified professional. What would you like to understand?";
   }
 
   // Hemoglobin questions
@@ -549,22 +517,20 @@ function getEnhancedNephroBotResponse(message: string): string {
     return "**Renal Replacement Therapy Options**\n\n**WHEN IS RRT NEEDED:**\n• eGFR <15 mL/min (Stage 5 CKD)\n• Severe symptoms (uremia, fluid overload)\n• Life-threatening complications\n\n**HEMODIALYSIS:**\n• **Frequency:** 3 times/week, 4 hours per session\n• **Process:** Blood filtered through artificial kidney\n• **Access:** AV fistula, AV graft, or central catheter\n• **Pros:** Efficient, done at center with support\n• **Cons:** Requires travel, dietary restrictions\n\n**PERITONEAL DIALYSIS:**\n• **Process:** Uses abdominal lining as filter\n• **Types:** CAPD (manual) or APD (machine overnight)\n• **Access:** Permanent catheter in abdomen\n• **Pros:** Done at home, more flexible\n• **Cons:** Risk of infection, daily commitment\n\n**KIDNEY TRANSPLANT:**\n• **Best option:** Longest survival, best quality of life\n• **Sources:** Living donor (best) or deceased donor\n• **Wait time:** 3-5 years for deceased donor\n• **Requirements:** Good overall health, compliance\n\n**PREPARATION STEPS:**\n• Early referral to transplant center\n• AV access creation 6 months before dialysis\n• Vaccinations up to date\n• Family education and support\n\n*Discuss all options with your nephrologist early to make the best choice for your situation.*";
   }
 
-  // General questions - use intelligent analysis for ANY question format
+  // Route longer questions through the broader kidney-health response library.
   if (msg.includes('?') || msg.includes('what') || msg.includes('how') || msg.includes('why') || msg.includes('when') || 
       msg.includes('does') || msg.includes('effect') || msg.includes('affect') || msg.includes('cause') || 
       msg.includes('help') || msg.includes('treat') || msg.includes('prevent') || msg.includes('manage') ||
       msg.includes('should') || msg.includes('can') || msg.includes('will') || msg.includes('is') || 
       msg.includes('tell') || msg.includes('explain') || msg.includes('about') || msg.length > 10) {
-    return analyzeAndRespondToMedicalQuery(message);
+    return respondToGeneralKidneyQuery(message);
   }
 
-  // Default comprehensive response for any other input
-  return "**I'm NephroBot - Your Advanced Kidney Health AI Specialist**\n\nI understand you have a kidney health question. While I have extensive medical knowledge about CKD, lab values, treatments, and management, I'd like to provide you with the most relevant information.\n\n**I can help with:**\n• **Lab results:** Creatinine, eGFR, hemoglobin, electrolytes\n• **CKD stages:** Understanding progression and symptoms\n• **Medications:** Kidney-protective drugs and interactions\n• **Diet & nutrition:** Renal-friendly meal planning\n• **Complications:** Anemia, bone disease, fluid retention\n• **Treatment options:** Dialysis, transplant preparation\n\n**To get the best answer, try asking:**\n- \"What does high creatinine mean?\"\n- \"How can I improve my hemoglobin?\"\n- \"What foods should I avoid with CKD?\"\n- \"Tell me about dialysis options\"\n\n*What specific kidney health topic would you like me to explain in detail?*";
+  return "**Kidney-health questions**\n\nI can explain general terms such as creatinine, eGFR, CKD stages, symptoms, and common tests. Try asking, \"What does high creatinine mean?\" or \"Which tests check kidney health?\"\n\n*For advice about your own results or treatment, speak with a qualified medical professional.*";
 
 }
 
-// Intelligent medical query analyzer
-function analyzeAndRespondToMedicalQuery(message: string): string {
+function respondToGeneralKidneyQuery(message: string): string {
   const msg = message.toLowerCase();
   
   // Specific medical conditions and effects

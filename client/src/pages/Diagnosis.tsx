@@ -10,7 +10,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { User, FlaskConical, FileText, BarChart3, ChevronDown, Stethoscope, ClipboardCheck, ShieldCheck } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { insertCKDAssessmentSchema, type InsertCKDAssessment } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -127,18 +127,18 @@ export default function Diagnosis() {
           "Work from a recent report, review each value, and mark anything you do not know. The result is educational context, not a diagnosis.",
           "हाल की रिपोर्ट से हर मान की समीक्षा करें और जो पता न हो उसे अज्ञात चुनें। परिणाम शैक्षिक संदर्भ है, निदान नहीं।",
         )}
-        aside={<div className="assessment-intro-note"><ShieldCheck aria-hidden="true" /><strong>{t("Before entering data", "डेटा दर्ज करने से पहले")}</strong><p>{t("Use your own report and check units carefully. Do not guess a laboratory value.", "अपनी रिपोर्ट का उपयोग करें और इकाइयों को ध्यान से जांचें। लैब मान का अनुमान न लगाएं।")}</p></div>}
+        aside={<div className="assessment-intro-note"><span aria-hidden="true">READ FIRST</span><strong>{t("Before entering data", "डेटा दर्ज करने से पहले")}</strong><p>{t("Use your own report and check units carefully. Do not guess a laboratory value.", "अपनी रिपोर्ट का उपयोग करें और इकाइयों को ध्यान से जांचें। लैब मान का अनुमान न लगाएं।")}</p></div>}
       />
 
       <div className="assessment-workspace">
         <aside className="assessment-rail">
           <div className="assessment-progress"><NumberFlow value={reviewProgress} /><span>%</span><p>{t("fields reviewed", "फ़ील्ड की समीक्षा")}</p><i><b style={{ width: `${reviewProgress}%` }} /></i></div>
           <nav aria-label={t("Assessment sections", "मूल्यांकन के भाग")}>
-            <a href="#patient-information"><span>01</span><div><User /><p>{t("Patient and report", "रोगी और रिपोर्ट")}</p></div></a>
-            <a href="#laboratory-results"><span>02</span><div><FlaskConical /><p>{t("Laboratory values", "प्रयोगशाला मान")}</p></div></a>
-            <a href="#medical-conditions"><span>03</span><div><FileText /><p>{t("Health history", "स्वास्थ्य इतिहास")}</p></div></a>
+            <a href="#patient-information"><span>01</span><div><p>{t("Patient and report", "रोगी और रिपोर्ट")}</p></div></a>
+            <a href="#laboratory-results"><span>02</span><div><p>{t("Laboratory values", "प्रयोगशाला मान")}</p></div></a>
+            <a href="#medical-conditions"><span>03</span><div><p>{t("Health history", "स्वास्थ्य इतिहास")}</p></div></a>
           </nav>
-          <div className="assessment-rail__boundary"><ClipboardCheck /><p>{t("Every value can change the result. Review before submitting.", "हर मान परिणाम बदल सकता है। सबमिट करने से पहले समीक्षा करें।")}</p></div>
+          <div className="assessment-rail__boundary"><strong>{t("Review required", "समीक्षा आवश्यक")}</strong><p>{t("Every value can change the result. Review before submitting.", "हर मान परिणाम बदल सकता है। सबमिट करने से पहले समीक्षा करें।")}</p></div>
         </aside>
 
         <section className="assessment-sheet">
@@ -150,7 +150,6 @@ export default function Diagnosis() {
             <CollapsibleTrigger asChild>
               <Button variant="outline" className="w-full justify-between text-xs sm:text-sm md:text-base py-2 sm:py-3 px-3 sm:px-4">
                 <div className="flex items-center min-w-0 flex-1">
-                  <Stethoscope className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
                   <span className="truncate text-left">{t("Don't know your values? Check the symptom checker", "अपनी मान नहीं जानते? लक्षण चेकर देखें")}</span>
                 </div>
                 <ChevronDown className={`h-3 w-3 sm:h-4 sm:w-4 transition-transform flex-shrink-0 ml-1 sm:ml-2 ${isSymptomCheckerOpen ? 'rotate-180' : ''}`} />
@@ -266,7 +265,6 @@ export default function Diagnosis() {
             <CollapsibleTrigger asChild>
               <Button variant="outline" className="w-full justify-between text-xs sm:text-sm md:text-base py-2 sm:py-3 px-3 sm:px-4">
                 <div className="flex items-center min-w-0 flex-1">
-                  <FileText className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
                   <span className="truncate text-left">{t("Need help finding values in your medical report?", "अपनी मेडिकल रिपोर्ट में मान खोजने में सहायता चाहिए?")}</span>
                 </div>
                 <ChevronDown className={`h-3 w-3 sm:h-4 sm:w-4 transition-transform flex-shrink-0 ml-1 sm:ml-2 ${isReportGuideOpen ? 'rotate-180' : ''}`} />
@@ -385,8 +383,7 @@ export default function Diagnosis() {
               {/* Patient Information */}
               <Card id="patient-information" className="assessment-block">
                 <CardHeader>
-                  <CardTitle className="flex items-center text-xl">
-                    <User className="mr-3 h-5 w-5 text-primary" />
+                  <CardTitle className="text-xl">
                     {t("Patient Information", "रोगी की जानकारी")}
                   </CardTitle>
                 </CardHeader>
@@ -517,8 +514,7 @@ export default function Diagnosis() {
               {/* Laboratory Results */}
               <Card id="laboratory-results" className="assessment-block">
                 <CardHeader>
-                  <CardTitle className="flex items-center text-xl">
-                    <FlaskConical className="mr-3 h-5 w-5 text-primary" />
+                  <CardTitle className="text-xl">
                     {t("Laboratory Results", "प्रयोगशाला परिणाम")}
                   </CardTitle>
                 </CardHeader>
@@ -892,8 +888,7 @@ export default function Diagnosis() {
               {/* Medical Conditions */}
               <Card id="medical-conditions" className="assessment-block">
                 <CardHeader>
-                  <CardTitle className="flex items-center text-xl">
-                    <FileText className="mr-3 h-5 w-5 text-primary" />
+                  <CardTitle className="text-xl">
                     {t("Medical Conditions", "चिकित्सकीय स्थितियां")}
                   </CardTitle>
                 </CardHeader>
@@ -1014,7 +1009,6 @@ export default function Diagnosis() {
                   className="px-8 py-4 text-lg"
                   disabled={mutation.isPending}
                 >
-                  <BarChart3 className="mr-3 h-5 w-5" />
                   {mutation.isPending ? t("Generating report…", "रिपोर्ट बनाई जा रही है…") : t("Generate preliminary report", "प्रारंभिक रिपोर्ट बनाएं")}
                 </Button>
               </div>

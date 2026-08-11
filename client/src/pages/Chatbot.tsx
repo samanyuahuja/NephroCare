@@ -1,15 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import {
-  Bot,
-  BookOpenText,
-  ChevronRight,
-  Info,
-  RotateCcw,
-  Send,
-  ShieldAlert,
-  User,
-} from "lucide-react";
+import { ChevronRight, Info, RotateCcw, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { t, useLanguage } from "@/hooks/useLanguage";
@@ -109,7 +100,11 @@ export default function Chatbot() {
 
       <div className="chat-workspace">
         <aside className="chat-sidebar">
-          <div className="chat-sidebar__heading"><BookOpenText aria-hidden="true" /><div><strong>{t("Starting points", "शुरुआती प्रश्न")}</strong><span>{t("Choose one or write your own", "एक चुनें या अपना प्रश्न लिखें")}</span></div></div>
+          <div className="chat-sidebar__heading">
+            <span aria-hidden="true">05 prompts</span>
+            <strong>{t("Starting points", "शुरुआती प्रश्न")}</strong>
+            <p>{t("Choose one or write your own", "एक चुनें या अपना प्रश्न लिखें")}</p>
+          </div>
           <div className="chat-prompts">
             {sampleQuestions.map((question, index) => (
               <button type="button" key={question} onClick={() => askQuestion(question)} disabled={sendMessageMutation.isPending}>
@@ -119,12 +114,12 @@ export default function Chatbot() {
               </button>
             ))}
           </div>
-          <div className="chat-safety-note"><ShieldAlert aria-hidden="true" /><p>{t("Do not use NephroBot for emergencies, diagnosis, medication changes, or treatment decisions.", "आपातकाल, निदान, दवा में बदलाव या उपचार के निर्णय के लिए नेफ्रोबॉट का उपयोग न करें।")}</p></div>
+          <div className="chat-safety-note"><strong>{t("Safety boundary", "सुरक्षा सीमा")}</strong><p>{t("Do not use NephroBot for emergencies, diagnosis, medication changes, or treatment decisions.", "आपातकाल, निदान, दवा में बदलाव या उपचार के निर्णय के लिए नेफ्रोबॉट का उपयोग न करें।")}</p></div>
         </aside>
 
         <section className="conversation" aria-label={t("NephroBot conversation", "नेफ्रोबॉट संवाद")}>
           <div className="conversation__bar">
-            <div><Bot aria-hidden="true" /><span>NephroBot</span></div>
+            <div><span className="conversation__status-dot" aria-hidden="true" /><span>NephroBot</span></div>
             <Button variant="ghost" size="sm" onClick={clearChat} disabled={messages.length === 0}>
               <RotateCcw />{t("Clear", "साफ करें")}
             </Button>
@@ -132,18 +127,18 @@ export default function Chatbot() {
 
           <div className="conversation__messages chat-container" aria-live="polite">
             <article className="message message--assistant">
-              <div className="message__identity"><Bot aria-hidden="true" /><span>NephroBot</span></div>
+              <div className="message__identity"><span>NephroBot</span></div>
               <p>{t("Hello. I can explain kidney-health terms and help you prepare questions for a qualified professional. What would you like to understand?", "नमस्ते। मैं किडनी स्वास्थ्य के शब्द समझा सकता हूं और योग्य पेशेवर के लिए प्रश्न तैयार करने में मदद कर सकता हूं। आप क्या समझना चाहते हैं?")}</p>
             </article>
 
             {messages.map((item) => (
               <div key={item.id} className="message-pair">
                 <article className="message message--user">
-                  <div className="message__identity"><User aria-hidden="true" /><span>{t("You", "आप")}</span></div>
+                  <div className="message__identity"><span>{t("You", "आप")}</span></div>
                   <p>{item.message}</p>
                 </article>
                 <article className="message message--assistant">
-                  <div className="message__identity"><Bot aria-hidden="true" /><span>NephroBot</span></div>
+                  <div className="message__identity"><span>NephroBot</span></div>
                   <p className="whitespace-pre-wrap">{item.response}</p>
                 </article>
               </div>
@@ -151,7 +146,7 @@ export default function Chatbot() {
 
             {sendMessageMutation.isPending && (
               <article className="message message--assistant message--thinking">
-                <div className="message__identity"><Bot aria-hidden="true" /><span>NephroBot</span></div>
+                <div className="message__identity"><span>NephroBot</span></div>
                 <div className="thinking-dots" aria-label={t("NephroBot is responding", "नेफ्रोबॉट उत्तर दे रहा है")}><i /><i /><i /></div>
               </article>
             )}

@@ -1,5 +1,3 @@
-import { Button } from "@/components/ui/button";
-import { Globe } from "lucide-react";
 import { useLanguage } from "@/hooks/useLanguage";
 
 interface LanguageToggleProps {
@@ -10,15 +8,15 @@ export default function LanguageToggle({ className = "" }: LanguageToggleProps) 
   const { language, toggleLanguage } = useLanguage();
 
   return (
-    <Button
-      variant="ghost"
-      size="sm"
+    <button
+      type="button"
       onClick={toggleLanguage}
       aria-label={language === "en" ? "Switch to Hindi" : "Switch to English"}
       className={`language-toggle ${className}`}
     >
-      <Globe className="h-4 w-4" />
-      {language === "en" ? "हिंदी" : "English"}
-    </Button>
+      <span className={language === "en" ? "is-current" : ""}>EN</span>
+      <i aria-hidden="true" />
+      <span className={language === "hi" ? "is-current" : ""}>हिं</span>
+    </button>
   );
 }

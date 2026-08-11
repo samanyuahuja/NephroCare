@@ -1,16 +1,16 @@
 import { Link } from "wouter";
-import { ArrowRight, Braces, FileSearch, HeartPulse, Languages, LockKeyhole, Scale } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import PageIntro from "@/components/PageIntro";
 import { Button } from "@/components/ui/button";
 import { t, useLanguage } from "@/hooks/useLanguage";
 
 const capabilities = [
-  { icon: FileSearch, title: ["Preliminary screening", "प्रारंभिक स्क्रीनिंग"], copy: ["Organises report values and health history into an educational estimate.", "रिपोर्ट मान और स्वास्थ्य इतिहास को एक शैक्षिक अनुमान में व्यवस्थित करता है।"] },
-  { icon: Scale, title: ["Visible reasoning", "स्पष्ट कारण"], copy: ["Shows which entered factors influenced the model instead of displaying only a score.", "सिर्फ स्कोर दिखाने के बजाय बताता है कि किन दर्ज कारकों ने मॉडल को प्रभावित किया।"] },
-  { icon: HeartPulse, title: ["Symptom context", "लक्षण संदर्भ"], copy: ["Helps organise warning signs by the attention they may need.", "चेतावनी संकेतों को आवश्यक ध्यान के अनुसार व्यवस्थित करने में मदद करता है।"] },
-  { icon: Languages, title: ["English and Hindi", "अंग्रेजी और हिंदी"], copy: ["Keeps the core health-information journey available in both languages.", "मुख्य स्वास्थ्य-सूचना यात्रा दोनों भाषाओं में उपलब्ध रखता है।"] },
-  { icon: LockKeyhole, title: ["Device-linked reports", "डिवाइस से जुड़ी रिपोर्ट"], copy: ["Reads report references from the browser before requesting saved records.", "सहेजे रिकॉर्ड मांगने से पहले ब्राउज़र से रिपोर्ट संदर्भ पढ़ता है।"] },
-  { icon: Braces, title: ["Student engineering project", "छात्र इंजीनियरिंग परियोजना"], copy: ["Built to explore responsible software, explainability, and accessible health communication.", "जिम्मेदार सॉफ्टवेयर, व्याख्यात्मकता और सुलभ स्वास्थ्य संचार को समझने के लिए बनाया गया।"] },
+  { title: ["Preliminary screening", "प्रारंभिक स्क्रीनिंग"], copy: ["Organises report values and health history into an educational estimate.", "रिपोर्ट मान और स्वास्थ्य इतिहास को एक शैक्षिक अनुमान में व्यवस्थित करता है।"] },
+  { title: ["Visible reasoning", "स्पष्ट कारण"], copy: ["Shows which entered factors influenced the model instead of displaying only a score.", "सिर्फ स्कोर दिखाने के बजाय बताता है कि किन दर्ज कारकों ने मॉडल को प्रभावित किया।"] },
+  { title: ["Symptom context", "लक्षण संदर्भ"], copy: ["Helps organise warning signs by the attention they may need.", "चेतावनी संकेतों को आवश्यक ध्यान के अनुसार व्यवस्थित करने में मदद करता है।"] },
+  { title: ["English and Hindi", "अंग्रेजी और हिंदी"], copy: ["Keeps the core health-information journey available in both languages.", "मुख्य स्वास्थ्य-सूचना यात्रा दोनों भाषाओं में उपलब्ध रखता है।"] },
+  { title: ["Device-linked reports", "डिवाइस से जुड़ी रिपोर्ट"], copy: ["Reads report references from the browser before requesting saved records.", "सहेजे रिकॉर्ड मांगने से पहले ब्राउज़र से रिपोर्ट संदर्भ पढ़ता है।"] },
+  { title: ["Student engineering project", "छात्र इंजीनियरिंग परियोजना"], copy: ["Built to explore responsible software, explainability, and accessible health communication.", "जिम्मेदार सॉफ्टवेयर, व्याख्यात्मकता और सुलभ स्वास्थ्य संचार को समझने के लिए बनाया गया।"] },
 ];
 
 export default function About() {
@@ -32,7 +32,7 @@ export default function About() {
 
       <section className="about-capability-section" aria-labelledby="about-capability-title">
         <div className="section-intro"><p className="section-kicker">{t("The product", "उत्पाद")}</p><h2 id="about-capability-title">{t("What the service is built to do", "सेवा किस काम के लिए बनी है")}</h2></div>
-        <div className="about-capability-grid">{capabilities.map((capability, index) => { const Icon = capability.icon; return <article key={capability.title[0]}><span>{String(index + 1).padStart(2, "0")}</span><Icon aria-hidden="true" /><h3>{t(capability.title[0], capability.title[1])}</h3><p>{t(capability.copy[0], capability.copy[1])}</p></article>; })}</div>
+        <div className="about-capability-grid">{capabilities.map((capability, index) => <article key={capability.title[0]}><span>{String(index + 1).padStart(2, "0")}</span><h3>{t(capability.title[0], capability.title[1])}</h3><p>{t(capability.copy[0], capability.copy[1])}</p></article>)}</div>
       </section>
 
       <section className="developer-note">

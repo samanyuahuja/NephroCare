@@ -1,247 +1,123 @@
 # NephroCare
 
-**Advanced Chronic Kidney Disease Prediction and Healthcare Platform**
+NephroCare is a bilingual kidney-health education and preliminary screening service. It helps people organise report values, review symptoms, and prepare clearer questions for a qualified clinician.
 
-NephroCare is an intelligent CKD screening and awareness platform that helps users assess their kidney health using clinical lab values, symptoms, and medical history. Built with machine learning algorithms and explainable AI techniques, it provides personalized insights, diet recommendations, and risk assessments to support early detection and management of chronic kidney disease.
+[Open NephroCare](https://www.nephrocares.in)
 
----
+> NephroCare does not diagnose chronic kidney disease, prescribe treatment, or replace professional medical care. Its assessment output is educational context for a clinical conversation.
 
-## Overview
+## Product overview
 
-Chronic Kidney Disease (CKD) affects over 850 million people worldwide and is often called a "silent killer" because symptoms appear late in the disease progression. Early detection can significantly improve treatment outcomes and delay disease progression. NephroCare bridges the gap between early-stage kidney health awareness and accessible digital tools, especially in regions where diagnostic resources are limited.
+| Area | What it provides |
+| --- | --- |
+| Assessment | A structured 20-field review of laboratory values and health history |
+| Preliminary report | An educational risk estimate with the entered factors that influenced it |
+| Symptoms | A 13-sign review organised by urgency and plain-language context |
+| My reports | Browser-linked access to assessment and diet-plan references |
+| NephroBot | General kidney-health explanations and appointment-question support |
+| CKD guide | English and Hindi information about stages, tests, risk factors, and warning signs |
+| Exports | Appointment-ready assessment and diet-conversation PDFs |
 
-This platform was developed by Samanyu Ahuja, a high school student from India with a passion for healthcare technology and social impact, to make kidney health screening accessible to everyone.
+The service is designed for patients and families in India who may be working from a printed or digital blood or urine report. Unknown fields can be marked rather than guessed, and the core experience is available in English and Hindi.
 
----
+## Product boundaries
 
-## Key Features
+- Assessment results are preliminary educational estimates, not diagnoses.
+- Diet content is a discussion guide for a clinician or renal dietitian, not a prescription.
+- NephroBot provides general information and must not be used for emergencies or medication decisions.
+- Report references are linked to the current browser; the project does not provide authenticated patient accounts.
+- Reference ranges and clinical meaning vary by laboratory, medical history, and clinician interpretation.
 
-### Advanced Diagnostics
-- Smart CKD prediction using 20+ medical indicators including serum creatinine, blood urea, albumin, hemoglobin, electrolytes, and more
-- Machine learning models (Logistic Regression and Random Forest) trained on clinical data with 95% accuracy
-- Risk level classification (Low / Moderate / High) with detailed probability scores
+## Architecture
 
-### Explainable AI
-- SHAP (SHapley Additive exPlanations) analysis showing which health parameters contribute most to CKD risk
-- Partial Dependence Plots (PDP) visualizing how individual features affect predictions
-- LIME (Local Interpretable Model-agnostic Explanations) for transparency and trust
-
-### Personalized Healthcare
-- SHAP-driven intelligent diet recommendations based on individual health parameters
-- Customizable meal plans with vegetarian and non-vegetarian options
-- Downloadable PDF reports with comprehensive medical data and recommendations
-- Assessment history tracking for monitoring health trends over time
-
-### Interactive Tools
-- Symptom Checker: Quick self-screening with 13 CKD-related symptoms and severity scoring
-- NephroBot: AI-powered chatbot using OpenAI GPT-4o for medical questions and guidance
-- Medical Report Value Locator: Easy reference guide for understanding lab results
-
-### Accessibility
-- Hindi and English language toggle for wider reach across India
-- Mobile-responsive design for access on any device
-- Browser-local data storage ensuring complete privacy
-- Professional medical-themed interface with clear visualizations
-
----
-
-## Technology Stack
-
-### Frontend
-- React 18 with TypeScript for type-safe development
-- Wouter for client-side routing
-- TanStack Query (React Query) for efficient server state management
-- Radix UI primitives with shadcn/ui components for accessible UI
-- Tailwind CSS for responsive, modern styling
-- Recharts for medical data visualizations
-
-### Backend
-- Node.js with Express.js server
-- TypeScript for end-to-end type safety
-- RESTful API architecture with JSON responses
-- Python integration for ML model predictions
-
-### Machine Learning
-- Scikit-learn for model training (Logistic Regression, Random Forest)
-- SHAP library for model interpretability
-- LIME for local explanations
-- Real clinical dataset with feature engineering
-
-### Data & Storage
-- PostgreSQL database with Neon serverless driver
-- Drizzle ORM for type-safe database operations
-- localStorage for privacy-focused local data persistence
-
-### AI Integration
-- OpenAI GPT-4o API for intelligent chatbot responses
-- Comprehensive medical knowledge fallback system
-- Context-aware responses for kidney health queries
-
----
-
-## Getting Started
-
-### Prerequisites
-- Node.js 20 or higher
-- A Supabase PostgreSQL project for durable production storage
-- Python 3.11 for ML model execution
-- OpenAI API key for chatbot functionality
-
-### Installation
-
-1. Clone the repository:
-```bash
-git clone https://github.com/yourusername/nephrocare.git
-cd nephrocare
+```mermaid
+flowchart LR
+  Browser[React client] --> API[Express API]
+  API --> Store[(PostgreSQL or local memory)]
+  API --> Scorer[Educational clinical-rules scorer]
+  API --> Chat[NephroBot provider or local responses]
+  Browser --> Local[Browser-linked report references]
 ```
 
-2. Install dependencies:
-```bash
-npm install
-```
+The Vercel deployment serves the Vite application and routes `/api/*` requests to a single Express function. PostgreSQL is used when `DATABASE_URL` is configured; local development falls back to temporary in-memory storage.
 
-3. Set up environment variables using the Supabase transaction-pooler URL:
-```bash
-# Create .env file with:
-DATABASE_URL=postgresql://postgres.PROJECT_REF:PASSWORD@POOLER_HOST:6543/postgres?sslmode=require
-DATABASE_POOL_MAX=5
-OPENAI_API_KEY=your_openai_api_key
-```
+## Technology
 
-4. Apply `migrations/0001_nephrocare_schema.sql` in Supabase, or run:
-```bash
-npm run db:push
-```
+- React 18, TypeScript, Vite, and Wouter
+- Express, Zod, Drizzle ORM, and PostgreSQL
+- TanStack Query and React Hook Form
+- Radix UI primitives and Lucide action icons
+- Recharts, jsPDF, and html2canvas
+- Vercel Functions and Supabase PostgreSQL
+- Optional OpenAI API connection for NephroBot, with local educational responses when unavailable
 
-5. Start the development server:
+## Local development
+
+### Requirements
+
+- Node.js 20 or newer
+- npm
+- Optional Supabase PostgreSQL database
+- Optional OpenAI API key for provider-backed NephroBot responses
+
+### Setup
+
 ```bash
+git clone https://github.com/samanyuahuja/NephroCare.git
+cd NephroCare
+npm ci
+cp .env.example .env
 npm run dev
 ```
 
-The application will be available at `http://localhost:5000`
+The development server uses `http://localhost:5000` unless `PORT` is set.
 
-### Building for Production
+### Environment variables
+
+```dotenv
+DATABASE_URL=postgresql://...
+DATABASE_POOL_MAX=5
+OPENAI_API_KEY=
+```
+
+Use a Supabase transaction-pooler URL on port `6543` with `sslmode=require` for serverless deployments. Never commit credentials.
+
+### Useful commands
 
 ```bash
-npm run build
-npm run start
+npm run dev       # Start the development server
+npm run check     # Run TypeScript checks
+npm run build     # Build the client and Node server
+npm run start     # Run the production build
+npm run db:push   # Apply the Drizzle schema
 ```
 
-### Vercel and Supabase
+## Project structure
 
-Set `DATABASE_URL` in Vercel for Production, Preview, and Development. Use the
-Supabase transaction pooler on port `6543`; serverless functions should not use
-the direct database hostname. After changing environment variables, redeploy so
-the new values are included in the deployment.
-
-`GET /api/health` reports whether the app is using PostgreSQL or the temporary
-in-memory fallback. A configured but unreachable database returns HTTP 503.
-
----
-
-## Project Structure
-
-```
-nephrocare/
-├── client/              # Frontend React application
-│   ├── src/
-│   │   ├── components/  # Reusable UI components
-│   │   ├── pages/       # Route pages (Home, Diagnosis, Results, etc.)
-│   │   ├── hooks/       # Custom React hooks
-│   │   └── lib/         # Utility functions and API client
-├── server/              # Backend Express server
-│   ├── routes.ts        # API endpoints
-│   ├── storage.ts       # Database interface
-│   └── vite.ts          # Vite integration
-├── shared/              # Shared TypeScript types and schemas
-│   └── schema.ts        # Database schema and Zod validators
-├── db/                  # Database configuration
-│   └── schema.ts        # Drizzle ORM schema
-└── fix_model_predictor.py  # ML model prediction script
+```text
+api/                 Vercel function entry point
+client/src/          React application, pages, components, and utilities
+migrations/          PostgreSQL schema migration
+server/              Express application, routes, storage, and security controls
+shared/              Shared schemas and TypeScript types
+DESIGN.md            Interface principles and component rules
+PRODUCT.md           Product purpose, users, capabilities, and constraints
 ```
 
----
+## Safety and privacy
 
-## Usage Guide
+The API applies schema validation, input sanitisation, request-size limits, rate limits, security headers, and production content-security policy. Secrets remain server-side. The database health state is available at `GET /api/health`.
 
-### For Patients
+This repository does not claim clinical certification or validated diagnostic performance. Any future accuracy claim must include the exact dataset, split method, sample size, metric definition, and independent validation evidence.
 
-1. **Take Assessment**: Complete the comprehensive health assessment form with lab values from your medical reports
-2. **View Results**: Get instant CKD risk prediction with detailed SHAP analysis
-3. **Understand Your Health**: Explore PDP and LIME explanations to understand which factors affect your kidney health
-4. **Get Diet Plan**: Receive personalized dietary recommendations based on your health parameters
-5. **Ask Questions**: Use NephroBot to get answers about CKD, lab values, and lifestyle modifications
-6. **Download Reports**: Save PDF reports of your assessment and diet plan for doctor consultations
+## Clinical context
 
-### For Healthcare Providers
+Dr. Davindar Chopra of Chopra Hospital, Chandigarh, reviewed the project's public-health intent and provided the recommendation retained in the product. This is presented as a clinician's perspective on the project, not regulatory approval or diagnostic validation.
 
-1. **Patient Screening**: Use as a preliminary screening tool for at-risk patients
-2. **Educational Resource**: Share with patients to increase awareness about CKD risk factors
-3. **Treatment Support**: Use SHAP analysis to identify priority areas for intervention
-4. **Monitoring Tool**: Track patient assessments over time to monitor disease progression
+General learning references used in the CKD guide include the [National Institute of Diabetes and Digestive and Kidney Diseases](https://www.niddk.nih.gov/health-information/kidney-disease/chronic-kidney-disease-ckd/tests-diagnosis) and the [NHS](https://www.nhs.uk/conditions/kidney-disease/diagnosis/).
 
----
+## Contact
 
-## Medical Disclaimer
-
-**Important**: NephroCare is designed for educational and screening purposes only. It is NOT a substitute for professional medical advice, diagnosis, or treatment.
-
-- Always consult qualified healthcare professionals for medical decisions
-- This tool provides risk assessment, not definitive diagnosis
-- Lab values should be interpreted by medical professionals
-- In case of emergency symptoms, seek immediate medical attention
-- Regular medical checkups are essential for proper CKD management
-
-The predictions and recommendations are based on machine learning models trained on clinical data and should be used as guidance for early awareness, not as medical instructions.
-
----
-
-## Contributing
-
-Contributions are welcome! If you'd like to improve NephroCare:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/improvement`)
-3. Make your changes with clear commit messages
-4. Test thoroughly to ensure medical accuracy
-5. Submit a pull request with detailed description
-
-Please ensure all medical content is evidence-based and properly referenced.
-
----
-
-## Acknowledgments
-
-- **Medical Validation**: Dr. Davindar Chopra, Chopra Hospital, Chandigarh
-- **Clinical Dataset**: UCI Machine Learning Repository - Chronic Kidney Disease Dataset
-- **ML Libraries**: Scikit-learn, SHAP, LIME development teams
-- **UI Components**: Radix UI and shadcn/ui for accessible design
-- **Inspiration**: The millions affected by CKD worldwide and the need for early detection tools
-
----
-
-## License
-
-This project is developed for educational and social impact purposes. Feel free to use, modify, and distribute to help improve kidney health awareness.
-
----
-
-## Contact & Support
-
-**Developer**: Samanyu Ahuja  
-**Email**: nephrocareai@gmail.com  
-**Instagram**: [@nephrocareai](https://instagram.com/nephrocareai)  
-
-For technical issues, feature requests, or collaboration opportunities, please reach out via email or Instagram.
-
----
-
-## About the Developer
-
-Samanyu Ahuja is a high school student from India passionate about merging healthcare and technology for meaningful change. With a strong foundation in computer science and biology, he created NephroCare to make kidney health screening accessible to everyone, especially in underserved regions.
-
-"This app is not meant to replace a doctor but to educate, empower, and guide users in understanding their kidney health better, especially in the early stages where intervention can make a huge difference."
-
----
-
-**Built with care for kidney health awareness. Take control of your health today.**
+- Email: [nephrocareai@gmail.com](mailto:nephrocareai@gmail.com)
+- Instagram: [@nephrocareai](https://www.instagram.com/nephrocareai/)
+- Maintainer: [Samanyu Ahuja](https://github.com/samanyuahuja)

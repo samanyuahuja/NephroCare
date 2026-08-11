@@ -3,13 +3,8 @@ import NumberFlow from "@number-flow/react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import {
-  Activity,
   ArrowRight,
-  CalendarDays,
-  FileHeart,
   Plus,
-  ShieldCheck,
-  Utensils,
 } from "lucide-react";
 import PageIntro from "@/components/PageIntro";
 import { Button } from "@/components/ui/button";
@@ -72,10 +67,9 @@ export default function Browse() {
   const latestDate = completedAssessments[0]?.createdAt ? formatDate(completedAssessments[0].createdAt) : "—";
 
   const EmptyState = ({ type }: { type: "reports" | "diet" }) => {
-    const Icon = type === "reports" ? FileHeart : Utensils;
     return (
       <div className="reports-empty">
-        <Icon aria-hidden="true" />
+        <span aria-hidden="true">{type === "reports" ? "REPORTS / 00" : "DIET / 00"}</span>
         <h2>{type === "reports" ? t("No reports on this device", "इस डिवाइस पर कोई रिपोर्ट नहीं") : t("No diet guidance yet", "अभी कोई आहार मार्गदर्शन नहीं")}</h2>
         <p>{type === "reports" ? t("Complete an assessment and its report reference will appear here.", "मूल्यांकन पूरा करें और उसका रिपोर्ट संदर्भ यहां दिखाई देगा।") : t("Diet guidance becomes available after an assessment.", "मूल्यांकन के बाद आहार मार्गदर्शन उपलब्ध होगा।")}</p>
         <Button asChild><Link href="/diagnosis">{t("Start assessment", "मूल्यांकन शुरू करें")}<ArrowRight /></Link></Button>
@@ -90,7 +84,7 @@ export default function Browse() {
         title={t("My reports", "मेरी रिपोर्ट")}
         description={t("A clear index of assessments and diet guidance connected to this device.", "इस डिवाइस से जुड़े मूल्यांकन और आहार मार्गदर्शन का स्पष्ट सूचकांक।")}
         actions={<Button asChild><Link href="/diagnosis"><Plus />{t("New assessment", "नया मूल्यांकन")}</Link></Button>}
-        aside={<div className="privacy-signal"><ShieldCheck aria-hidden="true" /><strong>{t("Device-linked access", "डिवाइस से जुड़ी पहुंच")}</strong><p>{t("Report references are read from this browser before records are requested.", "रिकॉर्ड मांगने से पहले रिपोर्ट संदर्भ इसी ब्राउज़र से पढ़े जाते हैं।")}</p></div>}
+        aside={<div className="privacy-signal"><span aria-hidden="true">DEVICE / LOCAL</span><strong>{t("Device-linked access", "डिवाइस से जुड़ी पहुंच")}</strong><p>{t("Report references are read from this browser before records are requested.", "रिकॉर्ड मांगने से पहले रिपोर्ट संदर्भ इसी ब्राउज़र से पढ़े जाते हैं।")}</p></div>}
       />
 
       <section className="report-overview" aria-label={t("Report overview", "रिपोर्ट सारांश")}>
@@ -101,8 +95,8 @@ export default function Browse() {
 
       <Tabs defaultValue="results" className="reports-tabs">
         <TabsList aria-label={t("Report type", "रिपोर्ट का प्रकार")}>
-          <TabsTrigger value="results"><Activity />{t("Assessments", "मूल्यांकन")}<span>{completedAssessments.length}</span></TabsTrigger>
-          <TabsTrigger value="diet-plans"><Utensils />{t("Diet guidance", "आहार मार्गदर्शन")}<span>{dietPlans.length}</span></TabsTrigger>
+          <TabsTrigger value="results">{t("Assessments", "मूल्यांकन")}<span>{completedAssessments.length}</span></TabsTrigger>
+          <TabsTrigger value="diet-plans">{t("Diet guidance", "आहार मार्गदर्शन")}<span>{dietPlans.length}</span></TabsTrigger>
         </TabsList>
 
         <TabsContent value="results">
@@ -113,7 +107,7 @@ export default function Browse() {
               {completedAssessments.map((assessment, index) => (
                 <article className="report-row" key={assessment.id}>
                   <div className="report-row__identity"><span>{String(index + 1).padStart(2, "0")}</span><div><strong>{assessment.patientName || t("Unnamed assessment", "बिना नाम का मूल्यांकन")}</strong><small>NC-{String(assessment.id).padStart(4, "0")}</small></div></div>
-                  <div className="report-row__date"><CalendarDays aria-hidden="true" />{formatDate(assessment.createdAt)}</div>
+                  <div className="report-row__date">{formatDate(assessment.createdAt)}</div>
                   <div><span className={`risk-label risk-label--${assessment.riskLevel?.toLowerCase()}`}>{assessment.riskLevel} {t("risk", "जोखिम")}</span></div>
                   <div className="report-row__score"><NumberFlow value={(assessment.riskScore || 0) * 100} format={{ maximumFractionDigits: 1 }} /><span>%</span></div>
                   <Button asChild variant="ghost" size="icon"><Link href={`/results/${assessment.id}`} aria-label={t("Open report", "रिपोर्ट खोलें")}><ArrowRight /></Link></Button>
@@ -130,7 +124,6 @@ export default function Browse() {
               {dietPlans.map((plan, index) => (
                 <article className="diet-row" key={plan.id}>
                   <span className="diet-row__number">{String(index + 1).padStart(2, "0")}</span>
-                  <Utensils aria-hidden="true" />
                   <div><strong>{t("Diet plan", "आहार योजना")} #{plan.id}</strong><p>{plan.dietType || t("Personalised", "व्यक्तिगत")}</p></div>
                   <time>{formatDate(plan.createdAt)}</time>
                   <Button asChild variant="outline"><Link href={`/diet-plan/${plan.assessmentId}`}>{t("Open plan", "योजना खोलें")}<ArrowRight /></Link></Button>

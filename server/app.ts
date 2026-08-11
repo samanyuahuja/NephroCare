@@ -6,15 +6,16 @@ import { log } from "./logger.js";
 
 export async function createApplication() {
   const app = express();
+  const isDevelopment = process.env.NODE_ENV === "development";
 
   app.use(helmet({
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        scriptSrc: ["'self'"],
+        scriptSrc: ["'self'", ...(isDevelopment ? ["'unsafe-inline'"] : [])],
         styleSrc: ["'self'", "'unsafe-inline'"],
         imgSrc: ["'self'", "data:", "blob:"],
-        connectSrc: ["'self'"],
+        connectSrc: ["'self'", ...(isDevelopment ? ["ws:", "http:"] : [])],
         fontSrc: ["'self'", "data:"],
         objectSrc: ["'none'"],
         baseUri: ["'self'"],

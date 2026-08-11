@@ -89,10 +89,10 @@ export default function Layout({ children }: LayoutProps) {
               id="mobile-navigation"
               className="mobile-nav"
               aria-label="Mobile navigation"
-              initial={reduceMotion ? false : { height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={reduceMotion ? undefined : { height: 0, opacity: 0 }}
-              transition={{ duration: 0.22 }}
+              initial={reduceMotion ? false : { y: -8 }}
+              animate={{ y: 0 }}
+              exit={reduceMotion ? undefined : { y: -6 }}
+              transition={{ duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
             >
               <div className="service-shell mobile-nav__inner">
                 {primaryNav.map((item) => (
@@ -112,15 +112,14 @@ export default function Layout({ children }: LayoutProps) {
         </AnimatePresence>
       </header>
 
-      <AnimatePresence mode="wait" initial={false}>
+      <AnimatePresence mode="sync" initial={false}>
         <motion.main
           id="main-content"
           key={location}
           className="service-shell site-main"
-          initial={reduceMotion ? false : { opacity: 0, y: 8 }}
+          initial={reduceMotion ? false : { opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={reduceMotion ? undefined : { opacity: 0, y: -4 }}
-          transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
         >
           {children}
         </motion.main>

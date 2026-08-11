@@ -4,12 +4,7 @@ import { motion } from "framer-motion";
 import {
   ArrowDown,
   ArrowRight,
-  BookOpenText,
-  FileHeart,
-  FlaskConical,
-  MessageCircle,
   ShieldCheck,
-  Stethoscope,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import DoctorEndorsement from "@/components/DoctorEndorsement";
@@ -20,7 +15,7 @@ const pathways = [
   {
     number: "01",
     href: "/diagnosis",
-    icon: FlaskConical,
+    label: ["Screening", "स्क्रीनिंग"],
     title: ["CKD risk assessment", "सीकेडी जोखिम मूल्यांकन"],
     copy: [
       "Turn recent laboratory values and health history into a structured preliminary report.",
@@ -31,7 +26,7 @@ const pathways = [
   {
     number: "02",
     href: "/symptom-checker",
-    icon: Stethoscope,
+    label: ["Triage", "प्राथमिकता"],
     title: ["Symptom review", "लक्षण समीक्षा"],
     copy: [
       "Review warning signs by urgency and prepare clearer questions for a clinician.",
@@ -42,7 +37,7 @@ const pathways = [
   {
     number: "03",
     href: "/browse",
-    icon: FileHeart,
+    label: ["Records", "रिकॉर्ड"],
     title: ["My reports", "मेरी रिपोर्ट"],
     copy: [
       "Return to assessments and diet guidance linked to this browser.",
@@ -53,7 +48,7 @@ const pathways = [
   {
     number: "04",
     href: "/chatbot",
-    icon: MessageCircle,
+    label: ["Questions", "प्रश्न"],
     title: ["Ask NephroBot", "नेफ्रोबॉट से पूछें"],
     copy: [
       "Ask a kidney-health question in a focused, bilingual conversation workspace.",
@@ -64,7 +59,7 @@ const pathways = [
   {
     number: "05",
     href: "/about-ckd",
-    icon: BookOpenText,
+    label: ["Learning", "जानकारी"],
     title: ["CKD field guide", "सीकेडी मार्गदर्शिका"],
     copy: [
       "Understand stages, tests, risk factors, warning signs, and useful next questions.",
@@ -162,23 +157,17 @@ export default function Home() {
           <p>{t("Each area is designed around a specific health-information task, so the experience stays focused.", "हर भाग एक खास स्वास्थ्य-सूचना कार्य के लिए बनाया गया है, ताकि अनुभव केंद्रित रहे।")}</p>
         </div>
         <div className="service-directory__grid">
-          {pathways.map((pathway) => {
-            const Icon = pathway.icon;
-            return (
-              <motion.article key={pathway.number} className="pathway" whileHover={{ y: -4 }} transition={{ duration: 0.2 }}>
-                <div className="pathway__meta">
-                  <span>{pathway.number}</span>
-                  <Icon aria-hidden="true" />
-                </div>
+          {pathways.map((pathway) => (
+              <Link key={pathway.number} href={pathway.href} className="pathway">
+                <div className="pathway__meta"><span>{pathway.number}</span><em>{t(pathway.label[0], pathway.label[1])}</em></div>
                 <h3>{t(pathway.title[0], pathway.title[1])}</h3>
                 <p>{t(pathway.copy[0], pathway.copy[1])}</p>
-                <Link href={pathway.href}>
+                <span className="pathway__action">
                   {t(pathway.action[0], pathway.action[1])}
                   <ArrowRight aria-hidden="true" />
-                </Link>
-              </motion.article>
-            );
-          })}
+                </span>
+              </Link>
+          ))}
         </div>
       </section>
 

@@ -3,15 +3,10 @@ import NumberFlow from "@number-flow/react";
 import { useLenis } from "lenis/react";
 import { useLocation } from "wouter";
 import {
-  AlertCircle,
-  AlertTriangle,
   ArrowLeft,
   ArrowRight,
-  Check,
   ChevronDown,
-  CircleDot,
   Info,
-  Stethoscope,
 } from "lucide-react";
 import PageIntro from "@/components/PageIntro";
 import { Button } from "@/components/ui/button";
@@ -110,13 +105,13 @@ export default function SymptomChecker() {
         <section className={`symptom-result symptom-result--${assessment.level}`}>
           <div className="symptom-result__score"><span>{t("Attention score", "ध्यान स्कोर")}</span><NumberFlow value={assessment.totalScore} /><small>{t("from selected signs", "चुने गए संकेतों से")}</small></div>
           <div className="symptom-result__summary"><p className="section-kicker">{t("Suggested priority", "सुझाई गई प्राथमिकता")}</p><h2>{t(...levelCopy[assessment.level])}</h2><p>{t("The pattern you selected suggests the next step below. A clinician may reach a different conclusion after examination and testing.", "आपके चुने गए लक्षण नीचे दिए अगले कदम का संकेत देते हैं। जांच और परीक्षण के बाद चिकित्सक अलग निष्कर्ष पर पहुंच सकते हैं।")}</p></div>
-          <div className="symptom-result__icon" aria-hidden="true">{assessment.urgency === "urgent" ? <AlertTriangle /> : assessment.urgency === "high" ? <AlertCircle /> : <Check />}</div>
+          <div className="symptom-result__status"><span>{t("Priority", "प्राथमिकता")}</span><strong>{t(assessment.urgency === "urgent" ? "Urgent" : assessment.urgency === "high" ? "Timely" : "Monitor", assessment.urgency === "urgent" ? "तत्काल" : assessment.urgency === "high" ? "समय पर" : "निगरानी")}</strong></div>
         </section>
         <div className="symptom-result-grid">
           <section><p className="section-kicker">{t("What you selected", "आपने क्या चुना")}</p><h2>{t("Selected signs", "चुने गए संकेत")}</h2><div className="selected-signs">{assessment.selectedSymptoms.map((symptom) => <div key={symptom.id}><span>{symptom.severity}</span><p>{t(...symptom.name)}</p></div>)}</div></section>
           <section><p className="section-kicker">{t("Practical next step", "व्यावहारिक अगला कदम")}</p><h2>{t("What to do now", "अब क्या करें")}</h2><ol>{assessment.recommendations.map((recommendation, index) => <li key={recommendation[0]}><span>{String(index + 1).padStart(2, "0")}</span><p>{t(...recommendation)}</p></li>)}</ol></section>
         </div>
-        <div className="symptom-result-actions"><Button variant="outline" onClick={() => setAssessment(null)}><ArrowLeft />{t("Review again", "फिर से देखें")}</Button><Button onClick={() => setLocation("/diagnosis")}><Stethoscope />{t("Start full assessment", "पूर्ण मूल्यांकन शुरू करें")}<ArrowRight /></Button></div>
+        <div className="symptom-result-actions"><Button variant="outline" onClick={() => setAssessment(null)}><ArrowLeft />{t("Review again", "फिर से देखें")}</Button><Button onClick={() => setLocation("/diagnosis")}>{t("Start full assessment", "पूर्ण मूल्यांकन शुरू करें")}<ArrowRight /></Button></div>
       </div>
     );
   }
@@ -138,11 +133,16 @@ export default function SymptomChecker() {
             return (
               <Collapsible key={symptom.id}>
                 <div className={`symptom-item ${selected ? "is-selected" : ""}`}>
-                  <Checkbox id={symptom.id} checked={selected} onCheckedChange={() => toggleSymptom(symptom.id)} />
+                  <Checkbox
+                    id={symptom.id}
+                    checked={selected}
+                    onCheckedChange={() => toggleSymptom(symptom.id)}
+                    aria-label={t(`Select ${symptom.name[0]}`, `${symptom.name[1]} चुनें`)}
+                  />
                   <label htmlFor={symptom.id}><span>{t(...symptom.group)}</span><strong>{t(...symptom.name)}</strong></label>
                   <div className={`urgency-dots urgency-dots--${symptom.urgency}`} aria-label={`${symptom.severity} / 5`}><i /><i /><i /><i /><i /></div>
                   <CollapsibleTrigger asChild><button className="symptom-info-button" type="button" aria-label={t("More information", "अधिक जानकारी")}><ChevronDown /></button></CollapsibleTrigger>
-                  <CollapsibleContent className="symptom-item__detail"><p>{t(...symptom.description)}</p><span><CircleDot />{t(symptom.urgency === "urgent" ? "Urgent review" : symptom.urgency === "high" ? "Timely review" : "Monitor and discuss", symptom.urgency === "urgent" ? "तत्काल समीक्षा" : symptom.urgency === "high" ? "समय पर समीक्षा" : "निगरानी और चर्चा")}</span></CollapsibleContent>
+                  <CollapsibleContent className="symptom-item__detail"><p>{t(...symptom.description)}</p><span>{t(symptom.urgency === "urgent" ? "Urgent review" : symptom.urgency === "high" ? "Timely review" : "Monitor and discuss", symptom.urgency === "urgent" ? "तत्काल समीक्षा" : symptom.urgency === "high" ? "समय पर समीक्षा" : "निगरानी और चर्चा")}</span></CollapsibleContent>
                 </div>
               </Collapsible>
             );

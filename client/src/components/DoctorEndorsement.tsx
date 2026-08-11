@@ -1,4 +1,3 @@
-import { Quote, Stethoscope } from "lucide-react";
 import { t, useLanguage } from "@/hooks/useLanguage";
 
 interface DoctorEndorsementProps {
@@ -11,7 +10,8 @@ export default function DoctorEndorsement({ compact = false }: DoctorEndorsement
   return (
     <section className={`doctor-endorsement ${compact ? "doctor-endorsement--compact" : ""}`} aria-labelledby="doctor-recommendation-title">
       <div className="doctor-endorsement__mark" aria-hidden="true">
-        <Stethoscope />
+        <span>CLINICAL</span>
+        <strong>01</strong>
       </div>
       <div className="doctor-endorsement__copy">
         <p className="section-kicker">{t("Doctor's recommendation", "डॉक्टर की सिफारिश")}</p>
@@ -19,7 +19,6 @@ export default function DoctorEndorsement({ compact = false }: DoctorEndorsement
           {t("A clinical perspective on the project", "परियोजना पर एक चिकित्सकीय दृष्टिकोण")}
         </h2>
         <blockquote>
-          <Quote aria-hidden="true" />
           <p>
             {t(
               "Great app, valuable for the society for diabetic and CKD patients, has a high accuracy rate.",

@@ -3,7 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowRight, CheckCircle, Download, Droplets, Leaf, ShieldCheck, XCircle } from "lucide-react";
+import { ArrowRight, Download } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useLanguage, t } from "@/hooks/useLanguage";
 import type { DietPlan, CKDAssessment } from "@shared/schema";
@@ -52,7 +52,7 @@ export default function DietPlan({ params }: DietPlanProps) {
     enabled: !isNaN(assessmentId) && hasAccess,
   });
 
-  // Function to parse SHAP features for intelligent recommendations
+  // Parse stored factors used to organise the discussion guide.
   const parseShapFeatures = (shapFeatures: string | null) => {
     if (!shapFeatures) return [];
     try {
@@ -62,7 +62,7 @@ export default function DietPlan({ params }: DietPlanProps) {
     }
   };
 
-  // Advanced SHAP-based diet analysis
+  // Build the factor summary shown alongside the discussion guide.
   const generateShapBasedDietAnalysis = (assessment: CKDAssessment) => {
     const shapFeatures = parseShapFeatures(assessment.shapFeatures);
     
@@ -535,7 +535,7 @@ export default function DietPlan({ params }: DietPlanProps) {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-96">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <div className="loading-indicator" role="status" aria-label="Loading diet plan"><i /><i /><i /></div>
       </div>
     );
   }
@@ -566,7 +566,7 @@ export default function DietPlan({ params }: DietPlanProps) {
         title={t("A practical diet brief for discussion.", "चर्चा के लिए एक व्यावहारिक आहार सारांश।")}
         description={t("Use this educational plan to prepare questions for a renal dietitian or clinician. Individual needs can differ significantly.", "इस शैक्षिक योजना का उपयोग रीनल डाइटिशियन या चिकित्सक के लिए प्रश्न तैयार करने में करें। व्यक्तिगत जरूरतें काफी अलग हो सकती हैं।")}
         actions={<Button onClick={downloadDietPlan}><Download />{t("Download diet brief", "आहार सारांश डाउनलोड करें")}</Button>}
-        aside={<div className="diet-intro-signal"><Leaf aria-hidden="true" /><strong>{dietType === "vegetarian" ? t("Vegetarian view", "शाकाहारी दृश्य") : t("Non-vegetarian view", "मांसाहारी दृश्य")}</strong><p>{t("Switch the view below without losing this report.", "नीचे दृश्य बदलें, रिपोर्ट सुरक्षित रहेगी।")}</p></div>}
+        aside={<div className="diet-intro-signal"><span aria-hidden="true">DIET VIEW</span><strong>{dietType === "vegetarian" ? t("Vegetarian view", "शाकाहारी दृश्य") : t("Non-vegetarian view", "मांसाहारी दृश्य")}</strong><p>{t("Switch the view below without losing this report.", "नीचे दृश्य बदलें, रिपोर्ट सुरक्षित रहेगी।")}</p></div>}
       />
 
       <section className="diet-workspace">
@@ -605,7 +605,7 @@ export default function DietPlan({ params }: DietPlanProps) {
                 </div>
 
                 <div className="diet-context-strip">
-                  <ShieldCheck aria-hidden="true" />
+                  <span aria-hidden="true">DISCUSS</span>
                   <div>
                     <strong>{t("Use this as appointment preparation", "इसे मुलाकात की तैयारी के रूप में उपयोग करें")}</strong>
                     <p>{t("Ask a renal dietitian to interpret these signals alongside medicines, repeat labs, body weight and stage of kidney disease.", "रीनल डाइटिशियन से इन संकेतों को दवाओं, दोबारा किए गए लैब टेस्ट, शरीर के वजन और किडनी रोग की अवस्था के साथ समझने के लिए कहें।")}</p>
@@ -644,14 +644,14 @@ export default function DietPlan({ params }: DietPlanProps) {
 
           <div id="diet-plan-content" className="diet-columns">
             <article className="diet-column diet-column--eat">
-              <header><CheckCircle aria-hidden="true" /><div><span>{t("Review list A", "समीक्षा सूची ए")}</span><h3>{t("Food examples to discuss", "चर्चा के लिए भोजन के उदाहरण")}</h3></div></header>
+              <header><strong aria-hidden="true">A</strong><div><span>{t("Review list A", "समीक्षा सूची ए")}</span><h3>{t("Food examples to discuss", "चर्चा के लिए भोजन के उदाहरण")}</h3></div></header>
               <ul>
                 {foodsToEat.map((food: string, index: number) => <li key={index}><span>{String(index + 1).padStart(2, "0")}</span><p>{food}</p></li>)}
               </ul>
             </article>
 
             <article className="diet-column diet-column--avoid">
-              <header><XCircle aria-hidden="true" /><div><span>{t("Review list B", "समीक्षा सूची बी")}</span><h3>{t("Foods to ask about limiting", "सीमित करने के बारे में पूछने योग्य खाद्य पदार्थ")}</h3></div></header>
+              <header><strong aria-hidden="true">B</strong><div><span>{t("Review list B", "समीक्षा सूची बी")}</span><h3>{t("Foods to ask about limiting", "सीमित करने के बारे में पूछने योग्य खाद्य पदार्थ")}</h3></div></header>
               <ul>
                 {foodsToAvoid.map((food: string, index: number) => <li key={index}><span>{String(index + 1).padStart(2, "0")}</span><p>{food}</p></li>)}
               </ul>
@@ -659,7 +659,7 @@ export default function DietPlan({ params }: DietPlanProps) {
           </div>
 
           <section className="fluid-guidance">
-            <div className="fluid-guidance__icon"><Droplets aria-hidden="true" /></div>
+            <div className="fluid-guidance__icon" aria-hidden="true"><span>FLUID / 03</span></div>
             <div>
               <p className="section-kicker">{t("Fluid discussion", "तरल संबंधी चर्चा")}</p>
               <h2>{t("Do not guess a personal fluid target", "व्यक्तिगत तरल लक्ष्य का अनुमान न लगाएं")}</h2>

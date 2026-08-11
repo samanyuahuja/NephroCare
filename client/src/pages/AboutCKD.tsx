@@ -1,16 +1,5 @@
 import { Link } from "wouter";
-import {
-  Activity,
-  AlertTriangle,
-  ArrowRight,
-  BookOpenText,
-  Droplets,
-  ExternalLink,
-  FlaskConical,
-  HeartPulse,
-  ShieldCheck,
-  Stethoscope,
-} from "lucide-react";
+import { AlertTriangle, ArrowRight, ExternalLink } from "lucide-react";
 import PageIntro from "@/components/PageIntro";
 import { Button } from "@/components/ui/button";
 import { t, useLanguage } from "@/hooks/useLanguage";
@@ -34,10 +23,10 @@ const stages = [
 ];
 
 const riskFactors = [
-  { icon: Droplets, title: ["Diabetes", "मधुमेह"], copy: ["High blood glucose can damage the kidneys' filtering system over time.", "लंबे समय तक अधिक रक्त शर्करा किडनी की फिल्टर प्रणाली को नुकसान पहुंचा सकती है।"] },
-  { icon: Activity, title: ["High blood pressure", "उच्च रक्तचाप"], copy: ["Persistent pressure can damage the small blood vessels in the kidneys.", "लगातार अधिक दबाव किडनी की छोटी रक्त वाहिकाओं को नुकसान पहुंचा सकता है।"] },
-  { icon: HeartPulse, title: ["Heart disease", "हृदय रोग"], copy: ["Heart and kidney health share important risk pathways.", "हृदय और किडनी स्वास्थ्य के कई जोखिम कारक जुड़े होते हैं।"] },
-  { icon: ShieldCheck, title: ["Family history", "पारिवारिक इतिहास"], copy: ["A family history of kidney failure can increase the need for screening.", "परिवार में किडनी विफलता का इतिहास स्क्रीनिंग की आवश्यकता बढ़ा सकता है।"] },
+  { title: ["Diabetes", "मधुमेह"], copy: ["High blood glucose can damage the kidneys' filtering system over time.", "लंबे समय तक अधिक रक्त शर्करा किडनी की फिल्टर प्रणाली को नुकसान पहुंचा सकती है।"] },
+  { title: ["High blood pressure", "उच्च रक्तचाप"], copy: ["Persistent pressure can damage the small blood vessels in the kidneys.", "लगातार अधिक दबाव किडनी की छोटी रक्त वाहिकाओं को नुकसान पहुंचा सकता है।"] },
+  { title: ["Heart disease", "हृदय रोग"], copy: ["Heart and kidney health share important risk pathways.", "हृदय और किडनी स्वास्थ्य के कई जोखिम कारक जुड़े होते हैं।"] },
+  { title: ["Family history", "पारिवारिक इतिहास"], copy: ["A family history of kidney failure can increase the need for screening.", "परिवार में किडनी विफलता का इतिहास स्क्रीनिंग की आवश्यकता बढ़ा सकता है।"] },
 ];
 
 const symptoms = [
@@ -75,7 +64,7 @@ export default function AboutCKD() {
         }
         aside={
           <div className="guide-intro-signal">
-            <BookOpenText aria-hidden="true" />
+            <span aria-hidden="true">READ 01</span>
             <strong>{t("Start with two ideas", "दो बातों से शुरू करें")}</strong>
             <p>{t("Early CKD may have no symptoms. Blood and urine tests are central to checking kidney health.", "शुरुआती सीकेडी में लक्षण न भी हों। रक्त और मूत्र जांच किडनी स्वास्थ्य की जांच के मुख्य तरीके हैं।")}</p>
           </div>
@@ -100,7 +89,7 @@ export default function AboutCKD() {
             </div>
             <p className="guide-lede">{t("Chronic kidney disease means the kidneys are damaged or have a structural problem that prevents them from filtering blood as well as they should.", "क्रोनिक किडनी रोग का अर्थ है कि किडनी क्षतिग्रस्त है या उसकी संरचना में ऐसी समस्या है जिससे वह रक्त को ठीक से फिल्टर नहीं कर पाती।")}</p>
             <div className="guide-definition">
-              <FlaskConical aria-hidden="true" />
+              <span aria-hidden="true">NOTE</span>
               <div>
                 <strong>{t("One result is not the whole diagnosis", "एक परिणाम पूरा निदान नहीं है")}</strong>
                 <p>{t("Clinicians generally look for kidney damage or reduced function that persists for more than three months, using history, examination, and repeat tests.", "चिकित्सक आमतौर पर तीन महीने से अधिक समय तक बनी किडनी क्षति या कम कार्यक्षमता को इतिहास, जांच और दोबारा परीक्षण के साथ देखते हैं।")}</p>
@@ -132,10 +121,7 @@ export default function AboutCKD() {
               <div><p className="section-kicker">{t("Who should discuss testing", "किसे जांच पर बात करनी चाहिए")}</p><h2>{t("Common risk factors", "सामान्य जोखिम कारक")}</h2></div>
             </div>
             <div className="risk-ledger">
-              {riskFactors.map((factor) => {
-                const Icon = factor.icon;
-                return <div key={factor.title[0]}><Icon aria-hidden="true" /><h3>{t(factor.title[0], factor.title[1])}</h3><p>{t(factor.copy[0], factor.copy[1])}</p></div>;
-              })}
+              {riskFactors.map((factor, index) => <div key={factor.title[0]}><span>{String(index + 1).padStart(2, "0")}</span><h3>{t(factor.title[0], factor.title[1])}</h3><p>{t(factor.copy[0], factor.copy[1])}</p></div>)}
             </div>
           </section>
 
@@ -149,7 +135,7 @@ export default function AboutCKD() {
               {symptoms.map(([en, hi], index) => <li key={en}><span>{String(index + 1).padStart(2, "0")}</span>{t(en, hi)}</li>)}
             </ul>
             <div className="urgent-strip">
-              <Stethoscope aria-hidden="true" />
+              <span aria-hidden="true">URGENT</span>
               <div><strong>{t("Get urgent help for severe symptoms", "गंभीर लक्षणों में तुरंत मदद लें")}</strong><p>{t("Seek urgent medical care for chest pain, severe breathing difficulty, fainting, confusion, sudden major swelling, or very low urine output.", "सीने में दर्द, सांस लेने में गंभीर कठिनाई, बेहोशी, भ्रम, अचानक बहुत अधिक सूजन या बहुत कम पेशाब होने पर तुरंत चिकित्सा सहायता लें।")}</p></div>
             </div>
           </section>

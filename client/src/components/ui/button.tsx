@@ -5,11 +5,11 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[10px] text-sm font-semibold ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "motion-standard inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[8px] text-sm font-semibold ring-offset-background transition-[color,background-color,border-color,box-shadow,transform] duration-150 active:scale-[0.975] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground shadow-[0_8px_22px_rgba(11,110,209,0.18)] hover:-translate-y-0.5 hover:bg-blue-800 hover:shadow-[0_12px_28px_rgba(11,110,209,0.24)]",
+        default: "bg-primary text-primary-foreground shadow-[0_5px_14px_rgba(11,110,209,0.16)] hover:bg-blue-800 hover:shadow-[0_7px_18px_rgba(11,110,209,0.2)]",
         destructive:
           "bg-destructive text-destructive-foreground hover:bg-destructive/90",
         outline:

@@ -3,7 +3,7 @@ import NumberFlow from "@number-flow/react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowRight, BarChart3, TrendingUp, Lightbulb, Bot, Utensils, Download, MessageCircle, AlertTriangle, FileText, ShieldCheck } from "lucide-react";
+import { ArrowRight, Download } from "lucide-react";
 import { useLanguage, t } from "@/hooks/useLanguage";
 import { SHAPPlot } from "@/components/charts/SHAPPlot";
 import { PDPPlot } from "@/components/charts/PDPPlot";
@@ -30,7 +30,7 @@ export default function Results({ params }: ResultsProps) {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-96">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <div className="loading-indicator" role="status" aria-label="Loading report"><i /><i /><i /></div>
       </div>
     );
   }
@@ -446,6 +446,7 @@ export default function Results({ params }: ResultsProps) {
 
   const riskPercent = Math.max(0, Math.min(100, riskScore * 100));
   const riskTone = riskLevel.toLowerCase().includes("high") ? "high" : riskLevel.toLowerCase().includes("moderate") ? "moderate" : "low";
+  const riskLabel = riskLevel.replace(/\s+risk$/i, "");
   const topFactors = [...shapFeatures].sort((a, b) => Math.abs(b.impact) - Math.abs(a.impact)).slice(0, 5);
   const reportDate = assessment.createdAt
     ? new Date(assessment.createdAt).toLocaleDateString(language === "hi" ? "hi-IN" : "en-IN", { day: "2-digit", month: "short", year: "numeric" })
@@ -457,22 +458,22 @@ export default function Results({ params }: ResultsProps) {
         eyebrow={t("Preliminary screening report", "प्रारंभिक स्क्रीनिंग रिपोर्ट")}
         title={t("Your result, with the reasoning visible.", "आपका परिणाम, स्पष्ट कारणों के साथ।")}
         description={t("Review the estimate, inspect the factors behind it, then take the full report to a qualified clinician.", "अनुमान देखें, उसके कारण समझें और पूरी रिपोर्ट योग्य चिकित्सक के पास ले जाएं।")}
-        actions={<><Button onClick={downloadReport}><Download />{t("Download report", "रिपोर्ट डाउनलोड करें")}</Button><Button asChild variant="outline"><Link href={`/diet-plan/${assessmentId}`}><Utensils />{t("Open diet guidance", "आहार मार्गदर्शन खोलें")}</Link></Button></>}
-        aside={<div className="report-id"><FileText aria-hidden="true" /><span>{t("Report", "रिपोर्ट")}</span><strong>NC-{String(assessmentId).padStart(4, "0")}</strong><small>{reportDate}</small></div>}
+        actions={<><Button onClick={downloadReport}><Download />{t("Download report", "रिपोर्ट डाउनलोड करें")}</Button><Button asChild variant="outline"><Link href={`/diet-plan/${assessmentId}`}>{t("Open diet guidance", "आहार मार्गदर्शन खोलें")}</Link></Button></>}
+        aside={<div className="report-id"><span>{t("Report reference", "रिपोर्ट संदर्भ")}</span><strong>NC-{String(assessmentId).padStart(4, "0")}</strong><small>{reportDate}</small></div>}
       />
 
       <section className={`risk-summary risk-summary--${riskTone}`} aria-labelledby="risk-summary-title">
         <div className="risk-dial" style={{ "--risk-value": `${riskPercent * 3.6}deg` } as React.CSSProperties}>
           <div><NumberFlow value={riskPercent} format={{ maximumFractionDigits: 1 }} /><span>%</span><small>{t("screening estimate", "स्क्रीनिंग अनुमान")}</small></div>
         </div>
-        <div className="risk-summary__copy"><p className="section-kicker">{t("Result context", "परिणाम संदर्भ")}</p><h2 id="risk-summary-title">{riskLevel} {t("risk indication", "जोखिम संकेत")}</h2><p>{t(riskTone === "high" ? "This estimate needs prompt clinical review. It cannot confirm CKD or explain the cause by itself." : riskTone === "moderate" ? "This estimate deserves timely review with a clinician and comparison with repeat laboratory testing." : "This estimate is lower, but it cannot rule out kidney disease or replace recommended testing.", riskTone === "high" ? "इस अनुमान की शीघ्र चिकित्सकीय समीक्षा जरूरी है। यह अकेले सीकेडी की पुष्टि या कारण नहीं बता सकता।" : riskTone === "moderate" ? "इस अनुमान की समय पर चिकित्सकीय समीक्षा और दोबारा लैब जांच से तुलना जरूरी है।" : "यह अनुमान कम है, लेकिन किडनी रोग को खारिज या आवश्यक जांच का स्थान नहीं ले सकता।")}</p></div>
+        <div className="risk-summary__copy"><p className="section-kicker">{t("Result context", "परिणाम संदर्भ")}</p><h2 id="risk-summary-title">{riskLabel} {t("risk indication", "जोखिम संकेत")}</h2><p>{t(riskTone === "high" ? "This estimate needs prompt clinical review. It cannot confirm CKD or explain the cause by itself." : riskTone === "moderate" ? "This estimate deserves timely review with a clinician and comparison with repeat laboratory testing." : "This estimate is lower, but it cannot rule out kidney disease or replace recommended testing.", riskTone === "high" ? "इस अनुमान की शीघ्र चिकित्सकीय समीक्षा जरूरी है। यह अकेले सीकेडी की पुष्टि या कारण नहीं बता सकता।" : riskTone === "moderate" ? "इस अनुमान की समय पर चिकित्सकीय समीक्षा और दोबारा लैब जांच से तुलना जरूरी है।" : "यह अनुमान कम है, लेकिन किडनी रोग को खारिज या आवश्यक जांच का स्थान नहीं ले सकता।")}</p></div>
         <div className="risk-summary__facts"><div><span>{t("Patient", "रोगी")}</span><strong>{assessment.patientName}</strong></div><div><span>{t("Age", "आयु")}</span><strong>{assessment.age}</strong></div><div><span>{t("Creatinine", "क्रिएटिनिन")}</span><strong>{assessment.serumCreatinine} mg/dL</strong></div><div><span>{t("Blood pressure", "रक्तचाप")}</span><strong>{assessment.bloodPressure} mmHg</strong></div></div>
       </section>
 
       <section className="factor-section" aria-labelledby="factor-title">
         <div className="section-intro"><p className="section-kicker">{t("Model explanation", "मॉडल की व्याख्या")}</p><h2 id="factor-title">{t("What influenced this estimate", "इस अनुमान को किसने प्रभावित किया")}</h2><p>{t("Longer bars indicate a stronger influence in the model. They do not prove that a factor caused disease.", "लंबी पट्टियां मॉडल में अधिक प्रभाव दिखाती हैं। वे यह सिद्ध नहीं करतीं कि उसी कारक ने रोग पैदा किया।")}</p></div>
         <div className="factor-studio">
-          <div className="factor-chart"><div className="studio-label"><BarChart3 />SHAP {t("feature importance", "फीचर प्रभाव")}</div><SHAPPlot features={shapFeatures} /></div>
+          <div className="factor-chart"><div className="studio-label">SHAP / {t("feature importance", "फीचर प्रभाव")}</div><SHAPPlot features={shapFeatures} /></div>
           <div className="factor-ledger">
             {topFactors.length > 0 ? topFactors.map((factor, index) => <div key={`${factor.feature}-${index}`}><span>{String(index + 1).padStart(2, "0")}</span><div><strong>{factor.feature}</strong><p>{factor.impact > 0 ? t("Raised the model estimate", "मॉडल अनुमान बढ़ाया") : t("Lowered the model estimate", "मॉडल अनुमान घटाया")}</p></div><NumberFlow value={Math.abs(factor.impact * 100)} format={{ maximumFractionDigits: 1 }} /><small>%</small></div>) : <p className="factor-ledger__empty">{t("No factor detail was returned for this report.", "इस रिपोर्ट के लिए कारक विवरण उपलब्ध नहीं है।")}</p>}
           </div>
@@ -482,24 +483,24 @@ export default function Results({ params }: ResultsProps) {
       <section className="explanation-section" aria-labelledby="explanation-title">
         <div className="section-intro"><p className="section-kicker">{t("Three ways to inspect", "समझने के तीन तरीके")}</p><h2 id="explanation-title">{t("Explore the model from different angles", "मॉडल को अलग-अलग दृष्टिकोण से देखें")}</h2></div>
         <div className="explanation-grid">
-          <article><div className="studio-label"><TrendingUp />PDP</div><h3>{t("How one value changes the estimate", "एक मान अनुमान को कैसे बदलता है")}</h3><p>{t("The line shows the model's response as one input changes while other information is held steady.", "यह रेखा दिखाती है कि एक इनपुट बदलने पर मॉडल कैसे प्रतिक्रिया देता है, जबकि बाकी जानकारी स्थिर रहती है।")}</p><div className="explanation-visual"><PDPPlot assessment={assessment} /></div></article>
-          <article><div className="studio-label"><Lightbulb />LIME</div><h3>{t("A local explanation for this report", "इस रिपोर्ट की स्थानीय व्याख्या")}</h3><p>{t("LIME approximates which inputs mattered near this specific prediction.", "LIME अनुमान लगाता है कि इस खास भविष्यवाणी के पास कौन-से इनपुट महत्वपूर्ण थे।")}</p><div className="explanation-visual"><LIMEExplanation features={shapFeatures} /></div></article>
+          <article><div className="studio-label">PDP / MODEL RESPONSE</div><h3>{t("How one value changes the estimate", "एक मान अनुमान को कैसे बदलता है")}</h3><p>{t("The line shows the model's response as one input changes while other information is held steady.", "यह रेखा दिखाती है कि एक इनपुट बदलने पर मॉडल कैसे प्रतिक्रिया देता है, जबकि बाकी जानकारी स्थिर रहती है।")}</p><div className="explanation-visual"><PDPPlot assessment={assessment} /></div></article>
+          <article><div className="studio-label">LIME / LOCAL VIEW</div><h3>{t("A local explanation for this report", "इस रिपोर्ट की स्थानीय व्याख्या")}</h3><p>{t("LIME approximates which inputs mattered near this specific prediction.", "LIME अनुमान लगाता है कि इस खास भविष्यवाणी के पास कौन-से इनपुट महत्वपूर्ण थे।")}</p><div className="explanation-visual"><LIMEExplanation features={shapFeatures} /></div></article>
         </div>
       </section>
 
       {personalizedRecommendations.length > 0 && (
         <section className="review-priorities" aria-labelledby="review-priorities-title">
           <div className="section-intro"><p className="section-kicker">{t("Appointment preparation", "अपॉइंटमेंट की तैयारी")}</p><h2 id="review-priorities-title">{t("Values to discuss with a clinician", "चिकित्सक से चर्चा करने वाले मान")}</h2><p>{t("These are conversation prompts, not treatment instructions.", "ये बातचीत के प्रश्न हैं, उपचार निर्देश नहीं।")}</p></div>
-          <div className="priority-list">{personalizedRecommendations.slice(0, 4).map((recommendation, index) => <article key={`${recommendation.factor}-${index}`}><span>{String(index + 1).padStart(2, "0")}</span><div><h3>{recommendation.factor}</h3><p>{t("Entered value", "दर्ज मान")}: <strong>{recommendation.value}</strong></p></div><p>{t("Ask what this value means in the context of your history, medicines, symptoms, and repeat tests.", "पूछें कि आपके इतिहास, दवाओं, लक्षणों और दोबारा जांच के संदर्भ में इस मान का क्या अर्थ है।")}</p><AlertTriangle aria-hidden="true" /></article>)}</div>
+          <div className="priority-list">{personalizedRecommendations.slice(0, 4).map((recommendation, index) => <article key={`${recommendation.factor}-${index}`}><span>{String(index + 1).padStart(2, "0")}</span><div><h3>{recommendation.factor}</h3><p>{t("Entered value", "दर्ज मान")}: <strong>{recommendation.value}</strong></p></div><p>{t("Ask what this value means in the context of your history, medicines, symptoms, and repeat tests.", "पूछें कि आपके इतिहास, दवाओं, लक्षणों और दोबारा जांच के संदर्भ में इस मान का क्या अर्थ है।")}</p></article>)}</div>
         </section>
       )}
 
       <section className="results-next">
-        <div><Bot aria-hidden="true" /><div><p className="section-kicker">{t("Need a simpler explanation?", "और आसान व्याख्या चाहिए?")}</p><h2>{t("Take a question to NephroBot", "नेफ्रोबॉट से प्रश्न पूछें")}</h2><p>{t("Use the assistant to unpack a term, then verify medical decisions with a qualified professional.", "किसी शब्द को समझने के लिए सहायक का उपयोग करें, फिर चिकित्सकीय निर्णय योग्य पेशेवर से जांचें।")}</p></div></div>
-        <Button asChild><Link href="/chatbot"><MessageCircle />{t("Ask NephroBot", "नेफ्रोबॉट से पूछें")}<ArrowRight /></Link></Button>
+        <div><div><p className="section-kicker">{t("Need a simpler explanation?", "और आसान व्याख्या चाहिए?")}</p><h2>{t("Take a question to NephroBot", "नेफ्रोबॉट से प्रश्न पूछें")}</h2><p>{t("Use the assistant to unpack a term, then verify medical decisions with a qualified professional.", "किसी शब्द को समझने के लिए सहायक का उपयोग करें, फिर चिकित्सकीय निर्णय योग्य पेशेवर से जांचें।")}</p></div></div>
+        <Button asChild><Link href="/chatbot">{t("Ask NephroBot", "नेफ्रोबॉट से पूछें")}<ArrowRight /></Link></Button>
       </section>
 
-      <div className="medical-boundary"><ShieldCheck /><p>{t("This preliminary report cannot diagnose CKD, recommend medication, or determine treatment. Seek urgent care for severe or rapidly worsening symptoms.", "यह प्रारंभिक रिपोर्ट सीकेडी का निदान, दवा की सिफारिश या उपचार तय नहीं कर सकती। गंभीर या तेजी से बिगड़ते लक्षणों में तुरंत चिकित्सा सहायता लें।")}</p></div>
+      <div className="medical-boundary"><strong>{t("Medical boundary", "चिकित्सकीय सीमा")}</strong><p>{t("This preliminary report cannot diagnose CKD, recommend medication, or determine treatment. Seek urgent care for severe or rapidly worsening symptoms.", "यह प्रारंभिक रिपोर्ट सीकेडी का निदान, दवा की सिफारिश या उपचार तय नहीं कर सकती। गंभीर या तेजी से बिगड़ते लक्षणों में तुरंत चिकित्सा सहायता लें।")}</p></div>
     </div>
   );
 }
