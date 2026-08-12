@@ -10,6 +10,7 @@ import PageIntro from "@/components/PageIntro";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLanguage } from "@/hooks/useLanguage";
+import { getStoredAssessmentIds } from "@/lib/assessmentAccess";
 import type { CKDAssessment, DietPlan } from "@shared/schema";
 
 export default function Browse() {
@@ -19,12 +20,7 @@ export default function Browse() {
 
   useEffect(() => {
     const updateAssessmentIds = () => {
-      try {
-        const stored = localStorage.getItem("userAssessmentIds");
-        setUserAssessmentIds(stored ? JSON.parse(stored) : []);
-      } catch {
-        setUserAssessmentIds([]);
-      }
+      setUserAssessmentIds(getStoredAssessmentIds());
     };
 
     updateAssessmentIds();
