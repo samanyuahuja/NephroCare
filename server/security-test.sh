@@ -53,6 +53,11 @@ R=$(curl -s "$BASE/api/ckd-assessment/abc")
 check "Rejects non-integer ID" "Invalid assessment ID" "$R"
 echo ""
 
+echo "[5b] URL Param Validation (numeric prefix rejected)"
+R=$(curl -s "$BASE/api/ckd-assessment/12abc")
+check "Rejects partially numeric ID" "Invalid assessment ID" "$R"
+echo ""
+
 echo "[6] URL Param Validation (negative ID rejected)"
 R=$(curl -s "$BASE/api/ckd-assessment/-1")
 check "Rejects negative ID" "Invalid assessment ID" "$R"
