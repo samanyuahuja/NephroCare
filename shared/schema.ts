@@ -1,15 +1,14 @@
-import { pgTable, text, serial, integer, real, boolean, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, real, timestamp, uuid } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-export const users = pgTable("users", {
-  id: serial("id").primaryKey(),
-  username: text("username").notNull().unique(),
-  password: text("password").notNull(),
-});
-
 export const ckdAssessments = pgTable("ckd_assessments", {
   id: serial("id").primaryKey(),
+  publicId: uuid("public_id").notNull().unique(),
+  accessTokenHash: text("access_token_hash").notNull(),
+  encryptedPayload: text("encrypted_payload").notNull(),
+  consentVersion: text("consent_version").notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
   // Patient Info
   patientName: text("patient_name").notNull(),
   age: integer("age").notNull(),
@@ -54,26 +53,20 @@ export const dietPlans = pgTable("diet_plans", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const chatMessages = pgTable("chat_messages", {
-  id: serial("id").primaryKey(),
-  message: text("message").notNull(),
-  response: text("response").notNull(),
-  createdAt: timestamp("created_at").defaultNow(),
-});
-
-export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  password: true,
-});
-
 export const insertCKDAssessmentSchema = createInsertSchema(ckdAssessments).omit({
   id: true,
+  publicId: true,
+  accessTokenHash: true,
+  encryptedPayload: true,
+  consentVersion: true,
+  expiresAt: true,
   riskScore: true,
   riskLevel: true,
   shapFeatures: true,
   createdAt: true,
 }).strict().extend({
-  patientName: z.string().min(1, "Patient name is required").max(100, "Patient name too long"),
+  patientName: z.string().max(100, "Patient label too long").default(""),
+  age: z.number().int().min(18, "NephroCare is currently available only to adults").max(120),
   albumin: z.union([z.number().min(0).max(5), z.literal("unknown")]),
   sugar: z.union([z.number().min(0).max(5), z.literal("unknown")]),
   redBloodCells: z.enum(["normal", "abnormal", "unknown"]),
@@ -93,6 +86,13 @@ export const insertCKDAssessmentSchema = createInsertSchema(ckdAssessments).omit
   anemia: z.enum(["no", "yes", "unknown"]),
 });
 
+export const assessmentConsentSchema = z.object({
+  privacyNoticeVersion: z.literal("2026-08-12"),
+  healthDataProcessing: z.literal(true),
+  adultConfirmation: z.literal(true),
+  retentionDays: z.literal(30),
+}).strict();
+
 export const insertDietPlanSchema = createInsertSchema(dietPlans).omit({
   id: true,
   createdAt: true,
@@ -103,21 +103,9 @@ export const insertDietPlanSchema = createInsertSchema(dietPlans).omit({
   waterIntakeAdvice: z.string().max(2000, "Content too long"),
 });
 
-export const insertChatMessageSchema = createInsertSchema(chatMessages).omit({
-  id: true,
-  response: true,
-  createdAt: true,
-}).extend({
-  message: z.string().min(1, "Message is required").max(2000, "Message too long"),
-});
-
-export type InsertUser = z.infer<typeof insertUserSchema>;
-export type User = typeof users.$inferSelect;
 export type CKDAssessment = typeof ckdAssessments.$inferSelect;
 export type InsertCKDAssessment = z.infer<typeof insertCKDAssessmentSchema>;
 export type DietPlan = typeof dietPlans.$inferSelect & {
   patientName?: string; // Added from joined query
 };
 export type InsertDietPlan = z.infer<typeof insertDietPlanSchema>;
-export type ChatMessage = typeof chatMessages.$inferSelect;
-export type InsertChatMessage = z.infer<typeof insertChatMessageSchema>;

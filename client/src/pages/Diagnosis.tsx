@@ -16,6 +16,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage, t } from "@/hooks/useLanguage";
 import PageIntro from "@/components/PageIntro";
+import { storeAssessmentReference } from "@/lib/assessmentAccess";
 
 export default function Diagnosis() {
   const [, setLocation] = useLocation();
@@ -23,6 +24,7 @@ export default function Diagnosis() {
   const { language } = useLanguage();
   const [isSymptomCheckerOpen, setIsSymptomCheckerOpen] = useState(false);
   const [isReportGuideOpen, setIsReportGuideOpen] = useState(false);
+  const [consentAccepted, setConsentAccepted] = useState(false);
 
   // UCI CKD Dataset median values for form defaults
   // These provide balanced, unbiased starting points
@@ -69,19 +71,20 @@ export default function Diagnosis() {
 
   const mutation = useMutation({
     mutationFn: async (data: InsertCKDAssessment) => {
-      const response = await apiRequest("POST", "/api/ckd-assessment", data);
+      const response = await apiRequest("POST", "/api/ckd-assessment", {
+        assessment: data,
+        consent: {
+          privacyNoticeVersion: "2026-08-12",
+          healthDataProcessing: true,
+          adultConfirmation: true,
+          retentionDays: 30,
+        },
+      });
       return response.json();
     },
     onSuccess: (data) => {
       try {
-        // Store assessment ID in localStorage for privacy
-        const stored = localStorage.getItem('userAssessmentIds') || '[]';
-        const storedIds = JSON.parse(stored);
-        const updatedIds = [...storedIds, data.id];
-        localStorage.setItem('userAssessmentIds', JSON.stringify(updatedIds));
-        
-        // Dispatch custom event to notify other components
-        window.dispatchEvent(new CustomEvent('assessmentIdsUpdated'));
+        storeAssessmentReference({ publicId: data.publicId, accessToken: data.accessToken });
         
         // Invalidate Browse page queries
         queryClient.invalidateQueries({ queryKey: ["/api/ckd-assessments", "filtered"] });
@@ -94,11 +97,11 @@ export default function Diagnosis() {
         
         // Add a small delay to ensure localStorage is properly updated
         setTimeout(() => {
-          setLocation(`/results/${data.id}`);
+          setLocation(`/results/${data.publicId}`);
         }, 100);
       } catch (error) {
         console.error('Error storing assessment:', error);
-        setLocation(`/results/${data.id}`);
+        setLocation(`/results/${data.publicId}`);
       }
     },
     onError: (error) => {
@@ -112,6 +115,14 @@ export default function Diagnosis() {
   });
 
   const onSubmit = (data: InsertCKDAssessment) => {
+    if (!consentAccepted) {
+      toast({
+        title: t("Consent required", "सहमति आवश्यक है"),
+        description: t("Please confirm the health-data notice before continuing.", "आगे बढ़ने से पहले स्वास्थ्य डेटा सूचना की पुष्टि करें।"),
+        variant: "destructive",
+      });
+      return;
+    }
     mutation.mutate(data);
   };
 
@@ -393,11 +404,11 @@ export default function Diagnosis() {
                     name="patientName"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t("Patient Name", "रोगी का नाम")} *</FormLabel>
+                        <FormLabel>{t("Patient label (optional)", "रोगी का लेबल (वैकल्पिक)")}</FormLabel>
                         <FormControl>
                           <Input
                             type="text"
-                            placeholder={t("Enter patient's full name", "रोगी का पूरा नाम दर्ज करें")}
+                            placeholder={t("Use initials or a nickname", "अक्षर या उपनाम का उपयोग करें")}
                             {...field}
                           />
                         </FormControl>
@@ -1001,13 +1012,30 @@ export default function Diagnosis() {
                 </CardContent>
               </Card>
 
-              {/* Submit Button */}
+              <div className="border-t pt-6 text-left max-w-3xl mx-auto">
+                <label className="flex items-start gap-3 text-sm leading-6">
+                  <input
+                    type="checkbox"
+                    className="mt-1"
+                    checked={consentAccepted}
+                    onChange={(event) => setConsentAccepted(event.target.checked)}
+                  />
+                  <span>
+                    {t(
+                      "I am 18 or older and consent to NephroCare processing these health details to create this screening report. I understand the encrypted record is retained for 30 days, can be deleted from My Reports, and is not a diagnosis.",
+                      "मैं 18 वर्ष या उससे अधिक आयु का/की हूं और इस स्क्रीनिंग रिपोर्ट के लिए NephroCare द्वारा इन स्वास्थ्य विवरणों के उपयोग की सहमति देता/देती हूं। मैं समझता/समझती हूं कि एन्क्रिप्टेड रिकॉर्ड 30 दिनों तक रखा जाता है, मेरी रिपोर्ट से हटाया जा सकता है और यह निदान नहीं है।",
+                    )} {" "}
+                    <a href="/privacy" className="underline">{t("Privacy notice", "गोपनीयता सूचना")}</a>
+                  </span>
+                </label>
+              </div>
+
               <div className="text-center pt-6">
                 <Button 
                   type="submit" 
                   size="lg" 
                   className="px-8 py-4 text-lg"
-                  disabled={mutation.isPending}
+                  disabled={mutation.isPending || !consentAccepted}
                 >
                   {mutation.isPending ? t("Generating report…", "रिपोर्ट बनाई जा रही है…") : t("Generate preliminary report", "प्रारंभिक रिपोर्ट बनाएं")}
                 </Button>

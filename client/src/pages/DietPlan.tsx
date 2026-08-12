@@ -4,33 +4,37 @@ import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, Download } from "lucide-react";
-import { apiRequest } from "@/lib/queryClient";
 import { useLanguage, t } from "@/hooks/useLanguage";
 import type { DietPlan, CKDAssessment } from "@shared/schema";
 import PageIntro from "@/components/PageIntro";
-import { hasAssessmentAccess } from "@/lib/assessmentAccess";
+import { authorizedHeaders, getAssessmentReference } from "@/lib/assessmentAccess";
 
 interface DietPlanProps {
   params: { id: string };
 }
 
 export default function DietPlan({ params }: DietPlanProps) {
-  const assessmentId = parseInt(params.id);
+  const publicId = params.id;
   const [dietType, setDietType] = useState<'vegetarian' | 'non-vegetarian'>('vegetarian');
   const { language } = useLanguage();
 
-  const hasAccess = hasAssessmentAccess(assessmentId);
+  const reference = getAssessmentReference(publicId);
 
   const { data: assessment } = useQuery<CKDAssessment>({
-    queryKey: ["/api/ckd-assessment", assessmentId],
-    enabled: !isNaN(assessmentId) && hasAccess,
+    queryKey: ["/api/ckd-assessment", publicId],
+    queryFn: async () => {
+      const response = await fetch(`/api/ckd-assessment/${publicId}`, { headers: authorizedHeaders(reference!) });
+      if (!response.ok) throw new Error("Unable to load report");
+      return response.json();
+    },
+    enabled: Boolean(reference),
   });
 
   const dietPlanMutation = useMutation({
-    mutationFn: async ({ assessmentId, dietType }: { assessmentId: number, dietType: string }) => {
+    mutationFn: async ({ publicId, dietType }: { publicId: string, dietType: string }) => {
       // Create a complete diet plan payload with all required fields
       const dietPlanData = {
-        assessmentId,
+        publicId,
         dietType,
         foodsToEat: generateFoodToEat(dietType, assessment),
         foodsToAvoid: generateFoodToAvoid(dietType, assessment),
@@ -38,18 +42,23 @@ export default function DietPlan({ params }: DietPlanProps) {
         specialInstructions: generateSpecialInstructions(assessment)
       };
       
-      const response = await apiRequest("POST", "/api/diet-plan", dietPlanData);
+      const response = await fetch("/api/diet-plan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...authorizedHeaders(reference!) },
+        body: JSON.stringify(dietPlanData),
+      });
+      if (!response.ok) throw new Error("Unable to create diet guidance");
       return response.json();
     },
   });
 
   const { data: dietPlan, isLoading, refetch } = useQuery<DietPlan>({
-    queryKey: ["/api/diet-plan", assessmentId, dietType],
+    queryKey: ["/api/diet-plan", publicId, dietType],
     queryFn: () => {
       // Always create new diet plan when diet type changes
-      return dietPlanMutation.mutateAsync({ assessmentId, dietType });
+      return dietPlanMutation.mutateAsync({ publicId, dietType });
     },
-    enabled: !isNaN(assessmentId) && hasAccess,
+    enabled: Boolean(reference),
   });
 
   // Parse stored factors used to organise the discussion guide.
@@ -519,7 +528,7 @@ export default function DietPlan({ params }: DietPlanProps) {
     await generateDietPlanPDF(dietPlan, assessment);
   };
 
-  if (!hasAccess) {
+  if (!reference) {
     return (
       <Card className="max-w-md mx-auto">
         <CardContent className="pt-6 text-center">

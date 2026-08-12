@@ -3,10 +3,17 @@ import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import { registerRoutes } from "./routes.js";
 import { log } from "./logger.js";
+import { assertHealthDataSecurityConfigured } from "./healthDataSecurity.js";
 
 export async function createApplication() {
   const app = express();
   const isDevelopment = process.env.NODE_ENV === "development";
+  if (!isDevelopment) {
+    if (!process.env.DATABASE_URL?.trim()) {
+      throw new Error("DATABASE_URL is required in production");
+    }
+    assertHealthDataSecurityConfigured();
+  }
 
   app.use(helmet({
     contentSecurityPolicy: {
@@ -39,17 +46,16 @@ export async function createApplication() {
 
   const chatLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 20,
+    max: 10,
     standardHeaders: true,
     legacyHeaders: false,
     message: { error: "Chat rate limit reached. Please wait before sending more messages." },
   });
   app.use("/api/chat-direct", chatLimiter);
-  app.use("/api/chat-message", chatLimiter);
 
   app.use("/api/ckd-assessment", rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 30,
+    max: 10,
     standardHeaders: true,
     legacyHeaders: false,
     message: { error: "Assessment rate limit reached. Please wait before submitting again." },
@@ -57,7 +63,7 @@ export async function createApplication() {
 
   app.use("/api/diet-plan", rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 30,
+    max: 10,
     standardHeaders: true,
     legacyHeaders: false,
     message: { error: "Diet plan rate limit reached. Please wait before submitting again." },

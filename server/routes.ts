@@ -1,13 +1,19 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage.js";
-import { insertCKDAssessmentSchema, insertDietPlanSchema, insertChatMessageSchema } from "../shared/schema.js";
+import { assessmentConsentSchema, insertCKDAssessmentSchema } from "../shared/schema.js";
 import OpenAI from "openai";
 import { z } from "zod";
 import { checkDatabaseConnection } from "./db.js";
+import {
+  createAssessmentCapability,
+  encryptHealthPayload,
+  retentionDeadline,
+} from "./healthDataSecurity.js";
 
 // The provider key is read server-side and is never exposed to the client.
-const openai = process.env.OPENAI_API_KEY
+const openaiEnabled = process.env.OPENAI_CHAT_ENABLED?.trim().toLowerCase() === "true";
+const openai = openaiEnabled && process.env.OPENAI_API_KEY
   ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
   : null;
 
@@ -30,22 +36,37 @@ function sanitizeString(input: string): string {
     .trim();
 }
 
-// --- SECURITY: Validate and parse integer URL params safely ---
-function parseIntParam(value: string): number | null {
-  if (!/^\d+$/.test(value)) return null;
-
-  const num = Number(value);
-  if (!Number.isSafeInteger(num) || num < 1 || num > 2147483647) return null;
-  return num;
-}
-
 // --- SECURITY: Schema for chat message validation (length + type checks) ---
 const chatInputSchema = z.object({
   message: z.string().min(1, "Message is required").max(2000, "Message too long"),
 }).strict();
 
-// --- SECURITY: Schema for filtered ID queries (prevents JSON injection) ---
-const filteredIdsSchema = z.array(z.number().int().positive().max(2147483647)).max(100);
+const assessmentReferenceSchema = z.object({
+  publicId: z.string().uuid(),
+  accessToken: z.string().min(40).max(100),
+}).strict();
+const assessmentReferencesSchema = z.array(assessmentReferenceSchema).max(25);
+const assessmentSubmissionSchema = z.object({
+  assessment: insertCKDAssessmentSchema,
+  consent: assessmentConsentSchema,
+}).strict();
+const dietPlanRequestSchema = z.object({
+  publicId: z.string().uuid(),
+  dietType: z.enum(["vegetarian", "non-vegetarian"]),
+  foodsToEat: z.string().max(5000),
+  foodsToAvoid: z.string().max(5000),
+  waterIntakeAdvice: z.string().max(2000),
+}).strict();
+
+function bearerToken(header: string | undefined): string | null {
+  const match = header?.match(/^Bearer ([A-Za-z0-9_-]{40,100})$/);
+  return match?.[1] ?? null;
+}
+
+function publicAssessment(assessment: Record<string, any>) {
+  const { id, accessTokenHash, encryptedPayload, consentVersion, ...safe } = assessment;
+  return safe;
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -84,13 +105,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // --- SECURITY: CKD Assessment endpoint with schema-based validation ---
   app.post("/api/ckd-assessment", async (req, res) => {
     try {
-      const validatedData = insertCKDAssessmentSchema.parse(req.body);
+      await storage.purgeExpiredAssessments();
+      const submission = assessmentSubmissionSchema.parse(req.body);
+      const validatedData = submission.assessment;
       
       // --- SECURITY: Sanitize patient name to prevent stored XSS ---
       validatedData.patientName = sanitizeString(validatedData.patientName).substring(0, 100);
-      if (!validatedData.patientName) {
-        return res.status(400).json({ error: "Patient name is required" });
-      }
       
       // UCI CKD Dataset median values for "Don't Know" imputation
       // These are the actual median values from the training dataset (400 patients)
@@ -135,7 +155,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
       
       // Create initial assessment
-      const assessment = await storage.createCKDAssessment(transformedData);
+      const capability = createAssessmentCapability();
+      const expiresAt = retentionDeadline();
+      const protectedRecord = {
+        ...transformedData,
+        patientName: "",
+        age: 0,
+        bloodPressure: 0,
+        albumin: 0,
+        sugar: 0,
+        redBloodCells: "protected",
+        pusCell: "protected",
+        bloodGlucoseRandom: 0,
+        bloodUrea: 0,
+        serumCreatinine: 0,
+        sodium: 0,
+        potassium: 0,
+        hemoglobin: 0,
+        wbcCount: 0,
+        rbcCount: 0,
+        hypertension: "protected",
+        diabetesMellitus: "protected",
+        appetite: "protected",
+        pedalEdema: "protected",
+        anemia: "protected",
+        publicId: capability.publicId,
+        accessTokenHash: capability.accessTokenHash,
+        encryptedPayload: encryptHealthPayload(transformedData),
+        consentVersion: submission.consent.privacyNoticeVersion,
+        expiresAt,
+      };
+      const assessment = await storage.createCKDAssessment(protectedRecord);
       
       // Run ML prediction
       try {
@@ -164,8 +214,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         };
         
         const predictionResult = runCKDPrediction(modelInput);
-        console.log('Prediction result:', predictionResult);
-        
         if (predictionResult.success) {
           const updatedAssessment = await storage.updateCKDAssessmentResults(
             assessment.id,
@@ -184,16 +232,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
             })
           );
           
-          res.json(updatedAssessment || assessment);
+          res.status(201).json({
+            ...publicAssessment({ ...(updatedAssessment || assessment), ...transformedData }),
+            accessToken: capability.accessToken,
+          });
         } else {
           // Return assessment without ML prediction (fallback)
           console.warn('Clinical scoring failed, returning basic assessment');
-          res.json(assessment);
+          res.status(201).json({ ...publicAssessment({ ...assessment, ...transformedData }), accessToken: capability.accessToken });
         }
       } catch (mlError) {
         console.error('ML prediction error:', mlError);
         // Return basic assessment even if ML fails
-        res.json(assessment);
+        res.status(201).json({ ...publicAssessment({ ...assessment, ...transformedData }), accessToken: capability.accessToken });
       }
     } catch (error: any) {
       console.error('CKD Assessment error:', error);
@@ -209,61 +260,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.status(403).json({ error: "Use browser-linked assessment references" });
   });
 
-  // --- SECURITY: Filtered assessments with validated ID array ---
-  app.get("/api/ckd-assessments/filtered", async (req, res) => {
+  app.post("/api/ckd-assessments/filtered", async (req, res) => {
     try {
-      const { ids } = req.query;
-      if (!ids || typeof ids !== 'string') {
-        return res.json([]);
-      }
-      
-      let parsedIds: unknown;
-      try {
-        parsedIds = JSON.parse(ids);
-      } catch {
-        return res.status(400).json({ error: "Invalid ID format" });
-      }
-      
-      const validated = filteredIdsSchema.safeParse(parsedIds);
+      const validated = assessmentReferencesSchema.safeParse(req.body?.references);
       if (!validated.success) {
-        return res.status(400).json({ error: "Invalid assessment IDs" });
+        return res.status(400).json({ error: "Invalid report references" });
       }
-      
-      const assessments = await storage.getCKDAssessmentsByIds(validated.data);
-      res.json(assessments);
+      const assessments = await storage.getAuthorizedAssessments(validated.data);
+      res.json(assessments.map(publicAssessment));
     } catch (error: any) {
       console.error('Get CKD Assessments error:', error);
       res.status(500).json({ error: "Failed to fetch assessments" });
     }
   });
 
-  // --- SECURITY: Single assessment with validated integer param ---
-  app.get("/api/ckd-assessment/:id", async (req, res) => {
+  app.get("/api/ckd-assessment/:publicId", async (req, res) => {
     try {
-      const id = parseIntParam(req.params.id);
-      if (id === null) {
-        return res.status(400).json({ error: "Invalid assessment ID" });
-      }
-      const assessment = await storage.getCKDAssessment(id);
+      const accessToken = bearerToken(req.header("authorization"));
+      const reference = assessmentReferenceSchema.safeParse({ publicId: req.params.publicId, accessToken });
+      if (!reference.success) return res.status(401).json({ error: "A valid report capability is required" });
+      const assessment = await storage.getAuthorizedAssessment(reference.data);
       if (!assessment) {
-        return res.status(404).json({ error: "Assessment not found" });
+        return res.status(404).json({ error: "Report not found or access expired" });
       }
-      res.json(assessment);
+      res.json(publicAssessment(assessment));
     } catch (error: any) {
       console.error('Get CKD Assessment error:', error);
       res.status(500).json({ error: "Failed to fetch assessment" });
     }
   });
 
+  app.delete("/api/ckd-assessment/:publicId", async (req, res) => {
+    const accessToken = bearerToken(req.header("authorization"));
+    const reference = assessmentReferenceSchema.safeParse({ publicId: req.params.publicId, accessToken });
+    if (!reference.success) return res.status(401).json({ error: "A valid report capability is required" });
+    const deleted = await storage.deleteAuthorizedAssessment(reference.data);
+    return deleted ? res.status(204).send() : res.status(404).json({ error: "Report not found or access expired" });
+  });
+
   // --- SECURITY: Diet plan endpoint with sanitized text fields ---
   app.post("/api/diet-plan", async (req, res) => {
     try {
-      const validatedData = insertDietPlanSchema.parse(req.body);
+      const validatedData = dietPlanRequestSchema.parse(req.body);
+      const accessToken = bearerToken(req.header("authorization"));
+      const reference = assessmentReferenceSchema.safeParse({ publicId: validatedData.publicId, accessToken });
+      if (!reference.success) return res.status(401).json({ error: "A valid report capability is required" });
+      const assessment = await storage.getAuthorizedAssessment(reference.data);
+      if (!assessment) return res.status(404).json({ error: "Report not found or access expired" });
       validatedData.foodsToEat = sanitizeString(validatedData.foodsToEat);
       validatedData.foodsToAvoid = sanitizeString(validatedData.foodsToAvoid);
       validatedData.waterIntakeAdvice = sanitizeString(validatedData.waterIntakeAdvice);
-      const dietPlan = await storage.createDietPlan(validatedData);
-      res.json(dietPlan);
+      const dietPlan = await storage.createDietPlan({
+        assessmentId: assessment.id,
+        dietType: validatedData.dietType,
+        foodsToEat: validatedData.foodsToEat,
+        foodsToAvoid: validatedData.foodsToAvoid,
+        waterIntakeAdvice: validatedData.waterIntakeAdvice,
+      });
+      const { id, assessmentId, ...safePlan } = dietPlan;
+      res.json({ ...safePlan, publicId: assessment.publicId });
     } catch (error: any) {
       console.error('Diet Plan error:', error);
       if (error.name === "ZodError") {
@@ -278,68 +333,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.status(403).json({ error: "Use browser-linked assessment references" });
   });
 
-  // --- SECURITY: Diet plan with validated integer param ---
-  app.get("/api/diet-plan/:assessmentId", async (req, res) => {
+  app.post("/api/diet-plans/filtered", async (req, res) => {
     try {
-      const assessmentId = parseIntParam(req.params.assessmentId);
-      if (assessmentId === null) {
-        return res.status(400).json({ error: "Invalid assessment ID" });
-      }
-      const dietPlan = await storage.getDietPlanByAssessmentId(assessmentId);
-      if (!dietPlan) {
-        return res.status(404).json({ error: "Diet plan not found" });
-      }
-      res.json(dietPlan);
-    } catch (error: any) {
-      console.error('Get Diet Plan error:', error);
-      res.status(500).json({ error: "Failed to fetch diet plan" });
-    }
-  });
-
-  // --- SECURITY: Filtered diet plans with validated ID array ---
-  app.get("/api/diet-plans/filtered", async (req, res) => {
-    try {
-      const { ids } = req.query;
-      if (!ids || typeof ids !== 'string') {
-        return res.json([]);
-      }
-      
-      let parsedIds: unknown;
-      try {
-        parsedIds = JSON.parse(ids);
-      } catch {
-        return res.status(400).json({ error: "Invalid ID format" });
-      }
-      
-      const validated = filteredIdsSchema.safeParse(parsedIds);
-      if (!validated.success) {
-        return res.status(400).json({ error: "Invalid assessment IDs" });
-      }
-      
-      const dietPlans = await storage.getDietPlansByAssessmentIds(validated.data);
-      res.json(dietPlans);
+      const validated = assessmentReferencesSchema.safeParse(req.body?.references);
+      if (!validated.success) return res.status(400).json({ error: "Invalid report references" });
+      const assessments = await storage.getAuthorizedAssessments(validated.data);
+      const publicIds = new Map(assessments.map(({ id, publicId }) => [id, publicId]));
+      const dietPlans = await storage.getDietPlansForAuthorizedAssessments(validated.data);
+      res.json(dietPlans.map(({ id, assessmentId, ...plan }) => ({ ...plan, publicId: assessmentId ? publicIds.get(assessmentId) : undefined })));
     } catch (error: any) {
       console.error('Get Diet Plans error:', error);
       res.status(500).json({ error: "Failed to fetch diet plans" });
-    }
-  });
-
-  // --- SECURITY: Chat message endpoint with sanitized input ---
-  app.post("/api/chat-message", async (req, res) => {
-    try {
-      const validatedData = insertChatMessageSchema.parse(req.body);
-      validatedData.message = sanitizeString(validatedData.message);
-      if (!validatedData.message) {
-        return res.status(400).json({ error: "Message is required" });
-      }
-      const chatMessage = await storage.createChatMessage(validatedData);
-      res.json(chatMessage);
-    } catch (error: any) {
-      console.error('Chat Message error:', error);
-      if (error.name === "ZodError") {
-        return res.status(400).json({ error: "Invalid message data." });
-      }
-      res.status(500).json({ error: "Failed to create chat message" });
     }
   });
 
@@ -444,7 +448,7 @@ Explain general kidney-health terms in plain language and help users prepare que
           content: message
         }
       ],
-      max_tokens: 1500,
+      max_tokens: 500,
       temperature: 0.3, // Lower temperature for more accurate medical information
     });
 

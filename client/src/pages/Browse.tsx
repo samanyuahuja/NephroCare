@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import NumberFlow from "@number-flow/react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import {
   ArrowRight,
@@ -10,48 +10,68 @@ import PageIntro from "@/components/PageIntro";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLanguage } from "@/hooks/useLanguage";
-import { getStoredAssessmentIds } from "@/lib/assessmentAccess";
+import { authorizedHeaders, getStoredAssessmentReferences, removeAssessmentReference, type AssessmentReference } from "@/lib/assessmentAccess";
+import { queryClient } from "@/lib/queryClient";
 import type { CKDAssessment, DietPlan } from "@shared/schema";
+
+type PublicDietPlan = Omit<DietPlan, "id" | "assessmentId"> & { publicId: string };
 
 export default function Browse() {
   const { language } = useLanguage();
   const t = (en: string, hi: string) => language === "hi" ? hi : en;
-  const [userAssessmentIds, setUserAssessmentIds] = useState<number[]>([]);
+  const [references, setReferences] = useState<AssessmentReference[]>([]);
+
+  const deleteReport = useMutation({
+    mutationFn: async (publicId: string) => {
+      const reference = references.find((item) => item.publicId === publicId);
+      if (!reference) throw new Error("Report capability is unavailable");
+      const response = await fetch(`/api/ckd-assessment/${publicId}`, {
+        method: "DELETE",
+        headers: authorizedHeaders(reference),
+      });
+      if (!response.ok && response.status !== 404) throw new Error("Unable to delete report");
+      removeAssessmentReference(publicId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/ckd-assessments", "filtered"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/diet-plans", "filtered"] });
+    },
+  });
 
   useEffect(() => {
     const updateAssessmentIds = () => {
-      setUserAssessmentIds(getStoredAssessmentIds());
+      setReferences(getStoredAssessmentReferences());
     };
 
     updateAssessmentIds();
     window.addEventListener("storage", updateAssessmentIds);
-    window.addEventListener("assessmentIdsUpdated", updateAssessmentIds);
+    window.addEventListener("assessmentReferencesUpdated", updateAssessmentIds);
     return () => {
       window.removeEventListener("storage", updateAssessmentIds);
-      window.removeEventListener("assessmentIdsUpdated", updateAssessmentIds);
+      window.removeEventListener("assessmentReferencesUpdated", updateAssessmentIds);
     };
   }, []);
 
   const { data: assessments = [], isLoading: assessmentsLoading } = useQuery<CKDAssessment[]>({
-    queryKey: ["/api/ckd-assessments", "filtered", userAssessmentIds],
+    queryKey: ["/api/ckd-assessments", "filtered", references],
     queryFn: async () => {
-      if (userAssessmentIds.length === 0) return [];
-      const response = await fetch(`/api/ckd-assessments/filtered?ids=${encodeURIComponent(JSON.stringify(userAssessmentIds))}`);
+      if (references.length === 0) return [];
+      const response = await fetch("/api/ckd-assessments/filtered", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ references }) });
       if (!response.ok) throw new Error(`Failed to fetch assessments: ${response.status}`);
       return response.json();
     },
-    enabled: userAssessmentIds.length > 0,
+    enabled: references.length > 0,
   });
 
-  const { data: dietPlans = [], isLoading: dietPlansLoading } = useQuery<DietPlan[]>({
-    queryKey: ["/api/diet-plans", "filtered", userAssessmentIds],
+  const { data: dietPlans = [], isLoading: dietPlansLoading } = useQuery<PublicDietPlan[]>({
+    queryKey: ["/api/diet-plans", "filtered", references],
     queryFn: async () => {
-      if (userAssessmentIds.length === 0) return [];
-      const response = await fetch(`/api/diet-plans/filtered?ids=${encodeURIComponent(JSON.stringify(userAssessmentIds))}`);
+      if (references.length === 0) return [];
+      const response = await fetch("/api/diet-plans/filtered", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ references }) });
       if (!response.ok) throw new Error(`Failed to fetch diet plans: ${response.status}`);
       return response.json();
     },
-    enabled: userAssessmentIds.length > 0,
+    enabled: references.length > 0,
   });
 
   const formatDate = (value: string | Date | null) => {
@@ -101,12 +121,12 @@ export default function Browse() {
               <div className="report-ledger__heading"><div><p className="section-kicker">{t("Assessment archive", "मूल्यांकन संग्रह")}</p><h2 id="assessment-ledger-title">{t("Completed reports", "पूर्ण रिपोर्ट")}</h2></div><span>{t("Newest first", "नई रिपोर्ट पहले")}</span></div>
               <div className="report-ledger__columns" aria-hidden="true"><span>{t("Report", "रिपोर्ट")}</span><span>{t("Date", "तारीख")}</span><span>{t("Risk context", "जोखिम संदर्भ")}</span><span>{t("Score", "स्कोर")}</span><span /></div>
               {completedAssessments.map((assessment, index) => (
-                <article className="report-row" key={assessment.id}>
-                  <div className="report-row__identity"><span>{String(index + 1).padStart(2, "0")}</span><div><strong>{assessment.patientName || t("Unnamed assessment", "बिना नाम का मूल्यांकन")}</strong><small>NC-{String(assessment.id).padStart(4, "0")}</small></div></div>
+                <article className="report-row" key={assessment.publicId}>
+                  <div className="report-row__identity"><span>{String(index + 1).padStart(2, "0")}</span><div><strong>{assessment.patientName || t("Unnamed assessment", "बिना नाम का मूल्यांकन")}</strong><small>NC-{assessment.publicId.slice(0, 8).toUpperCase()}</small></div></div>
                   <div className="report-row__date">{formatDate(assessment.createdAt)}</div>
                   <div><span className={`risk-label risk-label--${assessment.riskLevel?.toLowerCase()}`}>{assessment.riskLevel} {t("risk", "जोखिम")}</span></div>
                   <div className="report-row__score"><NumberFlow value={(assessment.riskScore || 0) * 100} format={{ maximumFractionDigits: 1 }} /><span>%</span></div>
-                  <Button asChild variant="ghost" size="icon"><Link href={`/results/${assessment.id}`} aria-label={t("Open report", "रिपोर्ट खोलें")}><ArrowRight /></Link></Button>
+                  <div className="flex gap-2"><Button variant="outline" onClick={() => deleteReport.mutate(assessment.publicId)} disabled={deleteReport.isPending}>{t("Delete", "हटाएं")}</Button><Button asChild variant="ghost" size="icon"><Link href={`/results/${assessment.publicId}`} aria-label={t("Open report", "रिपोर्ट खोलें")}><ArrowRight /></Link></Button></div>
                 </article>
               ))}
             </section>
@@ -118,11 +138,11 @@ export default function Browse() {
             <section className="diet-ledger" aria-labelledby="diet-ledger-title">
               <div className="report-ledger__heading"><div><p className="section-kicker">{t("Nutrition archive", "पोषण संग्रह")}</p><h2 id="diet-ledger-title">{t("Diet guidance", "आहार मार्गदर्शन")}</h2></div></div>
               {dietPlans.map((plan, index) => (
-                <article className="diet-row" key={plan.id}>
+                <article className="diet-row" key={plan.publicId}>
                   <span className="diet-row__number">{String(index + 1).padStart(2, "0")}</span>
-                  <div><strong>{t("Diet plan", "आहार योजना")} #{plan.id}</strong><p>{plan.dietType || t("Personalised", "व्यक्तिगत")}</p></div>
+                  <div><strong>{t("Diet plan", "आहार योजना")}</strong><p>{plan.dietType || t("Personalised", "व्यक्तिगत")}</p></div>
                   <time>{formatDate(plan.createdAt)}</time>
-                  <Button asChild variant="outline"><Link href={`/diet-plan/${plan.assessmentId}`}>{t("Open plan", "योजना खोलें")}<ArrowRight /></Link></Button>
+                  <Button asChild variant="outline"><Link href={`/diet-plan/${plan.publicId}`}>{t("Open plan", "योजना खोलें")}<ArrowRight /></Link></Button>
                 </article>
               ))}
             </section>

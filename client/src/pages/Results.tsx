@@ -10,21 +10,26 @@ import { PDPPlot } from "@/components/charts/PDPPlot";
 import { LIMEExplanation } from "@/components/charts/LIMEExplanation";
 import type { CKDAssessment } from "@shared/schema";
 import PageIntro from "@/components/PageIntro";
-import { hasAssessmentAccess } from "@/lib/assessmentAccess";
+import { authorizedHeaders, getAssessmentReference } from "@/lib/assessmentAccess";
 
 interface ResultsProps {
   params: { id: string };
 }
 
 export default function Results({ params }: ResultsProps) {
-  const assessmentId = parseInt(params.id);
+  const publicId = params.id;
   const { language } = useLanguage();
 
-  const hasAccess = hasAssessmentAccess(assessmentId);
+  const reference = getAssessmentReference(publicId);
 
   const { data: assessment, isLoading, error } = useQuery<CKDAssessment>({
-    queryKey: ["/api/ckd-assessment", assessmentId],
-    enabled: !isNaN(assessmentId) && hasAccess,
+    queryKey: ["/api/ckd-assessment", publicId],
+    queryFn: async () => {
+      const response = await fetch(`/api/ckd-assessment/${publicId}`, { headers: authorizedHeaders(reference!) });
+      if (!response.ok) throw new Error("Unable to load report");
+      return response.json();
+    },
+    enabled: Boolean(reference),
   });
 
   if (isLoading) {
@@ -35,7 +40,7 @@ export default function Results({ params }: ResultsProps) {
     );
   }
 
-  if (!hasAccess) {
+  if (!reference) {
     return (
       <Card className="max-w-md mx-auto">
         <CardContent className="pt-6 text-center">
@@ -458,8 +463,8 @@ export default function Results({ params }: ResultsProps) {
         eyebrow={t("Preliminary screening report", "प्रारंभिक स्क्रीनिंग रिपोर्ट")}
         title={t("Your result, with the reasoning visible.", "आपका परिणाम, स्पष्ट कारणों के साथ।")}
         description={t("Review the estimate, inspect the factors behind it, then take the full report to a qualified clinician.", "अनुमान देखें, उसके कारण समझें और पूरी रिपोर्ट योग्य चिकित्सक के पास ले जाएं।")}
-        actions={<><Button onClick={downloadReport}><Download />{t("Download report", "रिपोर्ट डाउनलोड करें")}</Button><Button asChild variant="outline"><Link href={`/diet-plan/${assessmentId}`}>{t("Open diet guidance", "आहार मार्गदर्शन खोलें")}</Link></Button></>}
-        aside={<div className="report-id"><span>{t("Report reference", "रिपोर्ट संदर्भ")}</span><strong>NC-{String(assessmentId).padStart(4, "0")}</strong><small>{reportDate}</small></div>}
+        actions={<><Button onClick={downloadReport}><Download />{t("Download report", "रिपोर्ट डाउनलोड करें")}</Button><Button asChild variant="outline"><Link href={`/diet-plan/${publicId}`}>{t("Open diet guidance", "आहार मार्गदर्शन खोलें")}</Link></Button></>}
+        aside={<div className="report-id"><span>{t("Report reference", "रिपोर्ट संदर्भ")}</span><strong>NC-{publicId.slice(0, 8).toUpperCase()}</strong><small>{reportDate}</small></div>}
       />
 
       <section className={`risk-summary risk-summary--${riskTone}`} aria-labelledby="risk-summary-title">

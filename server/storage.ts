@@ -1,67 +1,56 @@
 import { 
-  users, 
   ckdAssessments, 
   dietPlans, 
-  chatMessages,
-  type User, 
-  type InsertUser,
   type CKDAssessment,
-  type InsertCKDAssessment,
   type DietPlan,
   type InsertDietPlan,
-  type ChatMessage,
-  type InsertChatMessage
 } from "../shared/schema.js";
 
 import { db } from "./db.js";
-import { eq, desc } from "drizzle-orm";
+import { and, desc, eq, gt, inArray, lte } from "drizzle-orm";
+import { decryptHealthPayload, tokenMatches } from "./healthDataSecurity.js";
+
+export interface AssessmentReference {
+  publicId: string;
+  accessToken: string;
+}
 
 export interface IStorage {
-  getUser(id: number): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
-  
   createCKDAssessment(assessment: any): Promise<CKDAssessment>;
-  getCKDAssessment(id: number): Promise<CKDAssessment | undefined>;
-  getCKDAssessmentsByIds(ids: number[]): Promise<CKDAssessment[]>;
+  purgeExpiredAssessments(): Promise<number>;
+  getAuthorizedAssessment(reference: AssessmentReference): Promise<CKDAssessment | undefined>;
+  getAuthorizedAssessments(references: AssessmentReference[]): Promise<CKDAssessment[]>;
+  deleteAuthorizedAssessment(reference: AssessmentReference): Promise<boolean>;
   updateCKDAssessmentResults(id: number, riskScore: number, riskLevel: string, shapFeatures: string): Promise<CKDAssessment | undefined>;
-  getAllCKDAssessments(): Promise<CKDAssessment[]>;
-  
   createDietPlan(dietPlan: InsertDietPlan): Promise<DietPlan>;
   getDietPlanByAssessmentId(assessmentId: number): Promise<DietPlan | undefined>;
-  getDietPlansByAssessmentIds(assessmentIds: number[]): Promise<DietPlan[]>;
-  getAllDietPlans(): Promise<DietPlan[]>;
-  
-  createChatMessage(message: InsertChatMessage): Promise<ChatMessage>;
-  getChatMessages(): Promise<ChatMessage[]>;
+  getDietPlansForAuthorizedAssessments(references: AssessmentReference[]): Promise<DietPlan[]>;
 }
 
 export class DatabaseStorage implements IStorage {
   constructor(private readonly database: NonNullable<typeof db>) {}
-
-  async getUser(id: number): Promise<User | undefined> {
-    const [user] = await this.database.select().from(users).where(eq(users.id, id));
-    return user || undefined;
-  }
-
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    const [user] = await this.database.select().from(users).where(eq(users.username, username));
-    return user || undefined;
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const [user] = await this.database.insert(users).values(insertUser).returning();
-    return user;
-  }
 
   async createCKDAssessment(assessment: any): Promise<CKDAssessment> {
     const [result] = await this.database.insert(ckdAssessments).values(assessment).returning();
     return result;
   }
 
-  async getCKDAssessment(id: number): Promise<CKDAssessment | undefined> {
-    const [assessment] = await this.database.select().from(ckdAssessments).where(eq(ckdAssessments.id, id));
-    return assessment || undefined;
+  async purgeExpiredAssessments(): Promise<number> {
+    const expired = await this.database.select({ id: ckdAssessments.id }).from(ckdAssessments).where(lte(ckdAssessments.expiresAt, new Date()));
+    if (expired.length === 0) return 0;
+    const ids = expired.map(({ id }) => id);
+    await this.database.delete(dietPlans).where(inArray(dietPlans.assessmentId, ids));
+    await this.database.delete(ckdAssessments).where(inArray(ckdAssessments.id, ids));
+    return ids.length;
+  }
+
+  async getAuthorizedAssessment(reference: AssessmentReference): Promise<CKDAssessment | undefined> {
+    const [assessment] = await this.database
+      .select()
+      .from(ckdAssessments)
+      .where(and(eq(ckdAssessments.publicId, reference.publicId), gt(ckdAssessments.expiresAt, new Date())));
+    if (!assessment || !tokenMatches(reference.accessToken, assessment.accessTokenHash)) return undefined;
+    return this.hydrate(assessment);
   }
 
   async updateCKDAssessmentResults(id: number, riskScore: number, riskLevel: string, shapFeatures: string): Promise<CKDAssessment | undefined> {
@@ -73,14 +62,17 @@ export class DatabaseStorage implements IStorage {
     return updated || undefined;
   }
 
-  async getCKDAssessmentsByIds(ids: number[]): Promise<CKDAssessment[]> {
-    if (ids.length === 0) return [];
-    const { inArray } = await import("drizzle-orm");
-    return await this.database.select().from(ckdAssessments).where(inArray(ckdAssessments.id, ids)).orderBy(desc(ckdAssessments.createdAt));
+  async getAuthorizedAssessments(references: AssessmentReference[]): Promise<CKDAssessment[]> {
+    const results = await Promise.all(references.map((reference) => this.getAuthorizedAssessment(reference)));
+    return results.filter((assessment): assessment is CKDAssessment => Boolean(assessment));
   }
 
-  async getAllCKDAssessments(): Promise<CKDAssessment[]> {
-    return await this.database.select().from(ckdAssessments).orderBy(desc(ckdAssessments.createdAt));
+  async deleteAuthorizedAssessment(reference: AssessmentReference): Promise<boolean> {
+    const assessment = await this.getAuthorizedAssessment(reference);
+    if (!assessment) return false;
+    await this.database.delete(dietPlans).where(eq(dietPlans.assessmentId, assessment.id));
+    const deleted = await this.database.delete(ckdAssessments).where(eq(ckdAssessments.id, assessment.id)).returning({ id: ckdAssessments.id });
+    return deleted.length === 1;
   }
 
   async createDietPlan(dietPlan: InsertDietPlan): Promise<DietPlan> {
@@ -93,118 +85,29 @@ export class DatabaseStorage implements IStorage {
     return plan || undefined;
   }
 
-  async getDietPlansByAssessmentIds(assessmentIds: number[]): Promise<DietPlan[]> {
-    if (assessmentIds.length === 0) return [];
-    const { inArray } = await import("drizzle-orm");
-    const result = await this.database
-      .select({
-        id: dietPlans.id,
-        assessmentId: dietPlans.assessmentId,
-        dietType: dietPlans.dietType,
-        foodsToEat: dietPlans.foodsToEat,
-        foodsToAvoid: dietPlans.foodsToAvoid,
-        waterIntakeAdvice: dietPlans.waterIntakeAdvice,
-        createdAt: dietPlans.createdAt,
-        patientName: ckdAssessments.patientName
-      })
-      .from(dietPlans)
-      .leftJoin(ckdAssessments, eq(dietPlans.assessmentId, ckdAssessments.id))
-      .where(inArray(dietPlans.assessmentId, assessmentIds))
-      .orderBy(desc(dietPlans.createdAt));
-    
-    return result as DietPlan[];
+  async getDietPlansForAuthorizedAssessments(references: AssessmentReference[]): Promise<DietPlan[]> {
+    const assessments = await this.getAuthorizedAssessments(references);
+    if (assessments.length === 0) return [];
+    return this.database.select().from(dietPlans).where(inArray(dietPlans.assessmentId, assessments.map(({ id }) => id))).orderBy(desc(dietPlans.createdAt));
   }
 
-  async getAllDietPlans(): Promise<DietPlan[]> {
-    // Join with assessments to get patient names
-    const result = await this.database
-      .select({
-        id: dietPlans.id,
-        assessmentId: dietPlans.assessmentId,
-        dietType: dietPlans.dietType,
-        foodsToEat: dietPlans.foodsToEat,
-        foodsToAvoid: dietPlans.foodsToAvoid,
-        waterIntakeAdvice: dietPlans.waterIntakeAdvice,
-        createdAt: dietPlans.createdAt,
-        patientName: ckdAssessments.patientName
-      })
-      .from(dietPlans)
-      .leftJoin(ckdAssessments, eq(dietPlans.assessmentId, ckdAssessments.id))
-      .orderBy(desc(dietPlans.createdAt));
-    
-    return result as DietPlan[];
-  }
-
-  async createChatMessage(message: InsertChatMessage): Promise<ChatMessage> {
-    const nephroResponse = this.generateNephroBotResponse(message.message);
-    const chatData = {
-      ...message,
-      response: nephroResponse
-    };
-    const [chat] = await this.database.insert(chatMessages).values(chatData).returning();
-    return chat;
-  }
-
-  private generateNephroBotResponse(message: string): string {
-    const msg = message.toLowerCase();
-    if (!msg) {
-      return "Please enter a message.";
-    } else if (msg.includes("what is ckd") || msg.includes("chronic kidney disease")) {
-      return "Chronic Kidney Disease (CKD) is a condition where your kidneys lose function over time. It's usually caused by diabetes or high blood pressure.";
-    } else if (msg.includes("symptoms")) {
-      return "Common CKD symptoms include fatigue, swelling in legs, nausea, high blood pressure, and frequent urination.";
-    } else if (msg.includes("treatment")) {
-      return "CKD treatment depends on the stage. It usually includes managing blood pressure, blood sugar, and avoiding further kidney damage. In severe cases, dialysis or transplant may be needed.";
-    } else if (msg.includes("diet")) {
-      return "A CKD diet includes low-sodium, low-protein foods, avoiding processed items, and drinking enough water. Consult a nephrologist for a custom plan.";
-    } else if (msg.includes("hi") || msg.includes("hello") || msg.includes("hey")) {
-      return "Hello! I'm NephroBot. Ask me anything about CKD (Chronic Kidney Disease).";
-    } else {
-      return "I'm here to help with CKD-related questions. Try asking about symptoms, treatment, diet, or general kidney health information.";
-    }
-  }
-
-  async getChatMessages(): Promise<ChatMessage[]> {
-    return await this.database.select().from(chatMessages).orderBy(desc(chatMessages.createdAt));
+  private hydrate(assessment: CKDAssessment): CKDAssessment {
+    const sensitive = decryptHealthPayload<Record<string, unknown>>(assessment.encryptedPayload);
+    return { ...assessment, ...sensitive } as CKDAssessment;
   }
 }
 
 export class MemStorage implements IStorage {
-  private users: Map<number, User>;
   private ckdAssessments: Map<number, CKDAssessment>;
   private dietPlans: Map<number, DietPlan>;
-  private chatMessages: Map<number, ChatMessage>;
-  private currentUserId: number;
   private currentAssessmentId: number;
   private currentDietPlanId: number;
-  private currentChatMessageId: number;
 
   constructor() {
-    this.users = new Map();
     this.ckdAssessments = new Map();
     this.dietPlans = new Map();
-    this.chatMessages = new Map();
-    this.currentUserId = 1;
     this.currentAssessmentId = 1;
     this.currentDietPlanId = 1;
-    this.currentChatMessageId = 1;
-  }
-
-  async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
-  }
-
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.currentUserId++;
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
-    return user;
   }
 
   async createCKDAssessment(insertAssessment: any): Promise<CKDAssessment> {
@@ -221,16 +124,37 @@ export class MemStorage implements IStorage {
     return assessment;
   }
 
-  async getCKDAssessment(id: number): Promise<CKDAssessment | undefined> {
-    return this.ckdAssessments.get(id);
+  async purgeExpiredAssessments(): Promise<number> {
+    let removed = 0;
+    for (const assessment of Array.from(this.ckdAssessments.values())) {
+      if (assessment.expiresAt <= new Date()) {
+        this.ckdAssessments.delete(assessment.id);
+        removed += 1;
+      }
+    }
+    return removed;
   }
 
-  async getCKDAssessmentsByIds(ids: number[]): Promise<CKDAssessment[]> {
-    return ids.map(id => this.ckdAssessments.get(id)).filter(Boolean) as CKDAssessment[];
+  async getAuthorizedAssessment(reference: AssessmentReference): Promise<CKDAssessment | undefined> {
+    const assessment = Array.from(this.ckdAssessments.values()).find(({ publicId }) => publicId === reference.publicId);
+    if (!assessment || assessment.expiresAt <= new Date() || !tokenMatches(reference.accessToken, assessment.accessTokenHash)) return undefined;
+    const sensitive = decryptHealthPayload<Record<string, unknown>>(assessment.encryptedPayload);
+    return { ...assessment, ...sensitive } as CKDAssessment;
   }
 
-  async getAllCKDAssessments(): Promise<CKDAssessment[]> {
-    return Array.from(this.ckdAssessments.values());
+  async getAuthorizedAssessments(references: AssessmentReference[]): Promise<CKDAssessment[]> {
+    const results = await Promise.all(references.map((reference) => this.getAuthorizedAssessment(reference)));
+    return results.filter((assessment): assessment is CKDAssessment => Boolean(assessment));
+  }
+
+  async deleteAuthorizedAssessment(reference: AssessmentReference): Promise<boolean> {
+    const assessment = await this.getAuthorizedAssessment(reference);
+    if (!assessment) return false;
+    this.ckdAssessments.delete(assessment.id);
+    this.dietPlans.forEach((plan, id) => {
+      if (plan.assessmentId === assessment.id) this.dietPlans.delete(id);
+    });
+    return true;
   }
 
   async updateCKDAssessmentResults(id: number, riskScore: number, riskLevel: string, shapFeatures: string): Promise<CKDAssessment | undefined> {
@@ -261,77 +185,10 @@ export class MemStorage implements IStorage {
     );
   }
 
-  async getDietPlansByAssessmentIds(assessmentIds: number[]): Promise<DietPlan[]> {
-    return Array.from(this.dietPlans.values()).filter(
-      (plan) => plan.assessmentId && assessmentIds.includes(plan.assessmentId)
-    );
-  }
-
-  async getAllDietPlans(): Promise<DietPlan[]> {
-    return Array.from(this.dietPlans.values());
-  }
-
-  async createChatMessage(insertMessage: InsertChatMessage): Promise<ChatMessage> {
-    const id = this.currentChatMessageId++;
-    
-    // Use NephroBot responses based on your Flask app.py logic
-    let response = "";
-    const msg = insertMessage.message.toLowerCase();
-
-    if (!msg) {
-      response = "Please enter a message.";
-    } else if (msg.includes("what is ckd") || msg.includes("chronic kidney disease")) {
-      response = "Chronic Kidney Disease (CKD) is a condition where your kidneys lose function over time. It's usually caused by diabetes or high blood pressure.";
-    } else if (msg.includes("symptoms")) {
-      response = "Common CKD symptoms include fatigue, swelling in legs, nausea, high blood pressure, and frequent urination.";
-    } else if (msg.includes("treatment")) {
-      response = "CKD treatment depends on the stage. It usually includes managing blood pressure, blood sugar, and avoiding further kidney damage. In severe cases, dialysis or transplant may be needed.";
-    } else if (msg.includes("diet")) {
-      response = "A CKD diet includes low-sodium, low-protein foods, avoiding processed items, and drinking enough water. Consult a nephrologist for a custom plan.";
-    } else if (msg.includes("is ckd curable")) {
-      response = "CKD isn't curable but it can be managed effectively with medications, lifestyle changes, and regular monitoring.";
-    } else if (msg.includes("hi") || msg.includes("hello") || msg.includes("hey")) {
-      response = "Hello! I'm NephroBot. Ask me anything about CKD (Chronic Kidney Disease).";
-    } else if (msg.includes("high creatinine")) {
-      response = "High creatinine can indicate poor kidney function. You should consult a nephrologist for further evaluation.";
-    } else if (msg.includes("gfr level")) {
-      response = "GFR (Glomerular Filtration Rate) is a key indicator of kidney function. A GFR below 60 may suggest CKD.";
-    } else if (msg.includes("protein in urine")) {
-      response = "Protein in urine (proteinuria) may indicate kidney damage. It should be investigated further.";
-    } else if (msg.includes("diet for ckd")) {
-      response = "CKD diet includes low sodium, controlled protein, and limited potassium and phosphorus depending on stage. Always consult a renal dietitian.";
-    } else if (msg.includes("what to eat in ckd")) {
-      response = "Safe foods include white rice, apples, cabbage, cauliflower, and lean protein (based on your stage and labs). Avoid salty, processed, and high-phosphorus foods.";
-    } else if (msg.includes("can i eat bananas")) {
-      response = "Bananas are high in potassium and may need to be limited in later CKD stages. Always check with your doctor.";
-    } else if (msg.includes("how to treat ckd")) {
-      response = "CKD treatment includes blood pressure control, diabetes management, dietary changes, and medications to protect kidney function.";
-    } else if (msg.includes("medicines for ckd")) {
-      response = "Common medications include ACE inhibitors, ARBs, phosphate binders, and diuretics — prescribed based on your condition.";
-    } else if (msg.includes("dialysis")) {
-      response = "Dialysis is used in end-stage CKD to remove waste from the blood when kidneys stop working effectively.";
-    } else if (msg.includes("ckd chatbot")) {
-      response = "You're chatting with me now! I'm NephroBot, designed to answer your questions about CKD.";
-    } else if (msg.includes("who made you")) {
-      response = "I was created to assist users with CKD-related queries using rule-based responses.";
-    } else {
-      response = "Sorry, I didn't understand that. Try asking about CKD symptoms, treatment, diet, risk factors, or prevention.";
-    }
-    
-    const chatMessage: ChatMessage = { 
-      ...insertMessage, 
-      id,
-      response,
-      createdAt: new Date()
-    };
-    this.chatMessages.set(id, chatMessage);
-    return chatMessage;
-  }
-
-  async getChatMessages(): Promise<ChatMessage[]> {
-    return Array.from(this.chatMessages.values()).sort((a, b) => 
-      a.createdAt!.getTime() - b.createdAt!.getTime()
-    );
+  async getDietPlansForAuthorizedAssessments(references: AssessmentReference[]): Promise<DietPlan[]> {
+    const assessments = await this.getAuthorizedAssessments(references);
+    const ids = new Set(assessments.map(({ id }) => id));
+    return Array.from(this.dietPlans.values()).filter((plan) => plan.assessmentId !== null && ids.has(plan.assessmentId));
   }
 
 

@@ -13,14 +13,14 @@ type LegalPageProps = {
   sections: Section[];
 };
 
-const effectiveDate = "11 August 2026";
+const effectiveDate = "12 August 2026";
 
 function LegalPage({ eyebrow, title, summary, sections }: LegalPageProps) {
   return (
     <article className="legal-page">
       <aside className="legal-page__aside">
         <p>{eyebrow}</p>
-        <time dateTime="2026-08-11">Effective {effectiveDate}</time>
+        <time dateTime="2026-08-12">Effective {effectiveDate}</time>
       </aside>
       <div className="legal-page__content">
         <h1>{title}</h1>
@@ -46,12 +46,12 @@ export function PrivacyPolicy() {
       sections={[
         {
           title: "Information you provide",
-          paragraphs: ["An assessment may include a name or label, age, laboratory values, symptoms, health history, and related screening answers. NephroBot receives the question you submit so it can return a response."],
-          bullets: ["Assessment inputs and generated risk context", "Diet preferences and generated guidance", "Questions submitted to NephroBot", "Messages you send to the support email"],
+          paragraphs: ["An assessment may include an optional label, age, laboratory values, symptoms, health history, and related screening answers. NephroBot receives the question needed to return a response; chat questions are not written to NephroCare's application database."],
+          bullets: ["Assessment inputs and generated risk context", "Diet preferences and generated guidance", "Questions submitted to NephroBot while the request is processed", "Messages you send to the support email"],
         },
         {
           title: "Information kept in your browser",
-          paragraphs: ["NephroCare stores your language preference, references to assessments created from this browser, and NephroBot conversation history in local browser storage. Clearing site data or changing devices can remove access to those local references."],
+          paragraphs: ["NephroCare stores your language preference, high-entropy report capabilities, and NephroBot conversation history in local browser storage. A capability acts like a private key to a report. Clearing site data removes those local references and may permanently remove your ability to retrieve a report."],
         },
         {
           title: "How information is used",
@@ -59,15 +59,15 @@ export function PrivacyPolicy() {
         },
         {
           title: "Storage and sharing",
-          paragraphs: ["Assessment records and generated diet plans may be stored by NephroCare's hosting and database providers so the requested features can operate. NephroCare does not sell personal information. Information may be disclosed when required by law, to protect the service, or to infrastructure providers acting on the service's behalf."],
+          paragraphs: ["Assessment health fields are encrypted before database storage. The database retains only encrypted clinical details, a hashed access capability, limited result metadata, consent version, and expiry time. New assessment records expire after 30 days. NephroCare does not sell personal information. Hosting and database providers process limited data only to operate and secure the requested service."],
         },
         {
           title: "Your choices",
-          paragraphs: [<>Use a label instead of a full name where possible. Do not submit another person's health information without permission. To ask about access, correction, or deletion, email <a href="mailto:nephrocareai@gmail.com">nephrocareai@gmail.com</a> with enough information to locate the relevant record.</>],
+          paragraphs: [<>Use initials or a nickname rather than a full name. You can retrieve or permanently delete a report from My Reports while its capability remains in this browser. For access, correction, deletion, consent withdrawal, or a privacy complaint, email <a href="mailto:nephrocareai@gmail.com">nephrocareai@gmail.com</a>. Never email laboratory values or other health data unless support specifically provides a secure method.</>],
         },
         {
-          title: "Children and urgent information",
-          paragraphs: ["If you are under the age at which you can consent to data processing on your own, use NephroCare with a parent or guardian. Do not use this service for emergencies or submit information that is unnecessary for the screening task."],
+          title: "Adults only and urgent information",
+          paragraphs: ["NephroCare does not accept assessment submissions from anyone under 18. A parent or guardian must not bypass this restriction by entering a child's details. Do not use this service for emergencies or submit information that is unnecessary for the screening task."],
         },
         {
           title: "Changes and questions",
@@ -101,7 +101,7 @@ export function MedicalDisclaimer() {
     <LegalPage
       eyebrow="Read before use"
       title="Medical disclaimer"
-      summary="NephroCare provides health education and preliminary screening support. It is not a medical device, diagnostic service, treatment plan, emergency service, or substitute for a qualified clinician."
+      summary="NephroCare provides health education and preliminary screening support. Its formal regulatory classification is under review; it is not authorised or registered for clinical diagnosis, treatment decisions, or emergency use and is not a substitute for a qualified clinician."
       sections={[
         { title: "No diagnosis or treatment", paragraphs: ["A risk score or symptom result cannot confirm or rule out chronic kidney disease or any other condition. Only an appropriately qualified professional can interpret your history, examine you, order tests, diagnose disease, and recommend treatment."] },
         { title: "Screening limitations", bullets: ["Results depend on the accuracy and completeness of the information entered", "Reference ranges vary by laboratory, age, sex, clinical history, medicines, and other factors", "A low preliminary estimate does not guarantee that no medical problem exists", "A high estimate does not establish a diagnosis"] },
