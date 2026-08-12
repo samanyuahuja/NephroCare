@@ -32,8 +32,10 @@ function sanitizeString(input: string): string {
 
 // --- SECURITY: Validate and parse integer URL params safely ---
 function parseIntParam(value: string): number | null {
-  const num = parseInt(value, 10);
-  if (isNaN(num) || num < 1 || num > 2147483647) return null;
+  if (!/^\d+$/.test(value)) return null;
+
+  const num = Number(value);
+  if (!Number.isSafeInteger(num) || num < 1 || num > 2147483647) return null;
   return num;
 }
 
