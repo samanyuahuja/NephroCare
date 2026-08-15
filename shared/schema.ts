@@ -96,7 +96,8 @@ export const insertCKDAssessmentSchema = createInsertSchema(ckdAssessments).omit
 export const insertDietPlanSchema = createInsertSchema(dietPlans).omit({
   id: true,
   createdAt: true,
-}).extend({
+}).strict().extend({
+  assessmentId: z.number().int().positive().max(2147483647),
   dietType: z.enum(["vegetarian", "non-vegetarian"]),
   foodsToEat: z.string().max(5000, "Content too long"),
   foodsToAvoid: z.string().max(5000, "Content too long"),
