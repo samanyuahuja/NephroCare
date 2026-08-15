@@ -262,6 +262,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       validatedData.foodsToEat = sanitizeString(validatedData.foodsToEat);
       validatedData.foodsToAvoid = sanitizeString(validatedData.foodsToAvoid);
       validatedData.waterIntakeAdvice = sanitizeString(validatedData.waterIntakeAdvice);
+      if (!validatedData.foodsToEat || !validatedData.foodsToAvoid || !validatedData.waterIntakeAdvice) {
+        return res.status(400).json({ error: "Diet plan content is required" });
+      }
       const dietPlan = await storage.createDietPlan(validatedData);
       res.json(dietPlan);
     } catch (error: any) {
