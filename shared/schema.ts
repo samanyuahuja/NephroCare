@@ -110,7 +110,7 @@ export const insertChatMessageSchema = createInsertSchema(chatMessages).omit({
   id: true,
   response: true,
   createdAt: true,
-}).extend({
+}).strict().extend({
   message: z.string().min(1, "Message is required").max(2000, "Message too long"),
 });
 
