@@ -74,6 +74,8 @@ export const insertCKDAssessmentSchema = createInsertSchema(ckdAssessments).omit
   createdAt: true,
 }).strict().extend({
   patientName: z.string().min(1, "Patient name is required").max(100, "Patient name too long"),
+  age: z.number().int().min(0).max(120),
+  bloodPressure: z.number().int().min(60).max(200),
   albumin: z.union([z.number().min(0).max(5), z.literal("unknown")]),
   sugar: z.union([z.number().min(0).max(5), z.literal("unknown")]),
   redBloodCells: z.enum(["normal", "abnormal", "unknown"]),
