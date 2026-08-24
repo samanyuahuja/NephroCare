@@ -113,7 +113,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Transform "unknown" values to dataset medians for database storage
       const transformedData = {
         patientName: validatedData.patientName,
-        age: validatedData.age || datasetMedians.age,
+        age: validatedData.age,
         bloodPressure: validatedData.bloodPressure || datasetMedians.bloodPressure,
         albumin: validatedData.albumin === "unknown" ? datasetMedians.albumin : Number(validatedData.albumin),
         sugar: validatedData.sugar === "unknown" ? datasetMedians.sugar : Number(validatedData.sugar),
@@ -142,7 +142,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Use the fixed model predictor with real trained models
         // Using dataset medians for "unknown" values
         const modelInput = {
-          age: validatedData.age || datasetMedians.age,
+          age: validatedData.age,
           bp: validatedData.bloodPressure || datasetMedians.bloodPressure,
           al: validatedData.albumin === "unknown" ? datasetMedians.albumin : validatedData.albumin,
           su: validatedData.sugar === "unknown" ? datasetMedians.sugar : validatedData.sugar,
