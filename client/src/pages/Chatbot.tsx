@@ -12,6 +12,17 @@ interface LocalChatMessage {
   timestamp: string;
 }
 
+function isLocalChatMessage(value: unknown): value is LocalChatMessage {
+  if (!value || typeof value !== "object") return false;
+  const message = value as Partial<LocalChatMessage>;
+  return (
+    typeof message.id === "number" &&
+    typeof message.message === "string" &&
+    typeof message.response === "string" &&
+    typeof message.timestamp === "string"
+  );
+}
+
 export default function Chatbot() {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<LocalChatMessage[]>([]);
@@ -21,7 +32,12 @@ export default function Chatbot() {
   useEffect(() => {
     try {
       const storedMessages = localStorage.getItem("nephroBotMessages");
-      if (storedMessages) setMessages(JSON.parse(storedMessages));
+      if (storedMessages) {
+        const parsedMessages: unknown = JSON.parse(storedMessages);
+        if (Array.isArray(parsedMessages)) {
+          setMessages(parsedMessages.filter(isLocalChatMessage));
+        }
+      }
     } catch (error) {
       console.error("Error loading chat messages:", error);
     }
