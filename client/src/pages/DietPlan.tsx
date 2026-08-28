@@ -8,14 +8,14 @@ import { apiRequest } from "@/lib/queryClient";
 import { useLanguage, t } from "@/hooks/useLanguage";
 import type { DietPlan, CKDAssessment } from "@shared/schema";
 import PageIntro from "@/components/PageIntro";
-import { hasAssessmentAccess } from "@/lib/assessmentAccess";
+import { hasAssessmentAccess, parseAssessmentId } from "@/lib/assessmentAccess";
 
 interface DietPlanProps {
   params: { id: string };
 }
 
 export default function DietPlan({ params }: DietPlanProps) {
-  const assessmentId = parseInt(params.id);
+  const assessmentId = parseAssessmentId(params.id) ?? 0;
   const [dietType, setDietType] = useState<'vegetarian' | 'non-vegetarian'>('vegetarian');
   const { language } = useLanguage();
 

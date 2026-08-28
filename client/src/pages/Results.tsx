@@ -10,14 +10,14 @@ import { PDPPlot } from "@/components/charts/PDPPlot";
 import { LIMEExplanation } from "@/components/charts/LIMEExplanation";
 import type { CKDAssessment } from "@shared/schema";
 import PageIntro from "@/components/PageIntro";
-import { hasAssessmentAccess } from "@/lib/assessmentAccess";
+import { hasAssessmentAccess, parseAssessmentId } from "@/lib/assessmentAccess";
 
 interface ResultsProps {
   params: { id: string };
 }
 
 export default function Results({ params }: ResultsProps) {
-  const assessmentId = parseInt(params.id);
+  const assessmentId = parseAssessmentId(params.id) ?? 0;
   const { language } = useLanguage();
 
   const hasAccess = hasAssessmentAccess(assessmentId);
