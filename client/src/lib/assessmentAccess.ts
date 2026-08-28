@@ -16,9 +16,11 @@ export function getStoredAssessmentIds(): number[] {
   try {
     const storedIds: unknown = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "[]");
     if (!Array.isArray(storedIds)) return [];
-    return storedIds.filter(
-      (id): id is number => Number.isInteger(id) && id > 0,
+    const validIds = storedIds.filter(
+      (id): id is number =>
+        Number.isInteger(id) && id > 0 && id <= MAX_ASSESSMENT_ID,
     );
+    return Array.from(new Set(validIds));
   } catch {
     return [];
   }
