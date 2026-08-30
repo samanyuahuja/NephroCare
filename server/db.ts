@@ -3,11 +3,11 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import * as schema from "../shared/schema.js";
 
 const databaseUrl = process.env.DATABASE_URL?.trim();
-const configuredPoolSize = Number.parseInt(
-  process.env.DATABASE_POOL_MAX || "5",
-  10,
-);
-const poolSize = Number.isFinite(configuredPoolSize)
+const poolSizeSetting = process.env.DATABASE_POOL_MAX?.trim() || "5";
+const configuredPoolSize = /^\d+$/.test(poolSizeSetting)
+  ? Number(poolSizeSetting)
+  : Number.NaN;
+const poolSize = Number.isSafeInteger(configuredPoolSize)
   ? Math.min(Math.max(configuredPoolSize, 1), 10)
   : 5;
 
