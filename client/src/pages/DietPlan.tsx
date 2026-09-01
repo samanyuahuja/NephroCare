@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, Download } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useLanguage, t } from "@/hooks/useLanguage";
-import type { DietPlan, CKDAssessment } from "@shared/schema";
+import type { DietPlan, CKDAssessment, InsertDietPlan } from "@shared/schema";
 import PageIntro from "@/components/PageIntro";
 import { hasAssessmentAccess, parseAssessmentId } from "@/lib/assessmentAccess";
 
@@ -27,7 +27,7 @@ export default function DietPlan({ params }: DietPlanProps) {
   });
 
   const dietPlanMutation = useMutation({
-    mutationFn: async ({ assessmentId, dietType }: { assessmentId: number, dietType: string }) => {
+    mutationFn: async ({ assessmentId, dietType }: { assessmentId: number, dietType: InsertDietPlan["dietType"] }) => {
       // Create a complete diet plan payload with all required fields
       const dietPlanData = {
         assessmentId,
@@ -35,8 +35,7 @@ export default function DietPlan({ params }: DietPlanProps) {
         foodsToEat: generateFoodToEat(dietType, assessment),
         foodsToAvoid: generateFoodToAvoid(dietType, assessment),
         waterIntakeAdvice: generateWaterIntake(assessment),
-        specialInstructions: generateSpecialInstructions(assessment)
-      };
+      } satisfies InsertDietPlan;
       
       const response = await apiRequest("POST", "/api/diet-plan", dietPlanData);
       return response.json();
@@ -479,38 +478,6 @@ export default function DietPlan({ params }: DietPlanProps) {
     }
 
     return advice.join(". ");
-  };
-
-  const generateSpecialInstructions = (assessment?: CKDAssessment) => {
-    if (!assessment) return "Regular monitoring of kidney function, follow medical advice, maintain healthy weight";
-    
-    const instructions = [];
-    const riskScore = assessment.riskScore || 0;
-    
-    if (riskScore > 0.6) {
-      instructions.push("Strict monitoring of kidney function, regular nephrology consultations");
-      instructions.push("Blood pressure control and diabetes management if applicable");
-    } else {
-      instructions.push("Regular monitoring of kidney function, follow medical advice");
-      instructions.push("Maintain healthy weight, preventive care");
-    }
-
-    // SHAP-based specific instructions
-    if (assessment.serumCreatinine && parseFloat(assessment.serumCreatinine.toString()) > 1.5) {
-      instructions.push("Work with renal dietitian for protein management");
-    }
-
-    if (assessment.potassium && parseFloat(assessment.potassium.toString()) > 5.0) {
-      instructions.push("Monitor blood potassium levels regularly");
-    }
-
-    if (assessment.diabetesMellitus === "yes") {
-      instructions.push("Coordinate with diabetes care team");
-    }
-
-    instructions.push("Keep food diary and track response to dietary changes");
-
-    return instructions.join(", ");
   };
 
   const downloadDietPlan = async () => {
