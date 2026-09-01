@@ -45,7 +45,10 @@ const chatInputSchema = z.object({
 }).strict();
 
 // --- SECURITY: Schema for filtered ID queries (prevents JSON injection) ---
-const filteredIdsSchema = z.array(z.number().int().positive().max(2147483647)).max(100);
+const filteredIdsSchema = z
+  .array(z.number().int().positive().max(2147483647))
+  .max(100)
+  .transform((ids) => Array.from(new Set(ids)));
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
