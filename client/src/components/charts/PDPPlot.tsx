@@ -70,7 +70,7 @@ const FEATURE_OPTIONS: FeatureConfig[] = [
     unit: "g/L",
     minValue: 0,
     maxValue: 5,
-    getValue: (a) => Number(a.albumin) || 1
+    getValue: (a) => Number(a.albumin)
   },
   {
     name: "Sodium",
