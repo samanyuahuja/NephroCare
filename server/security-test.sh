@@ -139,4 +139,5 @@ if [ $FAIL -eq 0 ]; then
   echo "All security tests passed."
 else
   echo "$FAIL test(s) failed. Review the output above."
+  exit 1
 fi
