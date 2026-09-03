@@ -6,7 +6,7 @@ import type { CKDAssessment, DietPlan } from '@shared/schema';
 const PDP_FEATURES = [
   { name: "Age", key: "age", unit: "years", minValue: 18, maxValue: 90, getValue: (a: CKDAssessment) => Number(a.age) || 45 },
   { name: "Blood Pressure", key: "bloodPressure", unit: "mmHg", minValue: 80, maxValue: 200, getValue: (a: CKDAssessment) => Number(a.bloodPressure) || 120 },
-  { name: "Albumin", key: "albumin", unit: "levels", minValue: 0, maxValue: 5, getValue: (a: CKDAssessment) => Number(a.albumin) || 1 },
+  { name: "Albumin", key: "albumin", unit: "levels", minValue: 0, maxValue: 5, getValue: (a: CKDAssessment) => Number(a.albumin) },
   { name: "Blood Glucose / Plasma Glucose", key: "bloodGlucoseRandom", unit: "mg/dL", minValue: 70, maxValue: 300, getValue: (a: CKDAssessment) => Number(a.bloodGlucoseRandom) || 140 },
   { name: "Blood Urea", key: "bloodUrea", unit: "mg/dL", minValue: 10, maxValue: 80, getValue: (a: CKDAssessment) => Number(a.bloodUrea) || 35 },
   { name: "Serum Creatinine", key: "serumCreatinine", unit: "mg/dL", minValue: 0.5, maxValue: 5, getValue: (a: CKDAssessment) => Number(a.serumCreatinine) || 1.2 },
