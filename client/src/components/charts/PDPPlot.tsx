@@ -36,9 +36,9 @@ const FEATURE_OPTIONS: FeatureConfig[] = [
     name: "Age",
     key: "age",
     unit: "years",
-    minValue: 20,
+    minValue: 0,
     maxValue: 80,
-    getValue: (a) => Number(a.age) || 45
+    getValue: (a) => Number(a.age)
   },
   {
     name: "Blood Pressure",

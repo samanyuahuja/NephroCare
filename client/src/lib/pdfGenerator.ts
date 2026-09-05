@@ -4,7 +4,7 @@ import type { CKDAssessment, DietPlan } from '@shared/schema';
 
 // PDP Features configuration for chart generation
 const PDP_FEATURES = [
-  { name: "Age", key: "age", unit: "years", minValue: 18, maxValue: 90, getValue: (a: CKDAssessment) => Number(a.age) || 45 },
+  { name: "Age", key: "age", unit: "years", minValue: 0, maxValue: 90, getValue: (a: CKDAssessment) => Number(a.age) },
   { name: "Blood Pressure", key: "bloodPressure", unit: "mmHg", minValue: 80, maxValue: 200, getValue: (a: CKDAssessment) => Number(a.bloodPressure) || 120 },
   { name: "Albumin", key: "albumin", unit: "levels", minValue: 0, maxValue: 5, getValue: (a: CKDAssessment) => Number(a.albumin) },
   { name: "Blood Glucose / Plasma Glucose", key: "bloodGlucoseRandom", unit: "mg/dL", minValue: 70, maxValue: 300, getValue: (a: CKDAssessment) => Number(a.bloodGlucoseRandom) || 140 },
