@@ -16,10 +16,12 @@ function isLocalChatMessage(value: unknown): value is LocalChatMessage {
   if (!value || typeof value !== "object") return false;
   const message = value as Partial<LocalChatMessage>;
   return (
-    typeof message.id === "number" &&
+    Number.isSafeInteger(message.id) &&
+    Number(message.id) > 0 &&
     typeof message.message === "string" &&
     typeof message.response === "string" &&
-    typeof message.timestamp === "string"
+    typeof message.timestamp === "string" &&
+    Number.isFinite(Date.parse(message.timestamp))
   );
 }
 
