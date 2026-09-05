@@ -1,5 +1,6 @@
 const STORAGE_KEY = "userAssessmentIds";
 const MAX_ASSESSMENT_ID = 2147483647;
+const MAX_STORED_ASSESSMENTS = 100;
 
 export function parseAssessmentId(value: string): number | null {
   if (!/^\d+$/.test(value)) return null;
@@ -20,7 +21,7 @@ export function getStoredAssessmentIds(): number[] {
       (id): id is number =>
         Number.isInteger(id) && id > 0 && id <= MAX_ASSESSMENT_ID,
     );
-    return Array.from(new Set(validIds));
+    return Array.from(new Set(validIds)).slice(-MAX_STORED_ASSESSMENTS);
   } catch {
     return [];
   }
