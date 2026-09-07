@@ -64,8 +64,12 @@ export default function Chatbot() {
         });
 
         if (!response.ok) throw new Error("Failed to get response from NephroBot");
-        const data = await response.json();
-        return data.reply || t("I could not process that question. Please try again.", "मैं उस प्रश्न को समझ नहीं पाया। कृपया दोबारा प्रयास करें।");
+        const data: unknown = await response.json();
+        const reply =
+          data && typeof data === "object" && "reply" in data && typeof data.reply === "string"
+            ? data.reply.trim()
+            : "";
+        return reply || t("I could not process that question. Please try again.", "मैं उस प्रश्न को समझ नहीं पाया। कृपया दोबारा प्रयास करें।");
       } catch (error) {
         console.error("Error calling chatbot:", error);
         return t("NephroBot is temporarily unavailable. Please try again later.", "नेफ्रोबॉट अभी उपलब्ध नहीं है। कृपया बाद में दोबारा प्रयास करें।");
