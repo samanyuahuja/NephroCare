@@ -12,6 +12,8 @@ interface LocalChatMessage {
   timestamp: string;
 }
 
+const MAX_SAVED_MESSAGES = 100;
+
 function isLocalChatMessage(value: unknown): value is LocalChatMessage {
   if (!value || typeof value !== "object") return false;
   const message = value as Partial<LocalChatMessage>;
@@ -37,7 +39,9 @@ export default function Chatbot() {
       if (storedMessages) {
         const parsedMessages: unknown = JSON.parse(storedMessages);
         if (Array.isArray(parsedMessages)) {
-          setMessages(parsedMessages.filter(isLocalChatMessage));
+          setMessages(
+            parsedMessages.filter(isLocalChatMessage).slice(-MAX_SAVED_MESSAGES),
+          );
         }
       }
     } catch (error) {
@@ -76,7 +80,10 @@ export default function Chatbot() {
       }
     },
     onSuccess: (botResponse, userMessage) => {
-      setMessages((current) => [...current, { id: Date.now(), message: userMessage, response: botResponse, timestamp: new Date().toISOString() }]);
+      setMessages((current) =>
+        [...current, { id: Date.now(), message: userMessage, response: botResponse, timestamp: new Date().toISOString() }]
+          .slice(-MAX_SAVED_MESSAGES),
+      );
       setMessage("");
     },
   });
