@@ -13,6 +13,7 @@ interface LocalChatMessage {
 }
 
 const MAX_SAVED_MESSAGES = 100;
+const MAX_MESSAGE_LENGTH = 2_000;
 
 function isLocalChatMessage(value: unknown): value is LocalChatMessage {
   if (!value || typeof value !== "object") return false;
@@ -21,6 +22,7 @@ function isLocalChatMessage(value: unknown): value is LocalChatMessage {
     Number.isSafeInteger(message.id) &&
     Number(message.id) > 0 &&
     typeof message.message === "string" &&
+    message.message.length <= MAX_MESSAGE_LENGTH &&
     typeof message.response === "string" &&
     typeof message.timestamp === "string" &&
     Number.isFinite(Date.parse(message.timestamp))
@@ -189,6 +191,7 @@ export default function Chatbot() {
                 onKeyDown={handleKeyDown}
                 placeholder={t("Ask a kidney-health question…", "किडनी स्वास्थ्य से जुड़ा प्रश्न पूछें…")}
                 disabled={sendMessageMutation.isPending}
+                maxLength={MAX_MESSAGE_LENGTH}
                 rows={2}
               />
               <Button onClick={handleSendMessage} disabled={!message.trim() || sendMessageMutation.isPending} size="icon" aria-label={t("Send question", "प्रश्न भेजें")}>
