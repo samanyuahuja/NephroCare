@@ -12,11 +12,14 @@ interface LIMEExplanationProps {
 
 export function LIMEExplanation({ features }: LIMEExplanationProps) {
   // Convert SHAP features to LIME format if needed
-  const limeFeatures = features.map((f: any) => ({
-    feature: f.feature || f.name || 'Unknown',
-    impact: f.impact || f.value || 0,
-    type: (f.impact || f.value || 0) > 0 ? 'positive' : 'negative'
-  }));
+  const limeFeatures = features.map((f: any) => {
+    const impact = f.impact ?? f.value ?? 0;
+    return {
+      feature: f.feature || f.name || 'Unknown',
+      impact,
+      type: impact > 0 ? 'positive' : 'negative'
+    };
+  });
 
   if (!limeFeatures || limeFeatures.length === 0) {
     return (
