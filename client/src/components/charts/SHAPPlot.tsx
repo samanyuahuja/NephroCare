@@ -20,16 +20,16 @@ export function SHAPPlot({ features }: SHAPPlotProps) {
   }
 
   // Limit to top 5 features only
-  const topFeatures = features
+  const topFeatures = [...features]
     .sort((a, b) => Math.abs(b.impact) - Math.abs(a.impact))
     .slice(0, 5);
+  const maxImpact = Math.max(...topFeatures.map((feature) => Math.abs(feature.impact)));
 
   return (
     <div className="space-y-4">
       {topFeatures.map((feature, index) => {
         const absImpact = Math.abs(feature.impact);
-        const maxImpact = Math.max(...topFeatures.map(f => Math.abs(f.impact)));
-        const percentage = (absImpact / maxImpact) * 100;
+        const percentage = maxImpact > 0 ? (absImpact / maxImpact) * 100 : 0;
         
         return (
           <div key={index} className="space-y-2">
