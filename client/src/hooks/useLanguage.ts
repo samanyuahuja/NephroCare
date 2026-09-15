@@ -10,7 +10,11 @@ interface LanguageState {
 
 const getStoredLanguage = (): Language => {
   if (typeof window === "undefined") return "en";
-  return localStorage.getItem("nephrocare-language") === "hi" ? "hi" : "en";
+  try {
+    return localStorage.getItem("nephrocare-language") === "hi" ? "hi" : "en";
+  } catch {
+    return "en";
+  }
 };
 
 let globalLanguage: Language = getStoredLanguage();
@@ -34,7 +38,11 @@ export const useLanguage = (): LanguageState => {
   const setLanguage = useCallback((newLanguage: Language) => {
     if (newLanguage === globalLanguage) return;
     globalLanguage = newLanguage;
-    localStorage.setItem("nephrocare-language", newLanguage);
+    try {
+      localStorage.setItem("nephrocare-language", newLanguage);
+    } catch {
+      // Keep the current session usable when browser storage is unavailable.
+    }
     document.documentElement.lang = newLanguage;
     listeners.forEach((listener) => listener());
   }, []);
