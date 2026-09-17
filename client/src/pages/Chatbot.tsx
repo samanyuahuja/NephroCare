@@ -107,7 +107,11 @@ export default function Chatbot() {
 
   const clearChat = () => {
     setMessages([]);
-    localStorage.removeItem("nephroBotMessages");
+    try {
+      localStorage.removeItem("nephroBotMessages");
+    } catch (error) {
+      console.error("Error clearing chat messages:", error);
+    }
   };
 
   const sampleQuestions = [
