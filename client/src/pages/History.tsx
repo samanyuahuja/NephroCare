@@ -116,7 +116,7 @@ const History = () => {
                         {assessment.riskLevel} {t("Risk", "जोखिम")}
                       </Badge>
                     )}
-                    {assessment.riskScore && (
+                    {assessment.riskScore != null && (
                       <div className="text-right">
                         <div className="text-sm text-gray-500">{t("Risk Score", "जोखिम स्कोर")}</div>
                         <div className="font-semibold">{(assessment.riskScore * 100).toFixed(1)}%</div>
