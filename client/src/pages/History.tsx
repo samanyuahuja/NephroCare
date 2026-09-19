@@ -19,6 +19,7 @@ const History = () => {
   const formatDateTime = (dateString: string | Date | null) => {
     if (!dateString) return "N/A";
     const date = new Date(dateString);
+    if (Number.isNaN(date.getTime())) return "N/A";
     return date.toLocaleDateString(language === 'hi' ? 'hi-IN' : 'en-US', {
       year: 'numeric',
       month: 'long',
