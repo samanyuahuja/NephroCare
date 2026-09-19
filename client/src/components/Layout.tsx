@@ -1,6 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { Activity, ArrowUpRight, Instagram, Mail, Menu, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import LanguageToggle from "@/components/LanguageToggle";
 import SiteMotion from "@/components/SiteMotion";
@@ -31,6 +31,10 @@ export default function Layout({ children }: LayoutProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   useLanguage();
   const reduceMotion = useReducedMotion();
+
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [location]);
 
   const isActive = (href: string) =>
     href === "/" ? location === "/" : location.startsWith(href);
