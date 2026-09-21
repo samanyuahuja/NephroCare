@@ -263,9 +263,9 @@ export class MemStorage implements IStorage {
   }
 
   async getDietPlansByAssessmentIds(assessmentIds: number[]): Promise<DietPlan[]> {
-    return Array.from(this.dietPlans.values()).filter(
-      (plan) => plan.assessmentId && assessmentIds.includes(plan.assessmentId)
-    );
+    return Array.from(this.dietPlans.values())
+      .filter((plan) => plan.assessmentId && assessmentIds.includes(plan.assessmentId))
+      .sort((a, b) => (b.createdAt?.getTime() ?? 0) - (a.createdAt?.getTime() ?? 0));
   }
 
   async getAllDietPlans(): Promise<DietPlan[]> {
