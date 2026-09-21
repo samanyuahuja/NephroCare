@@ -226,7 +226,8 @@ export class MemStorage implements IStorage {
   }
 
   async getCKDAssessmentsByIds(ids: number[]): Promise<CKDAssessment[]> {
-    return ids.map(id => this.ckdAssessments.get(id)).filter(Boolean) as CKDAssessment[];
+    return (ids.map(id => this.ckdAssessments.get(id)).filter(Boolean) as CKDAssessment[])
+      .sort((a, b) => (b.createdAt?.getTime() ?? 0) - (a.createdAt?.getTime() ?? 0));
   }
 
   async getAllCKDAssessments(): Promise<CKDAssessment[]> {
