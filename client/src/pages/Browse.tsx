@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLanguage } from "@/hooks/useLanguage";
 import { getStoredAssessmentIds } from "@/lib/assessmentAccess";
+import { formatReportDate } from "@/lib/reportFormatting";
 import type { CKDAssessment, DietPlan } from "@shared/schema";
 
 export default function Browse() {
@@ -55,8 +56,11 @@ export default function Browse() {
   });
 
   const formatDate = (value: string | Date | null) => {
-    if (!value) return t("Date unavailable", "तारीख उपलब्ध नहीं");
-    return new Date(value).toLocaleDateString(language === "hi" ? "hi-IN" : "en-IN", { day: "2-digit", month: "short", year: "numeric" });
+    return formatReportDate(
+      value,
+      language === "hi" ? "hi-IN" : "en-IN",
+      t("Date unavailable", "तारीख उपलब्ध नहीं"),
+    );
   };
 
   const completedAssessments = assessments.filter((assessment) => assessment.riskScore !== null && assessment.riskLevel);
