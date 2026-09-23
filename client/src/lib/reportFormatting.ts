@@ -13,3 +13,9 @@ export function formatReportDate(
     year: "numeric",
   });
 }
+
+export function getRiskLabelClassName(riskLevel: string | null): string {
+  const words = riskLevel?.trim().toLowerCase().split(/\s+/) ?? [];
+  const tone = ["high", "moderate", "low"].find((value) => words.includes(value));
+  return tone ? `risk-label risk-label--${tone}` : "risk-label";
+}

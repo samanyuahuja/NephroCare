@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLanguage } from "@/hooks/useLanguage";
 import { getStoredAssessmentIds } from "@/lib/assessmentAccess";
-import { formatReportDate } from "@/lib/reportFormatting";
+import { formatReportDate, getRiskLabelClassName } from "@/lib/reportFormatting";
 import type { CKDAssessment, DietPlan } from "@shared/schema";
 
 export default function Browse() {
@@ -108,7 +108,7 @@ export default function Browse() {
                 <article className="report-row" key={assessment.id}>
                   <div className="report-row__identity"><span>{String(index + 1).padStart(2, "0")}</span><div><strong>{assessment.patientName || t("Unnamed assessment", "बिना नाम का मूल्यांकन")}</strong><small>NC-{String(assessment.id).padStart(4, "0")}</small></div></div>
                   <div className="report-row__date">{formatDate(assessment.createdAt)}</div>
-                  <div><span className={`risk-label risk-label--${assessment.riskLevel?.toLowerCase()}`}>{assessment.riskLevel} {t("risk", "जोखिम")}</span></div>
+                  <div><span className={getRiskLabelClassName(assessment.riskLevel)}>{assessment.riskLevel} {t("risk", "जोखिम")}</span></div>
                   <div className="report-row__score"><NumberFlow value={(assessment.riskScore || 0) * 100} format={{ maximumFractionDigits: 1 }} /><span>%</span></div>
                   <Button asChild variant="ghost" size="icon"><Link href={`/results/${assessment.id}`} aria-label={t("Open report", "रिपोर्ट खोलें")}><ArrowRight /></Link></Button>
                 </article>
