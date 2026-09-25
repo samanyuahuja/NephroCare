@@ -11,6 +11,7 @@ import { LIMEExplanation } from "@/components/charts/LIMEExplanation";
 import type { CKDAssessment } from "@shared/schema";
 import PageIntro from "@/components/PageIntro";
 import { hasAssessmentAccess, parseAssessmentId } from "@/lib/assessmentAccess";
+import { formatReportDate } from "@/lib/reportFormatting";
 
 interface ResultsProps {
   params: { id: string };
@@ -448,9 +449,11 @@ export default function Results({ params }: ResultsProps) {
   const riskTone = riskLevel.toLowerCase().includes("high") ? "high" : riskLevel.toLowerCase().includes("moderate") ? "moderate" : "low";
   const riskLabel = riskLevel.replace(/\s+risk$/i, "");
   const topFactors = [...shapFeatures].sort((a, b) => Math.abs(b.impact) - Math.abs(a.impact)).slice(0, 5);
-  const reportDate = assessment.createdAt
-    ? new Date(assessment.createdAt).toLocaleDateString(language === "hi" ? "hi-IN" : "en-IN", { day: "2-digit", month: "short", year: "numeric" })
-    : t("Date unavailable", "तारीख उपलब्ध नहीं");
+  const reportDate = formatReportDate(
+    assessment.createdAt,
+    language === "hi" ? "hi-IN" : "en-IN",
+    t("Date unavailable", "तारीख उपलब्ध नहीं"),
+  );
 
   return (
     <div className="results-page app-page">
