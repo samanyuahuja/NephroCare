@@ -89,7 +89,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getDietPlanByAssessmentId(assessmentId: number): Promise<DietPlan | undefined> {
-    const [plan] = await this.database.select().from(dietPlans).where(eq(dietPlans.assessmentId, assessmentId));
+    const [plan] = await this.database
+      .select()
+      .from(dietPlans)
+      .where(eq(dietPlans.assessmentId, assessmentId))
+      .orderBy(desc(dietPlans.createdAt), desc(dietPlans.id));
     return plan || undefined;
   }
 
@@ -257,9 +261,12 @@ export class MemStorage implements IStorage {
   }
 
   async getDietPlanByAssessmentId(assessmentId: number): Promise<DietPlan | undefined> {
-    return Array.from(this.dietPlans.values()).find(
-      (plan) => plan.assessmentId === assessmentId
-    );
+    return Array.from(this.dietPlans.values())
+      .filter((plan) => plan.assessmentId === assessmentId)
+      .sort((a, b) =>
+        (b.createdAt?.getTime() ?? 0) - (a.createdAt?.getTime() ?? 0) ||
+        b.id - a.id
+      )[0];
   }
 
   async getDietPlansByAssessmentIds(assessmentIds: number[]): Promise<DietPlan[]> {
