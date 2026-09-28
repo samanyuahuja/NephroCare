@@ -7,11 +7,16 @@ export function formatReportDate(
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return fallback;
 
-  return date.toLocaleDateString(locale, {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
+  try {
+    return date.toLocaleDateString(locale, {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  } catch (error) {
+    if (error instanceof RangeError) return fallback;
+    throw error;
+  }
 }
 
 export function getRiskLabelClassName(riskLevel: string | null): string {
