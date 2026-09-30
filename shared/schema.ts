@@ -73,7 +73,7 @@ export const insertCKDAssessmentSchema = createInsertSchema(ckdAssessments).omit
   shapFeatures: true,
   createdAt: true,
 }).strict().extend({
-  patientName: z.string().min(1, "Patient name is required").max(100, "Patient name too long"),
+  patientName: z.string().trim().min(1, "Patient name is required").max(100, "Patient name too long"),
   age: z.number().int().min(0).max(120),
   bloodPressure: z.number().int().min(60).max(200),
   albumin: z.union([z.number().min(0).max(5), z.literal("unknown")]),
@@ -101,9 +101,9 @@ export const insertDietPlanSchema = createInsertSchema(dietPlans).omit({
 }).strict().extend({
   assessmentId: z.number().int().positive().max(2147483647),
   dietType: z.enum(["vegetarian", "non-vegetarian"]),
-  foodsToEat: z.string().max(5000, "Content too long"),
-  foodsToAvoid: z.string().max(5000, "Content too long"),
-  waterIntakeAdvice: z.string().max(2000, "Content too long"),
+  foodsToEat: z.string().trim().min(1, "Content is required").max(5000, "Content too long"),
+  foodsToAvoid: z.string().trim().min(1, "Content is required").max(5000, "Content too long"),
+  waterIntakeAdvice: z.string().trim().min(1, "Content is required").max(2000, "Content too long"),
 });
 
 export const insertChatMessageSchema = createInsertSchema(chatMessages).omit({
@@ -111,7 +111,7 @@ export const insertChatMessageSchema = createInsertSchema(chatMessages).omit({
   response: true,
   createdAt: true,
 }).strict().extend({
-  message: z.string().min(1, "Message is required").max(2000, "Message too long"),
+  message: z.string().trim().min(1, "Message is required").max(2000, "Message too long"),
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
