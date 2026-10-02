@@ -471,7 +471,7 @@ Explain general kidney-health terms in plain language and help users prepare que
 function getLocalNephroBotResponse(message: string): string {
   const msg = message.toLowerCase();
 
-  if (/(hello|hi|hey|good morning|good afternoon|good evening|greetings)/i.test(msg)) {
+  if (/\b(?:hello|hi|hey|good morning|good afternoon|good evening|greetings)\b/i.test(msg)) {
     return "Hello. I can explain general kidney-health terms and help you prepare questions for a qualified professional. What would you like to understand?";
   }
 
