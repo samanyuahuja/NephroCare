@@ -21,7 +21,8 @@ export function getStoredAssessmentIds(): number[] {
       (id): id is number =>
         Number.isInteger(id) && id > 0 && id <= MAX_ASSESSMENT_ID,
     );
-    return Array.from(new Set(validIds)).slice(-MAX_STORED_ASSESSMENTS);
+    const mostRecentFirst = Array.from(new Set(validIds.reverse()));
+    return mostRecentFirst.reverse().slice(-MAX_STORED_ASSESSMENTS);
   } catch {
     return [];
   }
