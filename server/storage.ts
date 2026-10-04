@@ -76,7 +76,7 @@ export class DatabaseStorage implements IStorage {
   async getCKDAssessmentsByIds(ids: number[]): Promise<CKDAssessment[]> {
     if (ids.length === 0) return [];
     const { inArray } = await import("drizzle-orm");
-    return await this.database.select().from(ckdAssessments).where(inArray(ckdAssessments.id, ids)).orderBy(desc(ckdAssessments.createdAt));
+    return await this.database.select().from(ckdAssessments).where(inArray(ckdAssessments.id, ids)).orderBy(desc(ckdAssessments.createdAt), desc(ckdAssessments.id));
   }
 
   async getAllCKDAssessments(): Promise<CKDAssessment[]> {
@@ -114,7 +114,7 @@ export class DatabaseStorage implements IStorage {
       .from(dietPlans)
       .leftJoin(ckdAssessments, eq(dietPlans.assessmentId, ckdAssessments.id))
       .where(inArray(dietPlans.assessmentId, assessmentIds))
-      .orderBy(desc(dietPlans.createdAt));
+      .orderBy(desc(dietPlans.createdAt), desc(dietPlans.id));
     
     return result as DietPlan[];
   }
@@ -231,7 +231,9 @@ export class MemStorage implements IStorage {
 
   async getCKDAssessmentsByIds(ids: number[]): Promise<CKDAssessment[]> {
     return (ids.map(id => this.ckdAssessments.get(id)).filter(Boolean) as CKDAssessment[])
-      .sort((a, b) => (b.createdAt?.getTime() ?? 0) - (a.createdAt?.getTime() ?? 0));
+      .sort((a, b) =>
+        (b.createdAt?.getTime() ?? 0) - (a.createdAt?.getTime() ?? 0) || b.id - a.id
+      );
   }
 
   async getAllCKDAssessments(): Promise<CKDAssessment[]> {
@@ -272,7 +274,9 @@ export class MemStorage implements IStorage {
   async getDietPlansByAssessmentIds(assessmentIds: number[]): Promise<DietPlan[]> {
     return Array.from(this.dietPlans.values())
       .filter((plan) => plan.assessmentId && assessmentIds.includes(plan.assessmentId))
-      .sort((a, b) => (b.createdAt?.getTime() ?? 0) - (a.createdAt?.getTime() ?? 0));
+      .sort((a, b) =>
+        (b.createdAt?.getTime() ?? 0) - (a.createdAt?.getTime() ?? 0) || b.id - a.id
+      );
   }
 
   async getAllDietPlans(): Promise<DietPlan[]> {
