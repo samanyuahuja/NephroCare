@@ -14,6 +14,7 @@ interface LocalChatMessage {
 
 const MAX_SAVED_MESSAGES = 100;
 const MAX_MESSAGE_LENGTH = 2_000;
+const MAX_RESPONSE_LENGTH = 20_000;
 
 function isLocalChatMessage(value: unknown): value is LocalChatMessage {
   if (!value || typeof value !== "object") return false;
@@ -24,6 +25,7 @@ function isLocalChatMessage(value: unknown): value is LocalChatMessage {
     typeof message.message === "string" &&
     message.message.length <= MAX_MESSAGE_LENGTH &&
     typeof message.response === "string" &&
+    message.response.length <= MAX_RESPONSE_LENGTH &&
     typeof message.timestamp === "string" &&
     Number.isFinite(Date.parse(message.timestamp))
   );
@@ -73,7 +75,7 @@ export default function Chatbot() {
         const data: unknown = await response.json();
         const reply =
           data && typeof data === "object" && "reply" in data && typeof data.reply === "string"
-            ? data.reply.trim()
+            ? data.reply.trim().slice(0, MAX_RESPONSE_LENGTH)
             : "";
         return reply || t("I could not process that question. Please try again.", "मैं उस प्रश्न को समझ नहीं पाया। कृपया दोबारा प्रयास करें।");
       } catch (error) {
