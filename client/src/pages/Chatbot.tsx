@@ -16,6 +16,11 @@ const MAX_SAVED_MESSAGES = 100;
 const MAX_MESSAGE_LENGTH = 2_000;
 const MAX_RESPONSE_LENGTH = 20_000;
 
+function isIsoTimestamp(value: string): boolean {
+  const timestamp = Date.parse(value);
+  return Number.isFinite(timestamp) && new Date(timestamp).toISOString() === value;
+}
+
 function isLocalChatMessage(value: unknown): value is LocalChatMessage {
   if (!value || typeof value !== "object") return false;
   const message = value as Partial<LocalChatMessage>;
@@ -23,11 +28,13 @@ function isLocalChatMessage(value: unknown): value is LocalChatMessage {
     Number.isSafeInteger(message.id) &&
     Number(message.id) > 0 &&
     typeof message.message === "string" &&
+    message.message.trim().length > 0 &&
     message.message.length <= MAX_MESSAGE_LENGTH &&
     typeof message.response === "string" &&
+    message.response.trim().length > 0 &&
     message.response.length <= MAX_RESPONSE_LENGTH &&
     typeof message.timestamp === "string" &&
-    Number.isFinite(Date.parse(message.timestamp))
+    isIsoTimestamp(message.timestamp)
   );
 }
 
