@@ -16,6 +16,8 @@ import {
 import { db } from "./db.js";
 import { eq, desc } from "drizzle-orm";
 
+const GREETING_PATTERN = /\b(?:hello|hi|hey)\b/i;
+
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
@@ -161,7 +163,7 @@ export class DatabaseStorage implements IStorage {
       return "CKD treatment depends on the stage. It usually includes managing blood pressure, blood sugar, and avoiding further kidney damage. In severe cases, dialysis or transplant may be needed.";
     } else if (msg.includes("diet")) {
       return "A CKD diet includes low-sodium, low-protein foods, avoiding processed items, and drinking enough water. Consult a nephrologist for a custom plan.";
-    } else if (msg.includes("hi") || msg.includes("hello") || msg.includes("hey")) {
+    } else if (GREETING_PATTERN.test(msg)) {
       return "Hello! I'm NephroBot. Ask me anything about CKD (Chronic Kidney Disease).";
     } else {
       return "I'm here to help with CKD-related questions. Try asking about symptoms, treatment, diet, or general kidney health information.";
@@ -302,7 +304,7 @@ export class MemStorage implements IStorage {
       response = "A CKD diet includes low-sodium, low-protein foods, avoiding processed items, and drinking enough water. Consult a nephrologist for a custom plan.";
     } else if (msg.includes("is ckd curable")) {
       response = "CKD isn't curable but it can be managed effectively with medications, lifestyle changes, and regular monitoring.";
-    } else if (msg.includes("hi") || msg.includes("hello") || msg.includes("hey")) {
+    } else if (GREETING_PATTERN.test(msg)) {
       response = "Hello! I'm NephroBot. Ask me anything about CKD (Chronic Kidney Disease).";
     } else if (msg.includes("high creatinine")) {
       response = "High creatinine can indicate poor kidney function. You should consult a nephrologist for further evaluation.";
