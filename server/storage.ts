@@ -18,6 +18,14 @@ import { eq, desc } from "drizzle-orm";
 
 const GREETING_PATTERN = /\b(?:hello|hi|hey)\b/i;
 
+function compareNewestFirst(
+  first: { createdAt: Date | null; id: number },
+  second: { createdAt: Date | null; id: number },
+): number {
+  return (second.createdAt?.getTime() ?? 0) - (first.createdAt?.getTime() ?? 0) ||
+    second.id - first.id;
+}
+
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
@@ -82,7 +90,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllCKDAssessments(): Promise<CKDAssessment[]> {
-    return await this.database.select().from(ckdAssessments).orderBy(desc(ckdAssessments.createdAt));
+    return await this.database
+      .select()
+      .from(ckdAssessments)
+      .orderBy(desc(ckdAssessments.createdAt), desc(ckdAssessments.id));
   }
 
   async createDietPlan(dietPlan: InsertDietPlan): Promise<DietPlan> {
@@ -136,7 +147,7 @@ export class DatabaseStorage implements IStorage {
       })
       .from(dietPlans)
       .leftJoin(ckdAssessments, eq(dietPlans.assessmentId, ckdAssessments.id))
-      .orderBy(desc(dietPlans.createdAt));
+      .orderBy(desc(dietPlans.createdAt), desc(dietPlans.id));
     
     return result as DietPlan[];
   }
@@ -171,7 +182,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getChatMessages(): Promise<ChatMessage[]> {
-    return await this.database.select().from(chatMessages).orderBy(desc(chatMessages.createdAt));
+    return await this.database
+      .select()
+      .from(chatMessages)
+      .orderBy(desc(chatMessages.createdAt), desc(chatMessages.id));
   }
 }
 
@@ -233,13 +247,11 @@ export class MemStorage implements IStorage {
 
   async getCKDAssessmentsByIds(ids: number[]): Promise<CKDAssessment[]> {
     return (ids.map(id => this.ckdAssessments.get(id)).filter(Boolean) as CKDAssessment[])
-      .sort((a, b) =>
-        (b.createdAt?.getTime() ?? 0) - (a.createdAt?.getTime() ?? 0) || b.id - a.id
-      );
+      .sort(compareNewestFirst);
   }
 
   async getAllCKDAssessments(): Promise<CKDAssessment[]> {
-    return Array.from(this.ckdAssessments.values());
+    return Array.from(this.ckdAssessments.values()).sort(compareNewestFirst);
   }
 
   async updateCKDAssessmentResults(id: number, riskScore: number, riskLevel: string, shapFeatures: string): Promise<CKDAssessment | undefined> {
@@ -267,22 +279,17 @@ export class MemStorage implements IStorage {
   async getDietPlanByAssessmentId(assessmentId: number): Promise<DietPlan | undefined> {
     return Array.from(this.dietPlans.values())
       .filter((plan) => plan.assessmentId === assessmentId)
-      .sort((a, b) =>
-        (b.createdAt?.getTime() ?? 0) - (a.createdAt?.getTime() ?? 0) ||
-        b.id - a.id
-      )[0];
+      .sort(compareNewestFirst)[0];
   }
 
   async getDietPlansByAssessmentIds(assessmentIds: number[]): Promise<DietPlan[]> {
     return Array.from(this.dietPlans.values())
       .filter((plan) => plan.assessmentId && assessmentIds.includes(plan.assessmentId))
-      .sort((a, b) =>
-        (b.createdAt?.getTime() ?? 0) - (a.createdAt?.getTime() ?? 0) || b.id - a.id
-      );
+      .sort(compareNewestFirst);
   }
 
   async getAllDietPlans(): Promise<DietPlan[]> {
-    return Array.from(this.dietPlans.values());
+    return Array.from(this.dietPlans.values()).sort(compareNewestFirst);
   }
 
   async createChatMessage(insertMessage: InsertChatMessage): Promise<ChatMessage> {
@@ -343,9 +350,7 @@ export class MemStorage implements IStorage {
   }
 
   async getChatMessages(): Promise<ChatMessage[]> {
-    return Array.from(this.chatMessages.values()).sort((a, b) => 
-      a.createdAt!.getTime() - b.createdAt!.getTime()
-    );
+    return Array.from(this.chatMessages.values()).sort(compareNewestFirst);
   }
 
 
