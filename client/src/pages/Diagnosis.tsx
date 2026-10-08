@@ -16,7 +16,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage, t } from "@/hooks/useLanguage";
 import PageIntro from "@/components/PageIntro";
-import { getStoredAssessmentIds } from "@/lib/assessmentAccess";
+import { getStoredAssessmentIds, parseAssessmentId } from "@/lib/assessmentAccess";
 
 export default function Diagnosis() {
   const [, setLocation] = useLocation();
@@ -71,7 +71,13 @@ export default function Diagnosis() {
   const mutation = useMutation({
     mutationFn: async (data: InsertCKDAssessment) => {
       const response = await apiRequest("POST", "/api/ckd-assessment", data);
-      return response.json();
+      const payload: unknown = await response.json();
+      if (!payload || typeof payload !== "object" || !("id" in payload)) {
+        throw new Error("Assessment response is missing an ID");
+      }
+      const id = parseAssessmentId(String(payload.id));
+      if (id === null) throw new Error("Assessment response has an invalid ID");
+      return { id };
     },
     onSuccess: (data) => {
       try {
