@@ -340,7 +340,7 @@ export class PDFGenerator {
 
   async generateAssessmentReport(assessment: CKDAssessment): Promise<void> {
     const riskScore = assessment.riskScore || 0;
-    const riskLevel = riskScore > 0.7 ? 'High Risk' : riskScore > 0.4 ? 'Moderate Risk' : 'Low Risk';
+    const riskLevel = assessment.riskLevel?.trim() || 'Risk unavailable';
     
     this.addHeader('Preliminary CKD Screening Report', `Patient: ${assessment.patientName}`);
     
@@ -422,11 +422,14 @@ export class PDFGenerator {
     this.doc.setFontSize(11);
     this.doc.setTextColor(31, 41, 55);
     
-    const riskText = riskScore > 0.7
+    const normalizedRiskLevel = riskLevel.toLowerCase();
+    const riskText = normalizedRiskLevel.includes('high')
       ? 'The entered pattern produced a higher screening estimate. Arrange prompt clinical review; use urgent services for severe or rapidly worsening symptoms.'
-      : riskScore > 0.4
+      : normalizedRiskLevel.includes('moderate')
         ? 'The entered pattern produced a moderate screening estimate. Discuss the result with a qualified clinician and compare it with repeat laboratory testing.'
-        : 'The entered pattern produced a lower screening estimate. This does not rule out CKD; symptoms, risk factors, and laboratory trends may still require review.';
+        : normalizedRiskLevel.includes('low')
+          ? 'The entered pattern produced a lower screening estimate. This does not rule out CKD; symptoms, risk factors, and laboratory trends may still require review.'
+          : 'No screening risk label was stored for this assessment. Ask a qualified clinician to interpret the entered values.';
     
     this.doc.text(riskText, this.margin, this.currentY, { maxWidth: this.pageWidth - 2 * this.margin });
     this.currentY += 15;
