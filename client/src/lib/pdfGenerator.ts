@@ -35,6 +35,16 @@ const localDateStamp = () => {
   return `${year}-${month}-${day}`;
 };
 
+const formatPdfDate = (value: string | Date | null | undefined): string => {
+  if (!value) return 'Unavailable';
+  const parsed = value instanceof Date
+    ? new Date(value.getTime())
+    : new Date(value);
+  return Number.isNaN(parsed.getTime())
+    ? 'Unavailable'
+    : parsed.toLocaleDateString();
+};
+
 export class PDFGenerator {
   private doc: jsPDF;
   private pageHeight: number;
@@ -352,7 +362,7 @@ export class PDFGenerator {
     this.addSection('Patient Information');
     this.addKeyValuePair('Name', assessment.patientName);
     this.addKeyValuePair('Age', `${assessment.age} years`);
-    this.addKeyValuePair('Assessment Date', new Date(assessment.createdAt!).toLocaleDateString());
+    this.addKeyValuePair('Assessment Date', formatPdfDate(assessment.createdAt));
     
     this.checkPageBreak();
     
@@ -488,9 +498,9 @@ export class PDFGenerator {
 
     this.addSection('Brief Overview');
     this.addKeyValuePair('Food Pattern', dietPlan.dietType);
-    this.addKeyValuePair('Brief Created', new Date(dietPlan.createdAt!).toLocaleDateString());
+    this.addKeyValuePair('Brief Created', formatPdfDate(dietPlan.createdAt));
     if (assessment) {
-      this.addKeyValuePair('Assessment Date', new Date(assessment.createdAt!).toLocaleDateString());
+      this.addKeyValuePair('Assessment Date', formatPdfDate(assessment.createdAt));
       this.addKeyValuePair('Screening Estimate', `${((assessment.riskScore || 0) * 100).toFixed(1)}%`);
     }
 
