@@ -103,6 +103,11 @@ R=$(curl -s -X POST "$BASE/api/ckd-assessment" -H "Content-Type: application/jso
 check "Rejects fractional values for integer lab fields" "Invalid assessment data" "$R"
 echo ""
 
+echo "[13c] Diet Plan Validation (assessment must exist)"
+R=$(curl -s -X POST "$BASE/api/diet-plan" -H "Content-Type: application/json" -d '{"assessmentId":2147483647,"dietType":"vegetarian","foodsToEat":"Vegetables","foodsToAvoid":"Processed foods","waterIntakeAdvice":"Follow clinician guidance"}')
+check "Rejects diet plans for missing assessments" "Assessment not found" "$R"
+echo ""
+
 echo "[14] API Key Not Exposed Client-Side"
 CLIENT_SRC=$(find client/src -name "*.ts" -o -name "*.tsx" | xargs grep -l "OPENAI\|API_KEY\|process\.env" 2>/dev/null || true)
 if [ -z "$CLIENT_SRC" ]; then

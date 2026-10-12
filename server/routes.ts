@@ -268,6 +268,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!validatedData.foodsToEat || !validatedData.foodsToAvoid || !validatedData.waterIntakeAdvice) {
         return res.status(400).json({ error: "Diet plan content is required" });
       }
+      const assessment = await storage.getCKDAssessment(validatedData.assessmentId);
+      if (!assessment) {
+        return res.status(404).json({ error: "Assessment not found" });
+      }
       const dietPlan = await storage.createDietPlan(validatedData);
       res.json(dietPlan);
     } catch (error: any) {
