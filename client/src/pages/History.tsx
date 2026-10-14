@@ -5,15 +5,24 @@ import { Badge } from "@/components/ui/badge";
 import { History as HistoryIcon, Calendar, User, TrendingUp } from "lucide-react";
 import { Link } from "wouter";
 import { useLanguage } from "@/hooks/useLanguage";
+import { getStoredAssessmentIds } from "@/lib/assessmentAccess";
 import type { CKDAssessment } from "@shared/schema";
 
 const History = () => {
   const { language } = useLanguage();
+  const assessmentIds = getStoredAssessmentIds();
   
   const t = (en: string, hi: string) => (language === 'hi' ? hi : en);
 
-  const { data: assessments, isLoading, error } = useQuery<CKDAssessment[]>({
-    queryKey: ["/api/ckd-assessments"],
+  const { data: assessments = [], isLoading, error } = useQuery<CKDAssessment[]>({
+    queryKey: ["/api/ckd-assessments", "filtered", assessmentIds],
+    queryFn: async () => {
+      const ids = encodeURIComponent(JSON.stringify(assessmentIds));
+      const response = await fetch(`/api/ckd-assessments/filtered?ids=${ids}`);
+      if (!response.ok) throw new Error(`Failed to fetch assessments: ${response.status}`);
+      return response.json();
+    },
+    enabled: assessmentIds.length > 0,
   });
 
   const formatDateTime = (dateString: string | Date | null) => {
