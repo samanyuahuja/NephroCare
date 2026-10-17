@@ -39,12 +39,11 @@ const History = () => {
   };
 
   const getRiskBadgeVariant = (riskLevel: string | null) => {
-    switch (riskLevel?.toLowerCase()) {
-      case 'high': return 'destructive';
-      case 'moderate': return 'default';
-      case 'low': return 'secondary';
-      default: return 'outline';
-    }
+    const words = riskLevel?.trim().toLowerCase().split(/\s+/) ?? [];
+    if (words.includes('high')) return 'destructive';
+    if (words.includes('moderate')) return 'default';
+    if (words.includes('low')) return 'secondary';
+    return 'outline';
   };
 
   if (isLoading) {
