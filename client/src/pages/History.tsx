@@ -46,6 +46,18 @@ const History = () => {
     return 'outline';
   };
 
+  const formatConditions = (assessment: CKDAssessment) => {
+    const conditions = [
+      assessment.hypertension === 'yes' ? t("Hypertension", "उच्च रक्तचाप") : null,
+      assessment.diabetesMellitus === 'yes' ? t("Diabetes", "मधुमेह") : null,
+      assessment.anemia === 'yes' ? t("Anemia", "एनीमिया") : null,
+    ].filter((condition): condition is string => condition !== null);
+
+    return conditions.length > 0
+      ? conditions.join(", ")
+      : t("None reported", "कोई दर्ज नहीं");
+  };
+
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -157,10 +169,7 @@ const History = () => {
 
                 <div className="flex items-center justify-between">
                   <div className="text-sm text-gray-600 dark:text-gray-300">
-                    {t("Medical conditions:", "चिकित्सा स्थितियां:")} 
-                    {assessment.hypertension === 'yes' && ` ${t("Hypertension", "उच्च रक्तचाप")}`}
-                    {assessment.diabetesMellitus === 'yes' && ` ${t("Diabetes", "मधुमेह")}`}
-                    {assessment.anemia === 'yes' && ` ${t("Anemia", "एनीमिया")}`}
+                    {t("Medical conditions:", "चिकित्सा स्थितियां:")} {formatConditions(assessment)}
                   </div>
                   
                   <div className="flex gap-2">
