@@ -24,3 +24,7 @@ export function getRiskLabelClassName(riskLevel: string | null): string {
   const tone = ["high", "moderate", "low"].find((value) => words.includes(value));
   return tone ? `risk-label risk-label--${tone}` : "risk-label";
 }
+
+export function withoutRiskSuffix(riskLevel: string): string {
+  return riskLevel.trim().replace(/\s+risk$/i, "");
+}
