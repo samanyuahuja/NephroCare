@@ -6,6 +6,7 @@ import { History as HistoryIcon, Calendar, User, TrendingUp } from "lucide-react
 import { Link } from "wouter";
 import { useLanguage } from "@/hooks/useLanguage";
 import { getStoredAssessmentIds } from "@/lib/assessmentAccess";
+import { withoutRiskSuffix } from "@/lib/reportFormatting";
 import type { CKDAssessment } from "@shared/schema";
 
 const History = () => {
@@ -134,7 +135,7 @@ const History = () => {
                   <div className="flex items-center gap-2">
                     {assessment.riskLevel && (
                       <Badge variant={getRiskBadgeVariant(assessment.riskLevel)}>
-                        {assessment.riskLevel} {t("Risk", "जोखिम")}
+                        {withoutRiskSuffix(assessment.riskLevel)} {t("Risk", "जोखिम")}
                       </Badge>
                     )}
                     {assessment.riskScore != null && (
