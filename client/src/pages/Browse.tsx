@@ -33,7 +33,11 @@ export default function Browse() {
     };
   }, []);
 
-  const { data: assessments = [], isLoading: assessmentsLoading } = useQuery<CKDAssessment[]>({
+  const {
+    data: assessments = [],
+    isLoading: assessmentsLoading,
+    isError: assessmentsError,
+  } = useQuery<CKDAssessment[]>({
     queryKey: ["/api/ckd-assessments", "filtered", userAssessmentIds],
     queryFn: async () => {
       if (userAssessmentIds.length === 0) return [];
@@ -44,7 +48,11 @@ export default function Browse() {
     enabled: userAssessmentIds.length > 0,
   });
 
-  const { data: dietPlans = [], isLoading: dietPlansLoading } = useQuery<DietPlan[]>({
+  const {
+    data: dietPlans = [],
+    isLoading: dietPlansLoading,
+    isError: dietPlansError,
+  } = useQuery<DietPlan[]>({
     queryKey: ["/api/diet-plans", "filtered", userAssessmentIds],
     queryFn: async () => {
       if (userAssessmentIds.length === 0) return [];
@@ -100,7 +108,7 @@ export default function Browse() {
         </TabsList>
 
         <TabsContent value="results">
-          {assessmentsLoading ? <div className="reports-loading" role="status">{t("Loading reports…", "रिपोर्ट लोड हो रही हैं…")}</div> : completedAssessments.length === 0 ? <EmptyState type="reports" /> : (
+          {assessmentsError ? <div className="reports-loading" role="alert">{t("Reports could not be loaded. Try again shortly.", "रिपोर्ट लोड नहीं हो सकीं। थोड़ी देर बाद फिर कोशिश करें।")}</div> : assessmentsLoading ? <div className="reports-loading" role="status">{t("Loading reports…", "रिपोर्ट लोड हो रही हैं…")}</div> : completedAssessments.length === 0 ? <EmptyState type="reports" /> : (
             <section className="report-ledger" aria-labelledby="assessment-ledger-title">
               <div className="report-ledger__heading"><div><p className="section-kicker">{t("Assessment archive", "मूल्यांकन संग्रह")}</p><h2 id="assessment-ledger-title">{t("Completed reports", "पूर्ण रिपोर्ट")}</h2></div><span>{t("Newest first", "नई रिपोर्ट पहले")}</span></div>
               <div className="report-ledger__columns" aria-hidden="true"><span>{t("Report", "रिपोर्ट")}</span><span>{t("Date", "तारीख")}</span><span>{t("Risk context", "जोखिम संदर्भ")}</span><span>{t("Score", "स्कोर")}</span><span /></div>
@@ -118,7 +126,7 @@ export default function Browse() {
         </TabsContent>
 
         <TabsContent value="diet-plans">
-          {dietPlansLoading ? <div className="reports-loading" role="status">{t("Loading diet guidance…", "आहार मार्गदर्शन लोड हो रहा है…")}</div> : dietPlans.length === 0 ? <EmptyState type="diet" /> : (
+          {dietPlansError ? <div className="reports-loading" role="alert">{t("Diet guidance could not be loaded. Try again shortly.", "आहार मार्गदर्शन लोड नहीं हो सका। थोड़ी देर बाद फिर कोशिश करें।")}</div> : dietPlansLoading ? <div className="reports-loading" role="status">{t("Loading diet guidance…", "आहार मार्गदर्शन लोड हो रहा है…")}</div> : dietPlans.length === 0 ? <EmptyState type="diet" /> : (
             <section className="diet-ledger" aria-labelledby="diet-ledger-title">
               <div className="report-ledger__heading"><div><p className="section-kicker">{t("Nutrition archive", "पोषण संग्रह")}</p><h2 id="diet-ledger-title">{t("Diet guidance", "आहार मार्गदर्शन")}</h2></div></div>
               {dietPlans.map((plan, index) => (
