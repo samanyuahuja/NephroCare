@@ -4,6 +4,19 @@ import rateLimit from "express-rate-limit";
 import { registerRoutes } from "./routes.js";
 import { log } from "./logger.js";
 
+function getErrorStatus(error: unknown): number {
+  if (!error || typeof error !== "object") return 500;
+
+  const candidates = [
+    "status" in error ? error.status : undefined,
+    "statusCode" in error ? error.statusCode : undefined,
+  ];
+  const status = candidates.find(
+    (candidate) => Number.isInteger(candidate) && Number(candidate) >= 400 && Number(candidate) <= 599,
+  );
+  return status === undefined ? 500 : Number(status);
+}
+
 export async function createApplication() {
   const app = express();
   const isDevelopment = process.env.NODE_ENV === "development";
@@ -79,7 +92,7 @@ export async function createApplication() {
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-    const status = err.status || err.statusCode || 500;
+    const status = getErrorStatus(err);
     console.error(`[ERROR] ${status}:`, err.message || err);
     const message = status < 500 ? (err.message || "Bad Request") : "Internal Server Error";
     res.status(status).json({ error: message });
