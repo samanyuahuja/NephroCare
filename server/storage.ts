@@ -17,6 +17,7 @@ import { db } from "./db.js";
 import { eq, desc } from "drizzle-orm";
 
 const GREETING_PATTERN = /\b(?:hello|hi|hey)\b/i;
+type NewCKDAssessment = typeof ckdAssessments.$inferInsert;
 
 function compareNewestFirst(
   first: { createdAt: Date | null; id: number },
@@ -31,7 +32,7 @@ export interface IStorage {
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   
-  createCKDAssessment(assessment: any): Promise<CKDAssessment>;
+  createCKDAssessment(assessment: NewCKDAssessment): Promise<CKDAssessment>;
   getCKDAssessment(id: number): Promise<CKDAssessment | undefined>;
   getCKDAssessmentsByIds(ids: number[]): Promise<CKDAssessment[]>;
   updateCKDAssessmentResults(id: number, riskScore: number, riskLevel: string, shapFeatures: string): Promise<CKDAssessment | undefined>;
@@ -64,7 +65,7 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async createCKDAssessment(assessment: any): Promise<CKDAssessment> {
+  async createCKDAssessment(assessment: NewCKDAssessment): Promise<CKDAssessment> {
     const [result] = await this.database.insert(ckdAssessments).values(assessment).returning();
     return result;
   }
@@ -227,7 +228,7 @@ export class MemStorage implements IStorage {
     return user;
   }
 
-  async createCKDAssessment(insertAssessment: any): Promise<CKDAssessment> {
+  async createCKDAssessment(insertAssessment: NewCKDAssessment): Promise<CKDAssessment> {
     const id = this.currentAssessmentId++;
     const assessment: CKDAssessment = { 
       ...insertAssessment, 
