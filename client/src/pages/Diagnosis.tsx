@@ -16,7 +16,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage, t } from "@/hooks/useLanguage";
 import PageIntro from "@/components/PageIntro";
-import { getStoredAssessmentIds, parseAssessmentId } from "@/lib/assessmentAccess";
+import { parseAssessmentId, rememberAssessmentId } from "@/lib/assessmentAccess";
 
 export default function Diagnosis() {
   const [, setLocation] = useLocation();
@@ -82,9 +82,7 @@ export default function Diagnosis() {
     onSuccess: (data) => {
       try {
         // Store assessment ID in localStorage for privacy
-        const storedIds = getStoredAssessmentIds();
-        const updatedIds = Array.from(new Set([...storedIds, data.id]));
-        localStorage.setItem('userAssessmentIds', JSON.stringify(updatedIds));
+        rememberAssessmentId(data.id);
         
         // Dispatch custom event to notify other components
         window.dispatchEvent(new CustomEvent('assessmentIdsUpdated'));

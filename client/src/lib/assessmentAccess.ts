@@ -28,6 +28,17 @@ export function getStoredAssessmentIds(): number[] {
   }
 }
 
+export function rememberAssessmentId(assessmentId: number): void {
+  if (parseAssessmentId(String(assessmentId)) !== assessmentId) {
+    throw new Error("Assessment ID must be a positive database integer");
+  }
+  const storedIds = getStoredAssessmentIds().filter((id) => id !== assessmentId);
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify([...storedIds, assessmentId].slice(-MAX_STORED_ASSESSMENTS)),
+  );
+}
+
 export function hasAssessmentAccess(assessmentId: number): boolean {
   return (
     Number.isInteger(assessmentId) &&
