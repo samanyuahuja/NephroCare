@@ -21,9 +21,9 @@ export default function DietPlan({ params }: DietPlanProps) {
 
   const hasAccess = hasAssessmentAccess(assessmentId);
 
-  const { data: assessment } = useQuery<CKDAssessment>({
+  const { data: assessment, isLoading: isAssessmentLoading } = useQuery<CKDAssessment>({
     queryKey: ["/api/ckd-assessment", assessmentId],
-    enabled: !isNaN(assessmentId) && hasAccess,
+    enabled: assessmentId > 0 && hasAccess,
   });
 
   const dietPlanMutation = useMutation({
@@ -48,7 +48,7 @@ export default function DietPlan({ params }: DietPlanProps) {
       // Always create new diet plan when diet type changes
       return dietPlanMutation.mutateAsync({ assessmentId, dietType });
     },
-    enabled: !isNaN(assessmentId) && hasAccess,
+    enabled: assessmentId > 0 && hasAccess && assessment !== undefined,
   });
 
   // Parse stored factors used to organise the discussion guide.
@@ -499,7 +499,7 @@ export default function DietPlan({ params }: DietPlanProps) {
     );
   }
 
-  if (isLoading) {
+  if (isAssessmentLoading || isLoading) {
     return (
       <div className="flex justify-center items-center min-h-96">
         <div className="loading-indicator" role="status" aria-label="Loading diet plan"><i /><i /><i /></div>
