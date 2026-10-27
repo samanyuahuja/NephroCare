@@ -21,7 +21,11 @@ export default function DietPlan({ params }: DietPlanProps) {
 
   const hasAccess = hasAssessmentAccess(assessmentId);
 
-  const { data: assessment, isLoading: isAssessmentLoading } = useQuery<CKDAssessment>({
+  const {
+    data: assessment,
+    error: assessmentError,
+    isLoading: isAssessmentLoading,
+  } = useQuery<CKDAssessment>({
     queryKey: ["/api/ckd-assessment", assessmentId],
     enabled: assessmentId > 0 && hasAccess,
   });
@@ -504,6 +508,21 @@ export default function DietPlan({ params }: DietPlanProps) {
       <div className="flex justify-center items-center min-h-96">
         <div className="loading-indicator" role="status" aria-label="Loading diet plan"><i /><i /><i /></div>
       </div>
+    );
+  }
+
+  if (assessmentError || !assessment) {
+    return (
+      <Card className="max-w-md mx-auto">
+        <CardContent className="pt-6 text-center">
+          <p className="text-red-600">
+            {t("Failed to load the assessment for this diet brief.", "इस आहार सारांश के लिए मूल्यांकन लोड नहीं हो सका।")}
+          </p>
+          <Link href="/browse">
+            <Button className="mt-4">{t("View assessments", "मूल्यांकन देखें")}</Button>
+          </Link>
+        </CardContent>
+      </Card>
     );
   }
 
