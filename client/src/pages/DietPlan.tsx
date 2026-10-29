@@ -46,7 +46,7 @@ export default function DietPlan({ params }: DietPlanProps) {
     },
   });
 
-  const { data: dietPlan, isLoading } = useQuery<DietPlan>({
+  const { data: dietPlan, error: dietPlanError, isLoading } = useQuery<DietPlan>({
     queryKey: ["/api/diet-plan", assessmentId, dietType],
     queryFn: () => {
       // Always create new diet plan when diet type changes
@@ -517,6 +517,21 @@ export default function DietPlan({ params }: DietPlanProps) {
           <Link href="/browse">
             <Button className="mt-4">{t("View assessments", "मूल्यांकन देखें")}</Button>
           </Link>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (dietPlanError) {
+    return (
+      <Card className="max-w-md mx-auto">
+        <CardContent className="pt-6 text-center">
+          <p className="text-red-600">
+            {t("Failed to prepare this diet brief. Please try again.", "यह आहार सारांश तैयार नहीं हो सका। कृपया फिर से प्रयास करें।")}
+          </p>
+          <Button className="mt-4" onClick={() => window.location.reload()}>
+            {t("Try again", "फिर से प्रयास करें")}
+          </Button>
         </CardContent>
       </Card>
     );
