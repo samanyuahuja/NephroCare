@@ -46,7 +46,7 @@ export default function DietPlan({ params }: DietPlanProps) {
     },
   });
 
-  const { data: dietPlan, isLoading, refetch } = useQuery<DietPlan>({
+  const { data: dietPlan, isLoading } = useQuery<DietPlan>({
     queryKey: ["/api/diet-plan", assessmentId, dietType],
     queryFn: () => {
       // Always create new diet plan when diet type changes
@@ -276,12 +276,8 @@ export default function DietPlan({ params }: DietPlanProps) {
     return targets;
   };
 
-  const toggleDietType = async (type: 'vegetarian' | 'non-vegetarian') => {
+  const toggleDietType = (type: 'vegetarian' | 'non-vegetarian') => {
     setDietType(type);
-    // Force refetch with new diet type
-    setTimeout(() => {
-      refetch();
-    }, 100);
   };
 
   // Helper functions to generate SHAP-based comprehensive diet plan
