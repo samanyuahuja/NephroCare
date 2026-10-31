@@ -78,6 +78,12 @@ export default function Chatbot() {
           body: JSON.stringify({ message: userMessage }),
         });
 
+        if (response.status === 429) {
+          return t(
+            "Too many questions were sent. Please wait a few minutes and try again.",
+            "बहुत अधिक प्रश्न भेजे गए हैं। कृपया कुछ मिनट प्रतीक्षा करें और फिर प्रयास करें।",
+          );
+        }
         if (!response.ok) throw new Error("Failed to get response from NephroBot");
         const data: unknown = await response.json();
         const reply =
