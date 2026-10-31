@@ -46,7 +46,13 @@ export default function DietPlan({ params }: DietPlanProps) {
     },
   });
 
-  const { data: dietPlan, error: dietPlanError, isLoading } = useQuery<DietPlan>({
+  const {
+    data: dietPlan,
+    error: dietPlanError,
+    isFetching: isDietPlanFetching,
+    isLoading,
+    refetch: retryDietPlan,
+  } = useQuery<DietPlan>({
     queryKey: ["/api/diet-plan", assessmentId, dietType],
     queryFn: () => {
       // Always create new diet plan when diet type changes
@@ -529,8 +535,14 @@ export default function DietPlan({ params }: DietPlanProps) {
           <p className="text-red-600">
             {t("Failed to prepare this diet brief. Please try again.", "यह आहार सारांश तैयार नहीं हो सका। कृपया फिर से प्रयास करें।")}
           </p>
-          <Button className="mt-4" onClick={() => window.location.reload()}>
-            {t("Try again", "फिर से प्रयास करें")}
+          <Button
+            className="mt-4"
+            disabled={isDietPlanFetching}
+            onClick={() => void retryDietPlan()}
+          >
+            {isDietPlanFetching
+              ? t("Trying again…", "फिर से प्रयास हो रहा है…")
+              : t("Try again", "फिर से प्रयास करें")}
           </Button>
         </CardContent>
       </Card>
