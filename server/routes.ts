@@ -41,7 +41,7 @@ function parseIntParam(value: string): number | null {
 
 // --- SECURITY: Schema for chat message validation (length + type checks) ---
 const chatInputSchema = z.object({
-  message: z.string().min(1, "Message is required").max(2000, "Message too long"),
+  message: z.string().trim().min(1, "Message is required").max(2000, "Message too long"),
 }).strict();
 
 // --- SECURITY: Schema for filtered ID queries (prevents JSON injection) ---
