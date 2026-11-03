@@ -458,7 +458,8 @@ Explain general kidney-health terms in plain language and help users prepare que
       temperature: 0.3, // Lower temperature for more accurate medical information
     });
 
-    return response.choices[0].message.content || getLocalNephroBotResponse(message);
+    const providerReply = response.choices[0]?.message.content?.trim();
+    return providerReply || getLocalNephroBotResponse(message);
     
   } catch (error: any) {
     console.error('OpenAI API error:', error);
