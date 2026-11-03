@@ -42,6 +42,11 @@ R=$(curl -s -X POST "$BASE/api/chat-direct" -H "Content-Type: application/json" 
 check "Rejects empty message with generic error" "Invalid input" "$R"
 echo ""
 
+echo "[3b] Input Validation - Chat (whitespace-only message rejected)"
+R=$(curl -s -X POST "$BASE/api/chat-direct" -H "Content-Type: application/json" -d '{"message":"   "}')
+check "Rejects whitespace-only message with generic error" "Invalid input" "$R"
+echo ""
+
 echo "[4] Input Validation - Chat (oversized message rejected)"
 LONG=$(python3 -c "print('a'*2001)")
 R=$(curl -s -X POST "$BASE/api/chat-direct" -H "Content-Type: application/json" -d "{\"message\":\"$LONG\"}")
