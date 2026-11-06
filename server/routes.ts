@@ -216,8 +216,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/ckd-assessments/filtered", async (req, res) => {
     try {
       const { ids } = req.query;
-      if (!ids || typeof ids !== 'string') {
+      if (!ids) {
         return res.json([]);
+      }
+      if (typeof ids !== "string") {
+        return res.status(400).json({ error: "Invalid ID format" });
       }
       
       let parsedIds: unknown;
@@ -310,8 +313,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/diet-plans/filtered", async (req, res) => {
     try {
       const { ids } = req.query;
-      if (!ids || typeof ids !== 'string') {
+      if (!ids) {
         return res.json([]);
+      }
+      if (typeof ids !== "string") {
+        return res.status(400).json({ error: "Invalid ID format" });
       }
       
       let parsedIds: unknown;
