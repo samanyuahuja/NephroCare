@@ -56,6 +56,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const database = await checkDatabaseConnection();
     const healthy = !database.configured || database.connected;
 
+    res.set("Cache-Control", "no-store");
     res.status(healthy ? 200 : 503).json({
       status: healthy ? "OK" : "DEGRADED",
       database,
