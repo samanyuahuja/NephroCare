@@ -78,6 +78,11 @@ R=$(curl -s "$BASE/api/ckd-assessments/filtered?ids=notjson")
 check "Rejects invalid JSON in filter" "Invalid ID format" "$R"
 echo ""
 
+echo "[8b] Filtered IDs Validation (repeated query rejected)"
+R=$(curl -s "$BASE/api/ckd-assessments/filtered?ids=%5B1%5D&ids=%5B2%5D")
+check "Rejects repeated ID filters" "Invalid ID format" "$R"
+echo ""
+
 echo "[9] Filtered IDs Validation (non-array rejected)"
 R=$(curl -s "$BASE/api/ckd-assessments/filtered?ids=%22hello%22")
 check "Rejects non-array filter" "Invalid assessment IDs" "$R"
