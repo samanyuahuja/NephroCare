@@ -30,6 +30,7 @@ check "X-Frame-Options present" "SAMEORIGIN" "$HEADERS"
 check "Strict-Transport-Security present" "max-age=" "$HEADERS"
 check "X-DNS-Prefetch-Control present" "X-DNS-Prefetch-Control" "$HEADERS"
 check "RateLimit headers present" "RateLimit-Limit" "$HEADERS"
+check "Health status is not cached" "Cache-Control: no-store" "$HEADERS"
 echo ""
 
 echo "[2] Input Validation - Chat (strict mode rejects extra fields)"
