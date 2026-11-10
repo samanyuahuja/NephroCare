@@ -84,6 +84,11 @@ R=$(curl -s "$BASE/api/ckd-assessments/filtered?ids=%5B1%5D&ids=%5B2%5D")
 check "Rejects repeated ID filters" "Invalid ID format" "$R"
 echo ""
 
+echo "[8c] Filtered IDs Validation (blank query rejected)"
+R=$(curl -s "$BASE/api/ckd-assessments/filtered?ids=")
+check "Rejects blank assessment ID filters" "Invalid ID format" "$R"
+echo ""
+
 echo "[9] Filtered IDs Validation (non-array rejected)"
 R=$(curl -s "$BASE/api/ckd-assessments/filtered?ids=%22hello%22")
 check "Rejects non-array filter" "Invalid assessment IDs" "$R"
@@ -102,6 +107,11 @@ echo ""
 echo "[12] Diet Plan Param Validation"
 R=$(curl -s "$BASE/api/diet-plan/abc")
 check "Rejects non-integer diet plan ID" "Invalid assessment ID" "$R"
+echo ""
+
+echo "[12b] Filtered Diet Plans Validation (blank query rejected)"
+R=$(curl -s "$BASE/api/diet-plans/filtered?ids=")
+check "Rejects blank diet-plan ID filters" "Invalid ID format" "$R"
 echo ""
 
 echo "[13] Error Handling (no stack traces in 500 responses)"
