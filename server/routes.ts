@@ -217,7 +217,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/ckd-assessments/filtered", async (req, res) => {
     try {
       const { ids } = req.query;
-      if (!ids) {
+      if (ids === undefined) {
         return res.json([]);
       }
       if (typeof ids !== "string") {
@@ -314,7 +314,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/diet-plans/filtered", async (req, res) => {
     try {
       const { ids } = req.query;
-      if (!ids) {
+      if (ids === undefined) {
         return res.json([]);
       }
       if (typeof ids !== "string") {
