@@ -22,6 +22,8 @@ interface PredictionResult {
   primary_factors: string[];
 }
 
+const MAX_FILTER_IDS_LENGTH = 1200;
+
 // --- SECURITY: Input sanitization helper - strips HTML/script tags (OWASP A03:2021) ---
 function sanitizeString(input: string): string {
   return input
@@ -223,6 +225,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (typeof ids !== "string") {
         return res.status(400).json({ error: "Invalid ID format" });
       }
+      if (ids.length > MAX_FILTER_IDS_LENGTH) {
+        return res.status(400).json({ error: "ID filter is too long" });
+      }
       
       let parsedIds: unknown;
       try {
@@ -319,6 +324,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       if (typeof ids !== "string") {
         return res.status(400).json({ error: "Invalid ID format" });
+      }
+      if (ids.length > MAX_FILTER_IDS_LENGTH) {
+        return res.status(400).json({ error: "ID filter is too long" });
       }
       
       let parsedIds: unknown;

@@ -89,6 +89,12 @@ R=$(curl -s "$BASE/api/ckd-assessments/filtered?ids=")
 check "Rejects blank assessment ID filters" "Invalid ID format" "$R"
 echo ""
 
+echo "[8d] Filtered IDs Validation (oversized query rejected)"
+LONG_ID_FILTER=$(python3 -c "print('1'*1201)")
+R=$(curl -s "$BASE/api/ckd-assessments/filtered?ids=$LONG_ID_FILTER")
+check "Rejects oversized assessment ID filters" "ID filter is too long" "$R"
+echo ""
+
 echo "[9] Filtered IDs Validation (non-array rejected)"
 R=$(curl -s "$BASE/api/ckd-assessments/filtered?ids=%22hello%22")
 check "Rejects non-array filter" "Invalid assessment IDs" "$R"
@@ -112,6 +118,11 @@ echo ""
 echo "[12b] Filtered Diet Plans Validation (blank query rejected)"
 R=$(curl -s "$BASE/api/diet-plans/filtered?ids=")
 check "Rejects blank diet-plan ID filters" "Invalid ID format" "$R"
+echo ""
+
+echo "[12c] Filtered Diet Plans Validation (oversized query rejected)"
+R=$(curl -s "$BASE/api/diet-plans/filtered?ids=$LONG_ID_FILTER")
+check "Rejects oversized diet-plan ID filters" "ID filter is too long" "$R"
 echo ""
 
 echo "[13] Error Handling (no stack traces in 500 responses)"
