@@ -105,6 +105,12 @@ R=$(curl -s "$BASE/api/ckd-assessments/filtered?ids=%5B-1%2C0%5D")
 check "Rejects negative IDs in filter" "Invalid assessment IDs" "$R"
 echo ""
 
+echo "[10b] Filtered IDs Validation (too many IDs rejected)"
+TOO_MANY_IDS=$(python3 -c 'import json, urllib.parse; print(urllib.parse.quote(json.dumps(list(range(1, 102)))))')
+R=$(curl -s "$BASE/api/ckd-assessments/filtered?ids=$TOO_MANY_IDS")
+check "Rejects assessment filters over 100 IDs" "Invalid assessment IDs" "$R"
+echo ""
+
 echo "[11] XSS Sanitization (script tags stripped from chat)"
 R=$(curl -s -X POST "$BASE/api/chat-direct" -H "Content-Type: application/json" -d '{"message":"<script>alert(1)</script>hello"}')
 check "Returns response without script tags" "reply" "$R"
