@@ -126,6 +126,11 @@ R=$(curl -s "$BASE/api/diet-plans/filtered?ids=")
 check "Rejects blank diet-plan ID filters" "Invalid ID format" "$R"
 echo ""
 
+echo "[12b.1] Filtered Diet Plans Validation (repeated query rejected)"
+R=$(curl -s "$BASE/api/diet-plans/filtered?ids=%5B1%5D&ids=%5B2%5D")
+check "Rejects repeated diet-plan ID filters" "Invalid ID format" "$R"
+echo ""
+
 echo "[12c] Filtered Diet Plans Validation (oversized query rejected)"
 R=$(curl -s "$BASE/api/diet-plans/filtered?ids=$LONG_ID_FILTER")
 check "Rejects oversized diet-plan ID filters" "ID filter is too long" "$R"
