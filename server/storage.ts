@@ -167,6 +167,8 @@ export class DatabaseStorage implements IStorage {
     const msg = message.toLowerCase();
     if (!msg) {
       return "Please enter a message.";
+    } else if (msg.includes("is ckd curable")) {
+      return "CKD isn't curable but it can be managed effectively with medications, lifestyle changes, and regular monitoring.";
     } else if (msg.includes("what is ckd") || msg.includes("chronic kidney disease")) {
       return "Chronic Kidney Disease (CKD) is a condition where your kidneys lose function over time. It's usually caused by diabetes or high blood pressure.";
     } else if (msg.includes("symptoms")) {
@@ -302,6 +304,8 @@ export class MemStorage implements IStorage {
 
     if (!msg) {
       response = "Please enter a message.";
+    } else if (msg.includes("is ckd curable")) {
+      response = "CKD isn't curable but it can be managed effectively with medications, lifestyle changes, and regular monitoring.";
     } else if (msg.includes("what is ckd") || msg.includes("chronic kidney disease")) {
       response = "Chronic Kidney Disease (CKD) is a condition where your kidneys lose function over time. It's usually caused by diabetes or high blood pressure.";
     } else if (msg.includes("symptoms")) {
@@ -310,8 +314,6 @@ export class MemStorage implements IStorage {
       response = "CKD treatment depends on the stage. It usually includes managing blood pressure, blood sugar, and avoiding further kidney damage. In severe cases, dialysis or transplant may be needed.";
     } else if (msg.includes("diet")) {
       response = "A CKD diet includes low-sodium, low-protein foods, avoiding processed items, and drinking enough water. Consult a nephrologist for a custom plan.";
-    } else if (msg.includes("is ckd curable")) {
-      response = "CKD isn't curable but it can be managed effectively with medications, lifestyle changes, and regular monitoring.";
     } else if (GREETING_PATTERN.test(msg)) {
       response = "Hello! I'm NephroBot. Ask me anything about CKD (Chronic Kidney Disease).";
     } else if (msg.includes("high creatinine")) {
