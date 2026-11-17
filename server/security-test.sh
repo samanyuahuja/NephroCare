@@ -54,6 +54,11 @@ R=$(curl -s -X POST "$BASE/api/chat-direct" -H "Content-Type: application/json" 
 check "Rejects oversized message with generic error" "Invalid input" "$R"
 echo ""
 
+echo "[4b] Chat Routing (curability question uses the specific response)"
+R=$(curl -s -X POST "$BASE/api/chat-message" -H "Content-Type: application/json" -d '{"message":"is ckd curable"}')
+check "Answers CKD curability directly" "isn't curable" "$R"
+echo ""
+
 echo "[5] URL Param Validation (non-integer ID rejected)"
 R=$(curl -s "$BASE/api/ckd-assessment/abc")
 check "Rejects non-integer ID" "Invalid assessment ID" "$R"
