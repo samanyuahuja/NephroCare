@@ -175,6 +175,8 @@ export class DatabaseStorage implements IStorage {
       return "Common CKD symptoms include fatigue, swelling in legs, nausea, high blood pressure, and frequent urination.";
     } else if (msg.includes("treatment")) {
       return "CKD treatment depends on the stage. It usually includes managing blood pressure, blood sugar, and avoiding further kidney damage. In severe cases, dialysis or transplant may be needed.";
+    } else if (msg.includes("diet for ckd")) {
+      return "CKD diet includes low sodium, controlled protein, and limited potassium and phosphorus depending on stage. Always consult a renal dietitian.";
     } else if (msg.includes("diet")) {
       return "A CKD diet includes low-sodium, low-protein foods, avoiding processed items, and drinking enough water. Consult a nephrologist for a custom plan.";
     } else if (GREETING_PATTERN.test(msg)) {
@@ -312,6 +314,8 @@ export class MemStorage implements IStorage {
       response = "Common CKD symptoms include fatigue, swelling in legs, nausea, high blood pressure, and frequent urination.";
     } else if (msg.includes("treatment")) {
       response = "CKD treatment depends on the stage. It usually includes managing blood pressure, blood sugar, and avoiding further kidney damage. In severe cases, dialysis or transplant may be needed.";
+    } else if (msg.includes("diet for ckd")) {
+      response = "CKD diet includes low sodium, controlled protein, and limited potassium and phosphorus depending on stage. Always consult a renal dietitian.";
     } else if (msg.includes("diet")) {
       response = "A CKD diet includes low-sodium, low-protein foods, avoiding processed items, and drinking enough water. Consult a nephrologist for a custom plan.";
     } else if (GREETING_PATTERN.test(msg)) {
@@ -322,8 +326,6 @@ export class MemStorage implements IStorage {
       response = "GFR (Glomerular Filtration Rate) is a key indicator of kidney function. A GFR below 60 may suggest CKD.";
     } else if (msg.includes("protein in urine")) {
       response = "Protein in urine (proteinuria) may indicate kidney damage. It should be investigated further.";
-    } else if (msg.includes("diet for ckd")) {
-      response = "CKD diet includes low sodium, controlled protein, and limited potassium and phosphorus depending on stage. Always consult a renal dietitian.";
     } else if (msg.includes("what to eat in ckd")) {
       response = "Safe foods include white rice, apples, cabbage, cauliflower, and lean protein (based on your stage and labs). Avoid salty, processed, and high-phosphorus foods.";
     } else if (msg.includes("can i eat bananas")) {
