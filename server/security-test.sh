@@ -166,6 +166,11 @@ R=$(curl -s -X POST "$BASE/api/ckd-assessment" -H "Content-Type: application/jso
 check "Rejects blood counts outside integer storage" "Invalid assessment data" "$R"
 echo ""
 
+echo "[13e] Assessment Validation (RBC count must fit storage)"
+R=$(curl -s -X POST "$BASE/api/ckd-assessment" -H "Content-Type: application/json" -d '{"patientName":"Test Patient","age":40,"bloodPressure":80,"albumin":1,"sugar":1,"redBloodCells":"normal","pusCell":"normal","bloodGlucoseRandom":120,"bloodUrea":36,"serumCreatinine":1.2,"sodium":138,"potassium":4.4,"hemoglobin":12.5,"wbcCount":7800,"rbcCount":1e39,"hypertension":"no","diabetesMellitus":"no","appetite":"good","pedalEdema":"no","anemia":"no"}')
+check "Rejects RBC counts outside real storage" "Invalid assessment data" "$R"
+echo ""
+
 echo "[14] API Key Not Exposed Client-Side"
 CLIENT_SRC=$(find client/src -name "*.ts" -o -name "*.tsx" | xargs grep -l "OPENAI\|API_KEY\|process\.env" 2>/dev/null || true)
 if [ -z "$CLIENT_SRC" ]; then
