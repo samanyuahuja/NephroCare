@@ -87,7 +87,10 @@ export const insertCKDAssessmentSchema = createInsertSchema(ckdAssessments).omit
   potassium: z.union([z.number().min(3.0).max(6.0), z.literal("unknown")]),
   hemoglobin: z.union([z.number().min(8.0).max(18.0), z.literal("unknown")]),
   wbcCount: z.union([z.number().int().positive().max(2147483647), z.literal("unknown")]),
-  rbcCount: z.union([z.number().finite().positive(), z.literal("unknown")]),
+  rbcCount: z.union([
+    z.number().finite().positive().max(3.4e38),
+    z.literal("unknown"),
+  ]),
   hypertension: z.enum(["no", "yes", "unknown"]),
   diabetesMellitus: z.enum(["no", "yes", "unknown"]),
   appetite: z.enum(["good", "poor", "unknown"]),
