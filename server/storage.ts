@@ -178,7 +178,7 @@ export class DatabaseStorage implements IStorage {
     } else if (msg.includes("diet for ckd")) {
       return "CKD diet includes low sodium, controlled protein, and limited potassium and phosphorus depending on stage. Always consult a renal dietitian.";
     } else if (msg.includes("diet")) {
-      return "A CKD diet includes low-sodium, low-protein foods, avoiding processed items, and drinking enough water. Consult a nephrologist for a custom plan.";
+      return "A CKD diet often limits sodium and processed foods. Protein and fluid needs vary, so ask a nephrologist or renal dietitian for a personal plan.";
     } else if (GREETING_PATTERN.test(msg)) {
       return "Hello! I'm NephroBot. Ask me anything about CKD (Chronic Kidney Disease).";
     } else {
@@ -317,7 +317,7 @@ export class MemStorage implements IStorage {
     } else if (msg.includes("diet for ckd")) {
       response = "CKD diet includes low sodium, controlled protein, and limited potassium and phosphorus depending on stage. Always consult a renal dietitian.";
     } else if (msg.includes("diet")) {
-      response = "A CKD diet includes low-sodium, low-protein foods, avoiding processed items, and drinking enough water. Consult a nephrologist for a custom plan.";
+      response = "A CKD diet often limits sodium and processed foods. Protein and fluid needs vary, so ask a nephrologist or renal dietitian for a personal plan.";
     } else if (GREETING_PATTERN.test(msg)) {
       response = "Hello! I'm NephroBot. Ask me anything about CKD (Chronic Kidney Disease).";
     } else if (msg.includes("high creatinine")) {

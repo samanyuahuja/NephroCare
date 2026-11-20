@@ -64,6 +64,11 @@ R=$(curl -s -X POST "$BASE/api/chat-message" -H "Content-Type: application/json"
 check "Answers CKD diet details" "limited potassium and phosphorus" "$R"
 echo ""
 
+echo "[4d] Chat Safety (general diet response avoids fixed fluid advice)"
+R=$(curl -s -X POST "$BASE/api/chat-message" -H "Content-Type: application/json" -d '{"message":"kidney diet"}')
+check "Explains that fluid needs vary" "fluid needs vary" "$R"
+echo ""
+
 echo "[5] URL Param Validation (non-integer ID rejected)"
 R=$(curl -s "$BASE/api/ckd-assessment/abc")
 check "Rejects non-integer ID" "Invalid assessment ID" "$R"
